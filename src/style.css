@@ -1,0 +1,80 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg0: #0d1117;
+  --bg1: #161b22;
+  --bg2: #1c2330;
+  --bg3: #21262d;
+  --bg4: #30363d;
+  --border: #30363d;
+  --border2: #3d444d;
+  --text1: #e6edf3;
+  --text2: #8b949e;
+  --text3: #6e7681;
+  --amber: #d4a04a;
+  --amber-dim: #d4a04a22;
+  --amber-glow: #d4a04a44;
+  --red: #f85149;
+  --green: #3fb950;
+  --blue: #58a6ff;
+  --purple: #9288f8;
+  --sidebar-w: 268px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  font-size: 14px;
+}
+
+html, body, #app { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'DM Sans', 'Noto Sans SC', system-ui, sans-serif;
+  background: var(--bg0);
+  color: var(--text1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+/* Buttons */
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 500; transition: all .15s;
+}
+.btn-primary {
+  background: var(--amber); color: #0d1117;
+}
+.btn-primary:hover { background: #e0b060; }
+.btn-ghost {
+  background: transparent; color: var(--text2); border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--bg3); color: var(--text1); }
+.btn-danger {
+  background: transparent; color: var(--red); border: 1px solid transparent;
+}
+.btn-danger:hover { background: #f8514922; }
+
+/* Tag pill */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+  background: var(--bg4); color: var(--text2);
+  letter-spacing: .02em;
+}
+
+/* Fade transition */
+.fade-enter-active, .fade-leave-active { transition: opacity .18s, transform .18s; }
+.fade-enter-from { opacity: 0; transform: translateY(6px); }
+.fade-leave-to { opacity: 0; }
+
+/* Slide transition */
+.slide-enter-active, .slide-leave-active { transition: all .2s; }
+.slide-enter-from { opacity: 0; transform: translateX(-12px); }
+.slide-leave-to { opacity: 0; transform: translateX(12px); }
