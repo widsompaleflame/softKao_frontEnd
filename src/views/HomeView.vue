@@ -45,13 +45,6 @@
     <!-- Tips -->
     <div class="tips-row">
       <div class="tip-card">
-        <span class="tip-icon">💡</span>
-        <div>
-          <div class="tip-title">如何保存 Claude 的交互式内容</div>
-          <div class="tip-body">在 Claude 对话中，点击「新建笔记」→ 粘贴 Claude 生成的 HTML/SVG 代码 → 所有交互功能原样保留，通过 iframe 隔离渲染。</div>
-        </div>
-      </div>
-      <div class="tip-card">
         <span class="tip-icon">🔖</span>
         <div>
           <div class="tip-title">快捷操作</div>

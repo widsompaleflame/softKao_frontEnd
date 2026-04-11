@@ -26,7 +26,7 @@
     <div v-else-if="!notes.length && !loading" class="empty-state">
       <div class="empty-icon">📋</div>
       <div class="empty-title">这章还没有笔记</div>
-      <div class="empty-sub">粘贴 Claude 生成的内容，支持完整 HTML/SVG 交互</div>
+      <div class="empty-sub">粘贴HTML，支持完整 HTML/SVG 交互</div>
       <button class="btn btn-primary" style="margin-top:16px" @click="showModal = true">新建第一条笔记</button>
     </div>
 
@@ -70,13 +70,13 @@
               <input v-model="form.summary" class="field-input" placeholder="简短描述这条笔记的内容..." />
 
               <label class="field-label">
-                内容（粘贴 Claude 的 HTML/SVG 代码）
+                内容（粘贴 HTML/SVG 代码）
                 <span class="field-hint">— 交互功能将完整保留</span>
               </label>
               <textarea
                 v-model="form.content_html"
                 class="field-textarea"
-                placeholder="把 Claude 生成的 HTML 或 SVG 代码粘贴到这里...&#10;&#10;支持：&#10;· 带 JS 的交互式 SVG 图表&#10;· 带测验/动画的 HTML 页面&#10;· 知识图谱和流程图&#10;· 任何 claude.ai 可显示的内容"
+                placeholder="把HTML 或 SVG 代码粘贴到这里...&#10;&#10;支持：&#10;· 带 JS 的交互式 SVG 图表&#10;· 带测验/动画的 HTML 页面&#10;· 知识图谱和流程图&#10;· 任何 claude.ai 可显示的内容"
                 rows="14"
               ></textarea>
 
