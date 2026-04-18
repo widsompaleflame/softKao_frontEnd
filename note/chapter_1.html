@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一章 · 计算机系统基础知识 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbf7;          /* 米色主背景 */
+            --bg2: #f4efe6;         /* 略深的米色底色 */
+            --card: #ffffff;        /* 纯白卡片 */
+            --card2: #f9f7f2;       /* 卡片内部的次级背景 */
+            --border: #e8e2d5;      /* 柔和的边框 */
+            --border2: #d4cbb8;     /* 悬停加深的边框 */
+            --text: #2c2825;        /* 主文本：深灰咖色 */
+            --text2: #5e574f;       /* 次级文本：中灰咖色 */
+            --text3: #8f877c;       /* 提示文本：浅灰咖色 */
+            --accent: #0284c7;      /* 强调色：清晰的明蓝 */
+            --accent2: #0369a1;     /* 强调色悬停 */
+            --gold: #d97706;        /* 琥珀金 */
+            --gold2: #b45309;       /* 深琥珀 */
+            --green: #059669;       /* 翡翠绿 */
+            --red: #dc2626;         /* 砖红 */
+            --purple: #7c3aed;      /* 亮紫 */
+            --pink: #db2777;        /* 玫瑰粉 */
+            --nav-h: 56px;
+            --radius: 10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{
+            font-family:'Noto Sans SC',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            line-height:1.7;
+            overflow-x:hidden;
+        }
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ─── TOP NAV ─── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;
+            height:var(--nav-h);
+            background:rgba(253, 251, 247, .92);
+            backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);
+            z-index:1000;
+            display:flex;align-items:center;
+            padding:0 16px;
+            gap:2px;
+            overflow-x:auto;
+            white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{
+            font-size:.75rem;font-weight:700;
+            color:var(--accent);
+            letter-spacing:.08em;
+            margin-right:12px;flex-shrink:0;
+            display:flex;align-items:center;gap:6px;
+        }
+        .nav-brand svg{flex-shrink:0}
+        .nav-btn{
+            display:inline-flex;align-items:center;gap:5px;
+            padding:5px 12px;
+            border-radius:6px;
+            border:1px solid transparent;
+            background:transparent;
+            color:var(--text2);
+            font-family:inherit;
+            font-size:.78rem;
+            font-weight:500;
+            cursor:pointer;
+            transition:all .2s;
+            white-space:nowrap;
+            flex-shrink:0;
+        }
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ─── MAIN LAYOUT ─── */
+        main{padding-top:calc(var(--nav-h) + 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+
+        /* ─── SECTION HEADERS ─── */
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        .section-hero{
+            text-align:center;padding:40px 20px 32px;
+            background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);
+            border:1px solid var(--border);
+            border-radius:14px;margin-bottom:28px;
+            position:relative;overflow:hidden;
+        }
+        .section-hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.08) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:500px;margin:0 auto}
+        .section-tag{
+            display:inline-block;padding:3px 10px;background:rgba(2,132,199,.12);
+            border:1px solid rgba(2,132,199,.25);color:var(--accent);
+            border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em;
+            margin-bottom:12px;
+        }
+
+        /* ─── CARDS ─── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{
+            font-size:.95rem;font-weight:700;color:var(--accent);
+            margin-bottom:14px;display:flex;align-items:center;gap:8px;
+        }
+        .card-title .icon{font-size:1.1rem}
+
+        /* ─── ANALOGY BOX ─── */
+        .analogy{
+            background:rgba(217,119,6,.08);
+            border-left:3px solid var(--gold);
+            border-radius:0 8px 8px 0;
+            padding:12px 16px;margin:12px 0;
+            font-size:.88rem;color:var(--gold2);
+        }
+        .analogy strong{color:var(--gold)}
+
+        /* ─── MNEMONIC BOX ─── */
+        .mnemonic{
+            background:rgba(124,58,237,.07);
+            border-left:3px solid var(--purple);
+            border-radius:0 8px 8px 0;
+            padding:12px 16px;margin:12px 0;
+            font-size:.88rem;color:var(--purple);
+        }
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ─── FORMULA BOX ─── */
+        .formula-box{
+            background:#f0f6fa;
+            border:1px solid rgba(2,132,199,.2);
+            border-radius:8px;padding:14px 16px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:.82rem;color:var(--accent2);
+            white-space:pre-wrap;overflow-x:auto;
+            margin:12px 0;line-height:1.8;
+        }
+
+        /* ─── TABLES ─── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+
+        /* ─── KEY POINTS GRID ─── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{
+            background:var(--bg2);border:1px solid var(--border);
+            border-radius:8px;padding:11px 13px;
+            font-size:.82rem;
+        }
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ─── ALERT ─── */
+        .alert{
+            display:flex;gap:10px;
+            padding:10px 14px;border-radius:8px;
+            font-size:.85rem;margin:10px 0;
+            border:1px solid;
+        }
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+
+        /* ─── DIVIDER ─── */
+        .divider{height:1px;background:var(--border);margin:24px 0}
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ─── QUIZ ─── */
+        .quiz-q{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;
+            transition:border-color .2s;
+        }
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{
+            display:flex;align-items:flex-start;gap:8px;
+            padding:8px 11px;border-radius:7px;
+            border:1px solid var(--border);
+            background:var(--bg2);
+            color:var(--text2);font-family:inherit;font-size:.83rem;
+            cursor:pointer;transition:all .18s;text-align:left;
+            line-height:1.4;
+        }
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{
+            display:inline-flex;align-items:center;gap:6px;
+            padding:6px 14px;border-radius:6px;
+            border:1px solid var(--border2);
+            background:transparent;color:var(--text2);
+            font-family:inherit;font-size:.78rem;
+            cursor:pointer;transition:all .18s;
+        }
+        .reveal-btn:hover{background:var(--card2);color:var(--text);border-color:var(--border2)}
+        .quiz-ans{
+            margin-top:10px;padding:12px 14px;
+            background:rgba(5,150,105,.05);
+            border:1px solid rgba(5,150,105,.2);
+            border-radius:7px;font-size:.84rem;
+            display:none;animation:fadeUp .25s ease;
+        }
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        .quiz-footer{display:flex;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:gap 8px}
+        #quiz-score{font-size:.85rem;color:var(--text2)}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ─── FLASH CARDS ─── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{
+            background:var(--card);border:1px solid var(--border);
+            border-radius:10px;padding:16px;
+            transition:transform .2s,border-color .2s;
+        }
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ─── SVG MINDMAP ─── */
+        #mindmap-wrap{overflow-x:auto;padding:8px 0}
+        #mindmap-wrap svg text{font-family:'Noto Sans SC',sans-serif}
+
+        /* ─── TAG BADGES ─── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.15);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-calc{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+
+        /* ─── PROCESS FLOW ─── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* ─── COMPARISON ─── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-cisc .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-risc .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        /* ─── PYRAMID ─── */
+        .pyramid-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;margin:16px 0}
+        .pyr-row{
+            display:flex;align-items:center;justify-content:center;
+            border-radius:6px;text-align:center;
+            font-size:.8rem;font-weight:500;
+            transition:transform .15s;cursor:default;
+            padding:0 20px;
+        }
+        .pyr-row:hover{transform:scaleX(1.03)}
+
+        /* ─── OSI TABLE ─── */
+        .osi-grid{display:flex;flex-direction:column;gap:3px;margin:12px 0}
+        .osi-row{
+            display:grid;grid-template-columns:32px 1fr 1fr 1fr;
+            gap:8px;align-items:center;
+            padding:7px 10px;border-radius:6px;
+            border:1px solid var(--border);
+            background:var(--bg2);font-size:.81rem;
+            transition:border-color .15s;
+        }
+        .osi-row:hover{border-color:var(--border2)}
+        .osi-num{font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);text-align:center}
+        .osi-name{font-weight:600;color:var(--text)}
+        .osi-proto{color:var(--accent);font-size:.77rem}
+        .osi-device{color:var(--text2);font-size:.77rem}
+
+        /* ─── RESPONSIVE ─── */
+        @media(max-width:640px){
+            main{padding-left:12px;padding-right:12px}
+            .section-hero h1{font-size:1.3rem}
+            .kp-grid{grid-template-columns:1fr}
+            .flash-grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        架构师第一章
+    </div>
+    <button class="nav-btn active" onclick="showSection('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="showSection('s1',this)">① 系统概述</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">② 硬件基础</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">③ 软件基础</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">④ 计算机语言</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">⑤ 多媒体技术</button>
+    <button class="nav-btn" onclick="showSection('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="showSection('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 01</div>
+            <h1>计算机系统基础知识</h1>
+            <p>系统架构师考试必备 · 选择题约占 5-8 分 · 7大核心考点</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>全章知识架构</div>
+            <div id="mindmap-wrap">
+                <svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:540px">
+                    <defs>
+                        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#cbd5e1"/>
+                        </marker>
+                    </defs>
+                    <rect x="350" y="228" width="160" height="44" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="430" y="247" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第一章</text>
+                    <text x="430" y="263" text-anchor="middle" font-size="10.5" fill="#0284c7">计算机系统基础知识</text>
+
+                    <line x1="350" y1="250" x2="220" y2="100" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="120" y="78" width="120" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="180" y="94" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 系统概述</text>
+                    <text x="180" y="109" text-anchor="middle" font-size="9.5" fill="#475569">定义·Flynn分类</text>
+
+                    <line x1="350" y1="238" x2="170" y2="185" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="50" y="165" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="119" y="181" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. 硬件基础</text>
+                    <text x="119" y="196" text-anchor="middle" font-size="9.5" fill="#475569">CPU·存储·总线</text>
+
+                    <line x1="350" y1="258" x2="170" y2="310" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="50" y="290" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="119" y="306" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 软件基础</text>
+                    <text x="119" y="321" text-anchor="middle" font-size="9.5" fill="#475569">OS·DB·网络</text>
+
+                    <line x1="350" y1="268" x2="220" y2="400" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="120" y="382" width="120" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="180" y="397" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">4. 计算机语言</text>
+                    <text x="180" y="412" text-anchor="middle" font-size="9.5" fill="#475569">分代·编译·解释</text>
+
+                    <line x1="510" y1="268" x2="648" y2="400" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="598" y="382" width="120" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="658" y="397" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 多媒体技术</text>
+                    <text x="658" y="412" text-anchor="middle" font-size="9.5" fill="#475569">压缩·音视频·格式</text>
+
+                    <line x1="119" y1="165" x2="119" y2="90" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="60" y="72" width="80" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+                    <text x="100" y="89" text-anchor="middle" font-size="9.5" fill="#475569">冯诺依曼</text>
+                    <line x1="50" y1="184" x2="10" y2="155" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="-22" y="142" width="68" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1" transform="translate(22,0)"/>
+                    <text x="22" y="159" text-anchor="middle" font-size="9.5" fill="#475569">流水线计算</text>
+                    <line x1="50" y1="200" x2="10" y2="218" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="0" y="205" width="65" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+                    <text x="32" y="222" text-anchor="middle" font-size="9.5" fill="#475569">Cache命中率</text>
+
+                    <line x1="50" y1="310" x2="10" y2="282" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="0" y="268" width="62" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+                    <text x="31" y="285" text-anchor="middle" font-size="9.5" fill="#475569">进程管理</text>
+                    <line x1="50" y1="318" x2="10" y2="320" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="0" y="307" width="62" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+                    <text x="31" y="324" text-anchor="middle" font-size="9.5" fill="#475569">范式·ACID</text>
+                    <line x1="50" y1="328" x2="10" y2="358" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="0" y="345" width="62" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1"/>
+                    <text x="31" y="362" text-anchor="middle" font-size="9.5" fill="#475569">OSI/TCP</text>
+
+                    <line x1="510" y1="238" x2="700" y2="165" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="668" y="148" width="120" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="728" y="163" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">CISC vs RISC</text>
+                    <text x="728" y="178" text-anchor="middle" font-size="9.5" fill="#475569">指令集对比</text>
+
+                    <line x1="510" y1="250" x2="720" y2="250" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="688" y="232" width="120" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="748" y="247" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">存储层次</text>
+                    <text x="748" y="263" text-anchor="middle" font-size="9.5" fill="#475569">寄存器→Cache→主存</text>
+
+                    <line x1="510" y1="260" x2="700" y2="335" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="668" y="318" width="120" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="728" y="333" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">CAP定理</text>
+                    <text x="728" y="348" text-anchor="middle" font-size="9.5" fill="#475569">分布式系统</text>
+
+                    <rect x="790" y="62" width="54" height="18" rx="9" fill="rgba(220,38,38,.15)" stroke="rgba(220,38,38,.3)"/>
+                    <text x="817" y="75" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">必考计算</text>
+                    <line x1="788" y1="71" x2="750" y2="100" stroke="rgba(220,38,38,.3)" stroke-width=".8" stroke-dasharray="3,3"/>
+
+                    <rect x="370" y="198" width="90" height="18" rx="9" fill="rgba(217,119,6,.15)" stroke="rgba(217,119,6,.3)"/>
+                    <text x="415" y="211" text-anchor="middle" font-size="9" font-weight="700" fill="#d97706">选择题 5-8分</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="kp-grid">
+            <div class="kp-item">
+                <div class="kp-title">🔥 流水线计算</div>
+                <div class="kp-body">T = (t₁+…+tₖ) + (n-1)×Δt<br>几乎每年必考</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">🔥 Cache命中率</div>
+                <div class="kp-body">平均访问时间<br>两种方式区分</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">⚡ CISC vs RISC</div>
+                <div class="kp-body">微程序 vs 硬布线<br>对比表必背</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">⚡ 进程三态</div>
+                <div class="kp-body">就绪→阻塞❌<br>阻塞→运行❌</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">⚡ 数据库范式</div>
+                <div class="kp-body">1NF→2NF→3NF→BCNF<br>逐级消除依赖</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">⚡ OSI七层模型</div>
+                <div class="kp-body">各层对应设备<br>常见协议归属</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">📊 多媒体计算</div>
+                <div class="kp-body">音频/图像数据量<br>奈奎斯特定理</div>
+            </div>
+            <div class="kp-item">
+                <div class="kp-title">📊 Flynn分类</div>
+                <div class="kp-body">MISD实际不存在<br>经典陷阱题</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>计算机系统概述</h1>
+            <p>系统组成定义 · Flynn分类法 · 考点密度 ★★☆☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>1.1 计算机系统定义与组成</div>
+            <div class="analogy">
+                <strong>生活类比 · 餐厅模型：</strong><br>
+                <strong>硬件</strong> = 桌椅厨具（物理实体）&nbsp;&nbsp;
+                <strong>系统软件</strong> = 营业规则·操作系统&nbsp;&nbsp;
+                <strong>应用软件</strong> = 具体菜品·Word·微信
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>要点</th><th>说明</th></tr>
+                    <tr><td class="badge-acc">硬件五大部件</td><td>运算器 · 控制器 · 存储器 · 输入设备 · 输出设备</td></tr>
+                    <tr><td class="badge-acc">CPU的组成</td><td>CPU = 运算器 + 控制器（<strong class="badge-red">不包括</strong>存储器！）</td></tr>
+                    <tr><td class="badge-acc">系统软件</td><td>操作系统、编译程序、数据库管理系统</td></tr>
+                    <tr><td class="badge-acc">固件 Firmware</td><td>存储在ROM中的软件，兼具软硬件特性（如BIOS）</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                硬件五大件：<strong>运控存输出</strong> → 谐音 <strong>「孙悟空存书」</strong>（孙=运算 悟=控制 空=存储 存=输入 书=输出）
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏭</span>1.2 Flynn 分类法 <span class="tag tag-hot">高频考点</span></div>
+            <div class="analogy">
+                <strong>工厂类比：</strong>
+                SISD=一师傅一菜谱做一道菜 &nbsp;|&nbsp;
+                SIMD=教练喊口令全班一起做操(GPU) &nbsp;|&nbsp;
+                MISD=多厨师做同一块肉(几乎不存在) &nbsp;|&nbsp;
+                MIMD=多厨师各做各的菜(多核/集群)
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>分类</th><th>指令流</th><th>数据流</th><th>代表</th><th>备注</th></tr>
+                    <tr><td>SISD</td><td>单</td><td>单</td><td>传统单CPU</td><td>最基本</td></tr>
+                    <tr><td>SIMD</td><td>单</td><td>多</td><td>GPU / 向量机</td><td class="badge-gold">常考</td></tr>
+                    <tr><td class="badge-red">MISD</td><td>多</td><td>单</td><td>几乎不存在</td><td class="badge-red">陷阱题！</td></tr>
+                    <tr><td>MIMD</td><td>多</td><td>多</td><td>多核 / 集群</td><td class="badge-green">当前主流</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ MISD 实际极少存在——这是经典陷阱题，选项说"MISD有大量应用"时选错误选项。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「迷（MI）路的西弟（SD）找不到实际的路」</strong> → MISD实际不存在
+            </div>
+        </div>
+    </section>
+
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>计算机硬件基础知识</h1>
+            <p>冯诺依曼 · CPU · 存储器 · 总线 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🍳</span>2.1 冯·诺依曼计算机结构</div>
+            <div class="analogy">
+                <strong>核心思想：存储程序，顺序执行</strong><br>
+                以前：每做一道菜都要人在旁边指挥（硬连线）<br>
+                冯·诺依曼：把菜谱写好放在厨房，厨师自己按顺序看菜谱做菜
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">核心思想</div><div class="kp-body">存储程序 · 顺序执行</div></div>
+                <div class="kp-item"><div class="kp-title">冯·诺依曼瓶颈</div><div class="kp-body">CPU与存储器间的数据传输速率限制（带宽瓶颈）</div></div>
+                <div class="kp-item"><div class="kp-title">指令组成</div><div class="kp-body">操作码（做什么）+ 地址码（对谁做）</div></div>
+                <div class="kp-item"><div class="kp-title">vs 哈佛结构</div><div class="kp-body">哈佛：指令和数据分开存储&amp;总线；冯诺依曼：共用</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🧑‍🍳</span>2.2 CPU 组成与流水线 <span class="tag tag-hot">必考计算</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>寄存器</th><th>功能</th></tr>
+                    <tr><td class="badge-gold">PC 程序计数器</td><td>存放<strong>下一条</strong>要执行的指令地址</td></tr>
+                    <tr><td class="badge-gold">IR 指令寄存器</td><td>存放<strong>当前</strong>正在执行的指令</td></tr>
+                    <tr><td>ACC 累加器</td><td>存放运算结果</td></tr>
+                    <tr><td>MAR</td><td>存储器地址寄存器</td></tr>
+                    <tr><td>MDR</td><td>存储器数据寄存器</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">🏭 流水线技术 <span class="tag tag-calc">公式必背</span></div>
+            <div class="analogy">
+                洗车流水线：第1辆烘干时，第2辆擦洗，第3辆打泡，第4辆冲水——每环节不闲着
+            </div>
+            <div class="formula-box">⏱️  流水线执行时间（各段时间不等）：
+                T = (t₁ + t₂ + ... + tₖ) + (n-1) × Δt
+                其中：k = 段数  |  n = 指令数  |  Δt = 最长段时间
+
+                ⚡  加速比（各段时间相等时）：
+                S = (n × k × Δt) / [k×Δt + (n-1)×Δt]
+                当 n→∞ 时，S → k（最大加速比 = 流水线段数）
+
+                📊  吞吐率：
+                TP = n / T    最大吞吐率 = 1/Δt</div>
+            <div class="alert alert-info">💡 例题：3段流水线，各段耗时 2ns/3ns/1ns，100条指令<br>T = (2+3+1) + (100-1)×3 = 6 + 297 = <strong>303 ns</strong></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>流水线冒险</th><th>原因</th><th>说明</th></tr>
+                    <tr><td>结构冒险</td><td>资源冲突</td><td>多条指令竞争同一硬件资源</td></tr>
+                    <tr><td>数据冒险</td><td>数据依赖</td><td>后指令需要前指令结果</td></tr>
+                    <tr><td>控制冒险</td><td>分支跳转</td><td>条件分支导致流水线清空</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎮</span>2.3 专用处理器</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>处理器</th><th>类比</th><th>特点</th></tr>
+                    <tr><td class="badge-acc">GPU</td><td>美术特长生</td><td>擅长图形计算和大规模并行运算</td></tr>
+                    <tr><td class="badge-acc">DSP</td><td>音乐特长生</td><td>专门处理数字信号（音频、视频）</td></tr>
+                    <tr><td class="badge-acc">ASIC</td><td>定制专属工具</td><td>为特定任务设计，不可更改，大批量成本低</td></tr>
+                    <tr><td class="badge-acc">FPGA</td><td>乐高积木</td><td>可编程可重配，开发周期短，原型验证</td></tr>
+                </table>
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card vs-cisc">
+                    <div class="vs-title">ASIC</div>
+                    <div class="vs-item"><span class="label">可重编程</span><span class="badge-red">❌ 不可以</span></div>
+                    <div class="vs-item"><span class="label">开发周期</span><span>长</span></div>
+                    <div class="vs-item"><span class="label">大批量成本</span><span class="badge-green">低</span></div>
+                    <div class="vs-item"><span class="label">适用场景</span><span>大规模量产</span></div>
+                </div>
+                <div class="vs-card vs-risc">
+                    <div class="vs-title">FPGA</div>
+                    <div class="vs-item"><span class="label">可重编程</span><span class="badge-green">✅ 可以</span></div>
+                    <div class="vs-item"><span class="label">开发周期</span><span>短</span></div>
+                    <div class="vs-item"><span class="label">大批量成本</span><span class="badge-red">高</span></div>
+                    <div class="vs-item"><span class="label">适用场景</span><span>原型验证/小批量</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🍽️</span>2.4 CISC vs RISC 指令集 <span class="tag tag-hot">必考对比</span></div>
+            <div class="analogy">
+                <strong>CISC（复杂指令集）= 大酒店</strong>：菜单上什么菜都有，做法各异，代表：Intel x86<br>
+                <strong>RISC（精简指令集）= 快餐店</strong>：菜单精简，出餐时间相同，代表：ARM / MIPS / RISC-V
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>特征</th><th>CISC</th><th>RISC</th></tr>
+                    <tr><td>指令数量</td><td>&gt; 200条</td><td class="badge-green">&lt; 100条</td></tr>
+                    <tr><td>指令长度</td><td>变长</td><td class="badge-green">等长</td></tr>
+                    <tr><td>指令周期</td><td>不等</td><td class="badge-green">大多单周期</td></tr>
+                    <tr><td>控制方式</td><td class="badge-gold">微程序控制</td><td class="badge-green">硬布线控制</td></tr>
+                    <tr><td>寄存器数量</td><td>较少</td><td class="badge-green">大量通用寄存器</td></tr>
+                    <tr><td>流水线友好</td><td class="badge-red">难以优化</td><td class="badge-green">易于流水线</td></tr>
+                    <tr><td>寻址方式</td><td>多种</td><td>少且简单</td></tr>
+                    <tr><td>代表</td><td>x86</td><td>ARM / MIPS / SPARC</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「复杂微程序，精简硬布线；复杂指令多，精简寄存多」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏠</span>2.5 存储器层次与 Cache <span class="tag tag-hot">高频计算</span></div>
+            <div class="sub-title">存储层次（速度快→慢，容量小→大）</div>
+            <div class="pyramid-wrap">
+                <div class="pyr-row" style="width:120px;height:36px;background:#e0f2fe;border:1px solid #7dd3fc;color:#0369a1;font-size:.85rem">寄存器 &lt;1ns</div>
+                <div class="pyr-row" style="width:170px;height:34px;background:#f0f9ff;border:1px solid #bae6fd;color:#0284c7;font-size:.82rem">Cache 1-10ns</div>
+                <div class="pyr-row" style="width:230px;height:34px;background:#f8fafc;border:1px solid #e2e8f0;color:#334155;font-size:.82rem">主存 RAM 50-100ns</div>
+                <div class="pyr-row" style="width:300px;height:34px;background:#f1f5f9;border:1px solid #cbd5e1;color:#475569;font-size:.82rem">磁盘 SSD/HDD（ms级）</div>
+                <div class="pyr-row" style="width:370px;height:34px;background:#e2e8f0;border:1px solid #94a3b8;color:#64748b;font-size:.82rem">磁带 / 光盘（s级）</div>
+            </div>
+            <div class="sub-title">Cache 地址映射 <span class="tag tag-key">必考</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>映射方式</th><th>类比</th><th>命中率</th><th>实现难度</th></tr>
+                    <tr><td>直接映射</td><td>学号固定座位</td><td class="badge-red">最低</td><td class="badge-green">最简单</td></tr>
+                    <tr><td class="badge-gold">全相联映射</td><td>图书馆随便坐</td><td class="badge-green">最高</td><td class="badge-red">最复杂</td></tr>
+                    <tr><td>组相联映射</td><td>电影院分区坐</td><td>居中</td><td>居中</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">Cache 命中率公式 <span class="tag tag-calc">必背公式</span></div>
+            <div class="formula-box">命中率 H = Cache命中次数 / 总访问次数
+
+                方式①  同时访问：
+                t_avg = H × t_c + (1-H) × t_m
+
+                方式②  先Cache再主存（未命中后再访问主存）：
+                t_avg = H × t_c + (1-H) × (t_c + t_m)
+
+                例题：t_c=10ns, t_m=200ns, H=95%
+                方式① = 0.95×10 + 0.05×200 = 9.5+10 = 19.5ns
+                方式② = 0.95×10 + 0.05×(10+200) = 9.5+10.5 = 20ns  ←常考</div>
+            <div class="sub-title">虚拟存储器 / 页式管理</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>方式</th><th>碎片类型</th><th>特点</th></tr>
+                    <tr><td>页式</td><td class="badge-gold">内部碎片</td><td>等分大小，最后一页可能装不满</td></tr>
+                    <tr><td>段式</td><td class="badge-red">外部碎片</td><td>按逻辑分段，段与段之间有空隙</td></tr>
+                    <tr><td>段页式</td><td>两者皆有可能</td><td>先分段再分页，结合优点</td></tr>
+                </table>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>置换算法</th><th>说明</th><th>特点</th></tr>
+                    <tr><td>OPT</td><td>最优置换</td><td>理论最优，实际不可实现</td></tr>
+                    <tr><td>LRU</td><td>最近最少使用</td><td>性能好，实际常用</td></tr>
+                    <tr><td class="badge-red">FIFO</td><td>先进先出</td><td class="badge-red">会出现Belady异常！</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ Belady异常：FIFO算法中，增加页框数量，缺页率反而升高！只有FIFO会出现此现象。</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>类型</th><th>特点</th><th>用途</th></tr>
+                    <tr><td>SRAM</td><td class="badge-green">不需刷新，速度快，价格贵</td><td class="badge-gold">Cache</td></tr>
+                    <tr><td>DRAM</td><td>需要定期刷新，速度较慢，价格低</td><td class="badge-gold">主存</td></tr>
+                    <tr><td>ROM</td><td>只读，断电不丢失</td><td>BIOS存储</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「页内段外」</strong>：页式有<strong>内</strong>部碎片，段式有<strong>外</strong>部碎片
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🛤️</span>2.6 总线系统</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>总线类型</th><th>功能</th><th>说明</th></tr>
+                    <tr><td class="badge-acc">数据总线</td><td>运输数据</td><td>位数决定一次传多少（32位=4字节/次）</td></tr>
+                    <tr><td class="badge-acc">地址总线</td><td>门牌号系统</td><td>n位地址总线 → 最大寻址 2ⁿ 字节（32位→4GB）</td></tr>
+                    <tr><td class="badge-acc">控制总线</td><td>交通信号灯</td><td>控制读写、中断等信号</td></tr>
+                </table>
+            </div>
+            <div class="formula-box">总线带宽 = 总线宽度 × 总线频率  (MB/s)
+
+                例：64位总线，800MHz → 带宽 = 64/8 × 800 = 6400 MB/s</div>
+
+            <div class="sub-title">带宽计算：为什么除以 8？ <span class="tag tag-calc">避坑指南</span></div>
+            <div class="alert alert-info" style="display: block ;">
+                💡 <strong>核心原因：单位换算！</strong><br>
+                总线宽度的单位是<strong>位（Bit）</strong>，表示一次能并行传多少个 0 或 1。<br>
+                而带宽的统计标准单位通常是<strong>字节（Byte）</strong>（如 MB/s）。<br>
+                因为 <strong>1 Byte = 8 Bits</strong>，所以在计算带宽时，必须将总宽度除以 8 来完成单位转换。
+            </div>
+
+            <div class="sub-title">串行总线 vs 并行总线</div>
+            <div class="analogy">
+                <strong>🚗 生活类比：单车道高铁 vs 多车道公路</strong><br>
+                <strong>并行总线</strong> = 多车道公路：多辆车并排开。距离长了容易互相干扰，且终点必须等最慢的车对齐，所以<strong>上限开不快</strong>。<br>
+                <strong>串行总线</strong> = 单车道高铁：每次只走一节车厢。因为没有旁边车道干扰，无需对齐，发车频率（时钟频率）可以提升到极其恐怖的程度。<br>
+                <strong>结论：</strong>现代总线中，串行总线靠“极高的频率”在总速度上彻底碾压了并行总线！
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card vs-cisc">
+                    <div class="vs-title">并行总线 (Parallel)</div>
+                    <div class="vs-item"><span class="label">传输方式</span><span>多根线同时传多位</span></div>
+                    <div class="vs-item"><span class="label">时钟频率</span><span class="badge-red">很难提高(防干扰)</span></div>
+                    <div class="vs-item"><span class="label">传输距离</span><span class="badge-red">仅限短距离</span></div>
+                    <div class="vs-item"><span class="label">现代代表</span><span>传统 PCI、PATA</span></div>
+                </div>
+                <div class="vs-card vs-risc">
+                    <div class="vs-title">串行总线 (Serial)</div>
+                    <div class="vs-item"><span class="label">传输方式</span><span>一根线逐位(bit)传</span></div>
+                    <div class="vs-item"><span class="label">时钟频率</span><span class="badge-green">极高(无对齐负担)</span></div>
+                    <div class="vs-item"><span class="label">传输距离</span><span class="badge-green">适合长距离</span></div>
+                    <div class="vs-item"><span class="label">现代代表</span><span>PCIe、SATA、USB</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔌</span>2.7-2.8 接口与外部设备</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>接口</th><th>类型</th><th>特点</th></tr>
+                    <tr><td>USB</td><td>串行</td><td>热插拔、即插即用</td></tr>
+                    <tr><td>RS-232</td><td>串行</td><td>传统串口，距离较远</td></tr>
+                    <tr><td>SATA</td><td>串行</td><td>硬盘接口</td></tr>
+                    <tr><td>HDMI</td><td>串行</td><td>音视频传输</td></tr>
+                    <tr><td>IEEE 1284</td><td>并行</td><td>打印机接口（已淘汰）</td></tr>
+                </table>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>RAID级别</th><th>特点</th><th>容错</th></tr>
+                    <tr><td>RAID 0</td><td>条带化，速度最快</td><td class="badge-red">无冗余</td></tr>
+                    <tr><td>RAID 1</td><td>镜像，最安全</td><td class="badge-green">完全冗余</td></tr>
+                    <tr><td>RAID 5</td><td>分布式奇偶校验</td><td class="badge-gold">允许1盘故障</td></tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>计算机软件基础知识</h1>
+            <p>操作系统 · 数据库 · 网络协议 · 中间件 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏨</span>3.2 操作系统 — 进程管理 <span class="tag tag-hot">高频考点</span></div>
+            <div class="analogy">
+                操作系统 = 酒店总管家：进程管理=分配客房 | 存储管理=管理仓库 | 文件管理=档案室
+            </div>
+            <div class="sub-title">操作系统的四大特征</div>
+            <div class="analogy">
+                <strong>🏠 生活类比：合租房日常</strong><br>
+                <strong>并发</strong> = 室友A在洗衣服，室友B在做饭（微观上可能在切换，宏观上都在干活）。<br>
+                <strong>共享</strong> = 所有人都可以共同使用客厅和冰箱。<br>
+                <strong>虚拟</strong> = 房东把一个大客厅打隔断变成了好几个房间，每个人都觉得自己有个独立卧室。<br>
+                <strong>不确定性</strong> = 每天谁先抢到卫生间、谁先出门，顺序和耗时全凭运气，无法预知。
+            </div>
+            <div class="kp-grid" style="margin-bottom: 16px;">
+                <div class="kp-item"><div class="kp-title">并发性 (最基本)</div><div class="kp-body">宏观上同时运行，微观上交替执行。<br><span style="font-size:0.75rem;color:var(--text3)">注：区别于“并行”（同一物理时刻发生）</span></div></div>
+                <div class="kp-item"><div class="kp-title">共享性</div><div class="kp-body">系统资源供内存中多个并发执行的进程共同使用。</div></div>
+                <div class="kp-item"><div class="kp-title">虚拟性</div><div class="kp-body">通过技术（如分时、分页）将一个物理实体映射为多个逻辑对应物。</div></div>
+                <div class="kp-item"><div class="kp-title">不确定性(异步)</div><div class="kp-body">进程以不可预知的速度向前推进，每次执行结果的发生时间不确定。</div></div>
+            </div>
+
+            <div class="sub-title">操作系统的分类</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>分类类型</th><th>一句话要点</th><th>生活化类比</th></tr>
+                    <tr><td class="badge-acc">批处理系统</td><td>无交互，批量处理，吞吐量大</td><td><strong>攒衣服洗：</strong>攒够一堆脏衣服，扔进洗衣机一次性全洗完。</td></tr>
+                    <tr><td class="badge-acc">分时系统</td><td>时间片轮转，多终端交互性强</td><td><strong>餐厅服务员：</strong>服务员给每桌轮流倒水，每桌都觉得有专属服务。</td></tr>
+                    <tr><td class="badge-red">实时系统</td><td>严格的时间限制，极高的可靠性</td><td><strong>汽车安全气囊：</strong>撞车瞬间必须立刻弹出，晚半秒都不行。</td></tr>
+                    <tr><td>网络系统</td><td>通过网络实现资源共享和通信</td><td><strong>办公室共享：</strong>多台独立电脑通过局域网，共用一台打印机。</td></tr>
+                    <tr><td class="badge-gold">分布式系统</td><td>多机协同计算，对用户完全透明</td><td><strong>跨国集团：</strong>全球各地员工协同做一个大项目，客户只对接公司主体。</td></tr>
+                    <tr><td>嵌入式系统</td><td>专用于特定设备，软硬件可裁剪</td><td><strong>智能电饭煲：</strong>系统烧录在芯片里，专干精确控温煮饭这一件事。</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">进程三态模型</div>
+            <div style="margin:12px 0;padding:16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px">
+                <svg viewBox="0 0 480 200" style="width:100%;max-height:200px">
+                    <defs>
+                        <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#0284c7"/>
+                        </marker>
+                        <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+                        </marker>
+                    </defs>
+                    <rect x="20" y="80" width="100" height="44" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="70" y="97" text-anchor="middle" font-size="13" font-weight="700" fill="#0369a1">就绪</text>
+                    <text x="70" y="115" text-anchor="middle" font-size="10" fill="#475569">Ready</text>
+
+                    <rect x="188" y="80" width="104" height="44" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+                    <text x="240" y="97" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">运行</text>
+                    <text x="240" y="115" text-anchor="middle" font-size="10" fill="#475569">Running</text>
+
+                    <rect x="358" y="80" width="100" height="44" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+                    <text x="408" y="97" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">阻塞</text>
+                    <text x="408" y="115" text-anchor="middle" font-size="10" fill="#475569">Blocked</text>
+
+                    <path d="M120,98 L185,98" stroke="#0284c7" stroke-width="1.5" fill="none" marker-end="url(#a2)"/>
+                    <text x="152" y="90" text-anchor="middle" font-size="9.5" fill="#0284c7">调度</text>
+
+                    <path d="M190,108 L123,108" stroke="#475569" stroke-width="1.5" fill="none" marker-end="url(#a3)"/>
+                    <text x="152" y="122" text-anchor="middle" font-size="9.5" fill="#475569">时间片到/抢占</text>
+
+                    <path d="M292,98 L355,98" stroke="#7c3aed" stroke-width="1.5" fill="none" marker-end="url(#a2)"/>
+                    <text x="323" y="90" text-anchor="middle" font-size="9.5" fill="#7c3aed">等待I/O</text>
+
+                    <path d="M358,108 L293,130 L70,130 L70,124" stroke="#0284c7" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#a2)"/>
+                    <text x="220" y="147" text-anchor="middle" font-size="9.5" fill="#0284c7">I/O完成</text>
+
+                    <rect x="140" y="160" width="200" height="22" rx="5" fill="rgba(220,38,38,.08)" stroke="rgba(220,38,38,.2)"/>
+                    <text x="240" y="175" text-anchor="middle" font-size="10" fill="#dc2626">就绪→阻塞 ❌  阻塞→运行 ❌  均不存在！</text>
+                </svg>
+            </div>
+            <div class="sub-title">进程调度算法</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>算法</th><th>说明</th><th>特点</th></tr>
+                    <tr><td>FCFS</td><td>先来先服务</td><td>公平但对短作业不利</td></tr>
+                    <tr><td>SJF</td><td>短作业优先</td><td>平均等待时间最短，可能饿死长作业</td></tr>
+                    <tr><td>RR</td><td>时间片轮转</td><td>公平，适合分时系统</td></tr>
+                    <tr><td>优先级调度</td><td>按优先级执行</td><td>可能饿死低优先级进程</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">PV操作（信号量）<span class="tag tag-key">常考</span></div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">P操作（Wait）</div><div class="kp-body">信号量-1，若&lt;0则进程阻塞等待</div></div>
+                <div class="kp-item"><div class="kp-title">V操作（Signal）</div><div class="kp-body">信号量+1，若≤0则唤醒一个等待进程</div></div>
+            </div>
+            <div class="sub-title">死锁四个必要条件</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>#</th><th>条件</th><th>含义</th></tr>
+                    <tr><td>1</td><td>互斥条件</td><td>资源同一时间只能被一个进程占用</td></tr>
+                    <tr><td>2</td><td>请求与保持</td><td>占着资源还要申请新资源</td></tr>
+                    <tr><td>3</td><td class="badge-red">不可剥夺</td><td>不能强制取走进程已占资源（注意是"不可"剥夺！）</td></tr>
+                    <tr><td>4</td><td>循环等待</td><td>形成进程等待环路</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ 考题"可剥夺条件"——注意正确说法是「不可剥夺」，"可剥夺"不是死锁条件！</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>概念</th><th>说明</th></tr>
+                    <tr><td class="badge-gold">进程</td><td>资源分配的基本单位，有独立地址空间</td></tr>
+                    <tr><td class="badge-gold">线程</td><td>CPU调度的基本单位，共享进程资源，有自己的栈和PC</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                死锁四条件：<strong>「互不循环请求保持」</strong> → 互斥 / 不可剥夺 / 循环等待 / 请求与保持
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>3.3 数据库 <span class="tag tag-hot">高频考点</span></div>
+            <div class="sub-title">三级模式 — 两级映像</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>模式</th><th>类比</th><th>对应</th></tr>
+                    <tr><td class="badge-acc">外模式（用户视图）</td><td>你看到的Excel表格</td><td>不同用户视图</td></tr>
+                    <tr><td class="badge-acc">概念模式（逻辑结构）</td><td>档案分类规则</td><td>全局逻辑结构</td></tr>
+                    <tr><td class="badge-acc">内模式（物理存储）</td><td>档案放在哪个柜</td><td>物理存储结构</td></tr>
+                </table>
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">外↔概念映像</div><div class="kp-body">保证<strong>逻辑独立性</strong><br>逻辑结构变，外模式不变</div></div>
+                <div class="kp-item"><div class="kp-title">概念↔内模式映像</div><div class="kp-body">保证<strong>物理独立性</strong><br>物理存储变，概念模式不变</div></div>
+            </div>
+            <div class="sub-title">范式规范化 <span class="tag tag-key">必考</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>范式</th><th>消除的依赖</th><th>关键</th></tr>
+                    <tr><td>1NF</td><td>—</td><td>属性不可再分（原子性）</td></tr>
+                    <tr><td>1NF → 2NF</td><td class="badge-gold">部分函数依赖</td><td>非主属性完全依赖于主键</td></tr>
+                    <tr><td>2NF → 3NF</td><td class="badge-gold">传递函数依赖</td><td>非主属性不传递依赖主键</td></tr>
+                    <tr><td>3NF → BCNF</td><td>主属性的部分/传递依赖</td><td>所有决定因素都是候选键</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">事务 ACID 特性</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>特性</th><th>含义</th><th>转账类比</th></tr>
+                    <tr><td class="badge-acc">A 原子性</td><td>全做或全不做</td><td>扣钱和加钱必须同时成功或失败</td></tr>
+                    <tr><td class="badge-acc">C 一致性</td><td>一致状态间转换</td><td>转账前后总金额不变</td></tr>
+                    <tr><td class="badge-acc">I 隔离性</td><td>事务互不干扰</td><td>两人同时转账互不影响</td></tr>
+                    <tr><td class="badge-acc">D 持久性</td><td>提交后永久有效</td><td>成功后不会莫名回退</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                ACID → <strong>「原一隔持」</strong> → 谐音 <strong>「原来一哥很持久」</strong><br>
+                三级模式 → <strong>「外概内」</strong> → 外概逻辑独立，概内物理独立
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏪</span>3.4 分布式数据库 & CAP定理</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>透明性（从高到低）</th><th>含义</th></tr>
+                    <tr><td class="badge-green">分片透明（最高）</td><td>用户不知道数据如何分割</td></tr>
+                    <tr><td>复制透明</td><td>不知道数据是否有副本</td></tr>
+                    <tr><td>位置透明</td><td>不知道数据存在哪里</td></tr>
+                    <tr><td class="badge-red">局部映像透明（最低）</td><td>不知道局部DBMS类型</td></tr>
+                </table>
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">CAP定理</div><div class="kp-body">三者最多同时满足两个：一致性C / 可用性A / 分区容错P</div></div>
+                <div class="kp-item"><div class="kp-title">实际选择</div><div class="kp-body">P是必选 → 实际在 C 和 A 之间选择<br>CP: ZooKeeper | AP: Cassandra</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                透明性从高到低：<strong>「分复位局」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📬</span>3.6 网络协议 — OSI七层模型 <span class="tag tag-hot">必考</span></div>
+            <div class="osi-grid">
+                <div class="osi-row" style="border-color:rgba(219,39,119,.3);background:rgba(219,39,119,.04)">
+                    <div class="osi-num" style="color:#db2777">7</div>
+                    <div class="osi-name" style="color:#db2777">应用层</div>
+                    <div class="osi-proto" style="color:#db2777">HTTP/FTP/SMTP/DNS</div>
+                    <div class="osi-device">—</div>
+                </div>
+                <div class="osi-row">
+                    <div class="osi-num">6</div>
+                    <div class="osi-name">表示层</div>
+                    <div class="osi-proto">加密·压缩·格式转换</div>
+                    <div class="osi-device">—</div>
+                </div>
+                <div class="osi-row">
+                    <div class="osi-num">5</div>
+                    <div class="osi-name">会话层</div>
+                    <div class="osi-proto">建立·维护·终止会话</div>
+                    <div class="osi-device">—</div>
+                </div>
+                <div class="osi-row" style="border-color:rgba(5,150,105,.3);background:rgba(5,150,105,.04)">
+                    <div class="osi-num" style="color:#059669">4</div>
+                    <div class="osi-name" style="color:#059669">传输层</div>
+                    <div class="osi-proto" style="color:#059669">TCP / UDP</div>
+                    <div class="osi-device">网关</div>
+                </div>
+                <div class="osi-row" style="border-color:rgba(2,132,199,.3);background:rgba(2,132,199,.04)">
+                    <div class="osi-num" style="color:#0284c7">3</div>
+                    <div class="osi-name" style="color:#0284c7">网络层</div>
+                    <div class="osi-proto" style="color:#0284c7">IP / ICMP</div>
+                    <div class="osi-device" style="color:#0284c7">路由器</div>
+                </div>
+                <div class="osi-row">
+                    <div class="osi-num">2</div>
+                    <div class="osi-name">数据链路层</div>
+                    <div class="osi-proto">MAC / 帧</div>
+                    <div class="osi-device">交换机 / 网桥</div>
+                </div>
+                <div class="osi-row">
+                    <div class="osi-num">1</div>
+                    <div class="osi-name">物理层</div>
+                    <div class="osi-proto">网线 / 光纤</div>
+                    <div class="osi-device">集线器 / 中继器</div>
+                </div>
+            </div>
+            <div class="vs-grid" style="margin-top:14px">
+                <div class="vs-card vs-cisc">
+                    <div class="vs-title">TCP</div>
+                    <div class="vs-item"><span class="label">连接方式</span><span>面向连接</span></div>
+                    <div class="vs-item"><span class="label">可靠性</span><span class="badge-green">可靠传输</span></div>
+                    <div class="vs-item"><span class="label">速度</span><span class="badge-red">较慢</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>打电话</span></div>
+                </div>
+                <div class="vs-card vs-risc">
+                    <div class="vs-title">UDP</div>
+                    <div class="vs-item"><span class="label">连接方式</span><span>无连接</span></div>
+                    <div class="vs-item"><span class="label">可靠性</span><span class="badge-red">不可靠</span></div>
+                    <div class="vs-item"><span class="label">速度</span><span class="badge-green">快</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>发传单</span></div>
+                </div>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>协议</th><th>端口</th><th>说明</th></tr>
+                    <tr><td>HTTP</td><td>80</td><td>超文本传输</td></tr>
+                    <tr><td>HTTPS</td><td>443</td><td>加密HTTP</td></tr>
+                    <tr><td>FTP</td><td>21</td><td>文件传输</td></tr>
+                    <tr><td>SSH</td><td>22</td><td>安全远程登录</td></tr>
+                    <tr><td>SMTP</td><td>25</td><td>邮件发送</td></tr>
+                    <tr><td>DNS</td><td>53</td><td>域名解析</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                OSI七层（从下到上）：<strong>「物数网传会表应」</strong><br>
+                谐音：<strong>「巫师往前会表演」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🧩</span>3.7 构件 vs 中间件 <span class="tag tag-hot">易混辨析</span></div>
+            <div class="analogy">
+                <strong>🚗 生活类比：汽车零件 vs 物流网络</strong><br>
+                <strong>构件 (Component)</strong> = 标准化零件（如米其林轮胎）：隐藏内部细节，提供标准接口，主要为了<strong>复用和解耦</strong>。它是造应用的“砖块”。<br>
+                <strong>中间件 (Middleware)</strong> = 跨国物流网络（如顺丰快递）：屏蔽底层复杂路线和海关（操作系统/底层网络），负责把包裹（数据）送达。它是连接应用的“公路”。
+            </div>
+
+            <div class="sub-title">核心定位对比</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-cisc">
+                    <div class="vs-title">构件 (Component)</div>
+                    <div class="vs-item"><span class="label">层级位置</span><span>应用层（业务逻辑砖块）</span></div>
+                    <div class="vs-item"><span class="label">核心目标</span><span class="badge-green">代码复用、降低耦合</span></div>
+                    <div class="vs-item"><span class="label">颗粒度</span><span>较小（类、模块、微服务）</span></div>
+                    <div class="vs-item"><span class="label">关注点</span><span>业务功能怎么实现</span></div>
+                </div>
+                <div class="vs-card vs-risc">
+                    <div class="vs-title">中间件 (Middleware)</div>
+                    <div class="vs-item"><span class="label">层级位置</span><span>基础层（OS与应用间）</span></div>
+                    <div class="vs-item"><span class="label">核心目标</span><span class="badge-green">通信、集成、高可用</span></div>
+                    <div class="vs-item"><span class="label">颗粒度</span><span>庞大（独立部署的集群）</span></div>
+                    <div class="vs-item"><span class="label">关注点</span><span>应用间数据怎么搬运</span></div>
+                </div>
+            </div>
+
+            <div class="sub-title">常见分类与标准 <span class="tag tag-key">必考映射</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>类别</th><th>特点与说明</th><th>典型代表 / 标准</th></tr>
+                    <tr><td class="badge-acc" rowspan="3">构件标准</td><td>跨语言、跨平台，最中立</td><td><strong>CORBA</strong> (OMG组织)</td></tr>
+                    <tr><td>Windows平台为主</td><td><strong>COM/DCOM</strong> (Microsoft)</td></tr>
+                    <tr><td>基于Java平台</td><td><strong>EJB</strong> (Sun/Oracle)</td></tr>
+                    <tr><td class="badge-gold" rowspan="4">中间件分类</td><td>统一访问不同数据库</td><td>数据库中间件 (JDBC/ODBC)</td></tr>
+                    <tr><td>异步消息传递、削峰填谷</td><td>消息中间件/MOM (RabbitMQ/Kafka)</td></tr>
+                    <tr><td>管理分布式事务</td><td>交易中间件/TPM (Tuxedo)</td></tr>
+                    <tr><td>调用远程服务</td><td>RPC中间件 (gRPC/Dubbo)</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 协同关系：它们是天作之合</div>
+                <strong>构件往往运行在中间件之上。</strong><br>
+                例如：你用 Java 写了一个业务构件（EJB），你把它部署在提供运行环境和通信支持的应用服务器（对象中间件）上。两者配合，才能支撑起大型系统。
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                中间件分类：<strong>「数消交对远」</strong><br>
+                构件标准：<strong>「CORBA万国通，COM微软用，EJB爪哇种」</strong>
+            </div>
+        </div>
+    </section>
+
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>计算机语言</h1>
+            <p>语言分代 · 编译 vs 解释 · 编译过程六步 · 考点密度 ★★☆☆</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="icon">🗣️</span>4.1 语言演进 & UML 建模语言 <span class="tag tag-hot">重中之重</span></div>
+
+            <div class="sub-title">程序设计语言的分代</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>代</th><th>语言</th><th>类比</th><th>特点</th></tr>
+                    <tr><td>第1代</td><td>机器语言</td><td>原始人手势</td><td>纯0和1，CPU直接执行</td></tr>
+                    <tr><td>第2代</td><td>汇编语言</td><td>象形文字</td><td>助记符代替二进制，需汇编器</td></tr>
+                    <tr><td>第3代</td><td>高级语言</td><td>现代语言</td><td>接近人类语言（C/C++/Java/Python），需编译/解释</td></tr>
+                    <tr><td class="badge-acc">第4代</td><td class="badge-acc">建模语言 (UML)</td><td>工程蓝图</td><td>可视化建模，面向对象，所见即所得，如 UML</td></tr>
+                </table>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-tag" style="margin-top: 10px;">UML 核心三要素：事物、关系、视图</div>
+
+            <div class="sub-title">1. UML 事物 (Things) —— 模型的“词汇”</div>
+
+            <div class="kp-grid" style="margin-bottom: 16px;">
+                <div class="kp-item"><div class="kp-title">结构事物 (名词)</div><div class="kp-body">模型的静态部分。如：类(Class)、接口(Interface)、用例(UseCase)、构件(Component)、节点(Node)。</div></div>
+                <div class="kp-item"><div class="kp-title">行为事物 (动词)</div><div class="kp-body">模型的动态部分。表示跨越时间和空间的行为。如：交互(Interaction)、状态机(State Machine)。</div></div>
+                <div class="kp-item"><div class="kp-title">分组事物 (整理箱)</div><div class="kp-body">模型的组织部分。最主要的就是：包(Package)，用来把元素组织成组。</div></div>
+                <div class="kp-item"><div class="kp-title">注释事物 (便签纸)</div><div class="kp-body">模型的解释说明部分。如：注解(Note)，用于添加文本注释。</div></div>
+            </div>
+
+            <div class="sub-title">2. UML 关系 (Relationships) —— 词汇的“连接”</div>
+
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>关系类型</th><th>图形表示</th><th>含义与类比</th></tr>
+                    <tr><td class="badge-acc">依赖 (Dependency)</td><td>带箭头的<strong>虚线</strong></td><td><strong>“使用”关系：</strong>一个事物的变化会影响另一个事物。（如：人依赖空气、司机依赖车）</td></tr>
+                    <tr><td class="badge-acc">关联 (Association)</td><td>带箭头或不带的<strong>实线</strong></td><td><strong>“拥有”关系：</strong>结构化关系，一种强依赖。（如：企鹅与气候）<br><span style="color:var(--text3);font-size:0.75rem">特例：聚合(空心菱形，整体与部分可分)、组合(实心菱形，同生共死)</span></td></tr>
+                    <tr><td class="badge-gold">泛化 (Generalization)</td><td>带<strong>空心三角</strong>箭头的<strong>实线</strong></td><td><strong>“继承”关系：</strong>一般与特殊的关系。（如：动物与狗，狗泛化自动物）</td></tr>
+                    <tr><td class="badge-gold">实现 (Realization)</td><td>带<strong>空心三角</strong>箭头的<strong>虚线</strong></td><td><strong>“接口与实现”：</strong>类实现了接口的功能。（如：键盘实现了输入设备接口）</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 关系速记口诀</div>
+                <strong>「泛化实，实现虚；关联实，依赖虚」</strong><br>
+                记忆法：三角箭头代表“族谱/继承”（实线是亲生继承，虚线是契约实现）；普通箭头代表“使用”（实线是长期拥有的关联，虚线是临时借用的依赖）。
+            </div>
+
+            <div class="sub-title">3. UML "4+1" 视图模型 <span class="tag tag-hot">必考选择题</span></div>
+
+            <div class="analogy">
+                <strong>🏗️ 架构师视角：一栋大楼的五张图纸</strong><br>
+                给客户看功能（用例）、给设计师看空间（逻辑）、给包工头看施工流（进程）、给泥瓦匠看砖块怎么砌（实现）、给物业看大楼水网电网接哪（部署）。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>视图名称</th><th>主要关注者</th><th>关注点与作用</th><th>对应 UML 图</th></tr>
+                    <tr><td class="badge-red">用例视图 (Use Case)</td><td><strong>最终用户 / 分析师</strong></td><td>系统的功能需求。它是其他所有视图的<strong>核心和驱动力</strong>（所以叫"1"）。</td><td>用例图</td></tr>
+                    <tr><td class="badge-acc">逻辑视图 (Logical)</td><td>系统分析 / 设计人员</td><td>系统内部的功能设计和结构（词汇表）。</td><td>类图、对象图</td></tr>
+                    <tr><td class="badge-acc">进程视图 (Process)</td><td>系统集成人员</td><td>系统的非功能性需求（并发、同步、性能、吞吐量）。</td><td>活动图、状态机图</td></tr>
+                    <tr><td class="badge-acc">实现视图 (Impl)</td><td><strong>程序员</strong></td><td>软件代码的静态组织结构、软件模块划分。</td><td>构件图(组件图)</td></tr>
+                    <tr><td class="badge-acc">部署视图 (Deployment)</td><td><strong>系统/网络工程师</strong></td><td>软件到物理硬件的映射，拓扑结构、安装和通信。</td><td>节点图(部署图)</td></tr>
+                </table>
+            </div>
+
+            <div class="sub-title">🗺️ UML 元素综合关系全景图</div>
+            <div class="analogy">
+                结合下面的综合图来看，UML 实际上就是用<strong>事物（名词）</strong>，通过各种<strong>关系（动词）</strong>连接起来，最终画到不同的<strong>图（句子）</strong>中，从而形成完整的<strong>视图（故事/篇章）</strong>。
+            </div>
+
+        </div>
+    </section>
+
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>多媒体技术</h1>
+            <p>媒体分类 · 数据量计算 · 压缩格式 · 考点密度 ★★★☆</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="icon">🎬</span>5.1 媒体五种类型 <span class="tag tag-key">常考</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>类型</th><th>含义</th><th>举例</th></tr>
+                    <tr><td class="badge-acc">感觉媒体</td><td>人能直接感受的</td><td>声音、图像、文字</td></tr>
+                    <tr><td class="badge-acc">表示媒体</td><td>信息的编码方式</td><td>ASCII、JPEG、MP3</td></tr>
+                    <tr><td class="badge-acc">表现媒体</td><td>输入输出设备</td><td>键盘、显示器、音箱</td></tr>
+                    <tr><td class="badge-acc">存储媒体</td><td>存储信息的载体</td><td>硬盘、U盘、光盘</td></tr>
+                    <tr><td class="badge-acc">传输媒体</td><td>传输信息的载体</td><td>光纤、网线、电磁波</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「感表表存传」</strong> → 谐音「赶（感）表（表示）表（表现）存（存储）钱（传）」
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="icon">🎵</span>5.2 音视频数据量计算 <span class="tag tag-calc">必考公式</span></div>
+            <div class="formula-box">音频数据量(bit) = 采样频率(Hz) × 量化位数(bit) × 声道数 × 时间(s)
+
+                例：CD音质 = 44100 × 16 × 2 × 60 ÷ 8
+                = 84,672,000 字节 ≈ 10.09 MB/分钟
+
+                图像数据量(bit) = 水平像素 × 垂直像素 × 颜色深度(bit)
+
+                例：1920×1080，24位真彩色
+                = 1920 × 1080 × 24 ÷ 8 = 6,220,800 字节 ≈ 5.93 MB</div>
+            <div class="alert alert-info">💡 奈奎斯特采样定理：采样频率 ≥ 2 × 最高信号频率<br>人耳20Hz~20kHz → CD采样率44.1kHz > 2×20kHz</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>颜色深度</th><th>色彩数</th></tr>
+                    <tr><td>8位</td><td>256色</td></tr>
+                    <tr><td>16位</td><td>65,536色</td></tr>
+                    <tr><td class="badge-gold">24位</td><td class="badge-gold">1677万色（真彩色）</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="icon">🖼️</span>5.3 多媒体格式与压缩</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>图像格式</th><th>压缩类型</th><th>特点</th></tr>
+                    <tr><td>BMP</td><td>无压缩</td><td>文件大，质量最好</td></tr>
+                    <tr><td class="badge-red">JPEG</td><td class="badge-red">有损压缩</td><td>适合照片，文件小</td></tr>
+                    <tr><td class="badge-green">GIF</td><td class="badge-green">无损压缩</td><td>支持动画，最多256色</td></tr>
+                    <tr><td class="badge-green">PNG</td><td class="badge-green">无损压缩</td><td>支持透明度</td></tr>
+                </table>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>视频标准</th><th>对应场景</th></tr>
+                    <tr><td>MPEG-1</td><td>VCD标准</td></tr>
+                    <tr><td>MPEG-2</td><td>DVD标准</td></tr>
+                    <tr><td>MPEG-4</td><td>网络视频/流媒体</td></tr>
+                    <tr><td>H.264/AVC</td><td>高压缩效率，广泛使用</td></tr>
+                </table>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>颜色模型</th><th>用途</th><th>说明</th></tr>
+                    <tr><td>RGB</td><td>显示器</td><td>红绿蓝，加色模型</td></tr>
+                    <tr><td>CMYK</td><td>印刷</td><td>青品黄黑，减色模型</td></tr>
+                    <tr><td>YUV</td><td>视频</td><td>亮度+色差（电视标准）</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「GIF PNG无损好，JPEG MP3有损了」</strong><br>
+                MPEG标准：<strong>「1VCD 2DVD 4网络」</strong>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>配套练习题</h1>
+            <p>25道精选选择题 · 含解析 · 覆盖全章知识点</p>
+        </div>
+        <div id="quiz-score" style="margin-bottom:16px">已作答：<span id="answered">0</span> / 25 题 &nbsp;|&nbsp; 答对：<span id="correct-count">0</span> 题</div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">QUICK REF</div>
+            <h1>全章核心速记卡</h1>
+            <p>22个高频考点 · 口诀对照 · 考前冲刺</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id, btn) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // ─── QUIZ DATA ───
+    const quizData = [
+        {q:"在Flynn分类法中，当代多核处理器属于（　）类型。",opts:["SISD","SIMD","MISD","MIMD"],ans:3,exp:"多核处理器有多个独立核心，每核心可执行不同指令流，处理不同数据流 → MIMD（多指令多数据）。"},
+        {q:"以下关于Flynn分类的说法，错误的是（　）。",opts:["SISD是传统单处理器计算机","SIMD的代表是GPU和向量处理器","MISD在实际中已有大量应用","MIMD包括多处理器系统和多计算机系统"],ans:2,exp:"MISD（多指令单数据）理论上存在，但实际应用极少，几乎没有这种类型——是经典陷阱题。"},
+        {q:"冯·诺依曼计算机的最基本特征是（　）。",opts:["采用二进制编码","存储程序和程序控制","采用总线结构","采用操作系统"],ans:1,exp:"冯·诺依曼体系的核心就是'存储程序'——将程序和数据存储在存储器中，计算机顺序自动执行。"},
+        {q:"在CPU中，程序计数器（PC）的作用是（　）。",opts:["存放当前正在执行的指令","存放下一条要执行的指令的地址","存放操作数","存放运算结果"],ans:1,exp:"PC存放的是下一条要执行的指令的地址。IR（指令寄存器）存放当前指令。ACC存放运算结果。"},
+        {q:"某流水线由取指、分析、执行3个阶段组成，每阶段耗时分别为2ns、3ns、1ns。连续输入100条指令，执行时间为（　）ns。",opts:["300","303","306","600"],ans:1,exp:"T = (2+3+1) + (100-1)×3 = 6 + 297 = 303ns。第一条指令完整执行后，后续每条只需等最长段时间。"},
+        {q:"以下关于RISC和CISC的对比，正确的是（　）。",opts:["RISC采用微程序控制，CISC采用硬布线控制","RISC的指令数量多于CISC","RISC采用硬布线控制，更适合流水线","CISC的通用寄存器数量多于RISC"],ans:2,exp:"RISC：指令少、等长、硬布线控制、大量寄存器、适合流水线。A说反了；B RISC指令少；D RISC寄存器更多。"},
+        {q:"在Cache的地址映射方式中，（　）方式的命中率最高但硬件实现最复杂。",opts:["直接映射","全相联映射","组相联映射","段页式映射"],ans:1,exp:"全相联映射：主存块可放Cache任意位置，命中率最高；但所有Cache行都需要比较，硬件最复杂。直接映射最简单但命中率最低。"},
+        {q:"某计算机Cache存取时间10ns，主存存取时间200ns，命中率95%。采用先访问Cache再访问主存，平均存取时间为（　）ns。",opts:["19.5","20.5","20","30"],ans:2,exp:"先访问Cache再访问主存：命中=10ns，未命中=10+200=210ns。平均=0.95×10+0.05×210=9.5+10.5=20ns。若同时访问则为19.5ns，注意区分！"},
+        {q:"页式存储管理中会产生（　），段式存储管理中会产生（　）。",opts:["内部碎片；外部碎片","外部碎片；内部碎片","内部碎片；内部碎片","外部碎片；外部碎片"],ans:0,exp:"口诀「页内段外」：页式页面大小固定，最后一页可能未填满→内部碎片；段式段间可能有空隙→外部碎片。"},
+        {q:"在进程状态转换中，下列转换不可能发生的是（　）。",opts:["运行→就绪","就绪→运行","运行→阻塞","就绪→阻塞"],ans:3,exp:"就绪进程还没运行，不可能去等待I/O，因此就绪→阻塞不存在。同理阻塞→运行也不存在，必须先回就绪态。"},
+        {q:"产生死锁的四个必要条件中，不包括（　）。",opts:["互斥条件","请求与保持条件","可剥夺条件","循环等待条件"],ans:2,exp:"死锁四条件：互斥、请求与保持、不可剥夺、循环等待。C选项说的是「可剥夺」，正确应为「不可剥夺」，恰好相反。"},
+        {q:"进程和线程的关系，下列说法正确的是（　）。",opts:["线程是资源分配的基本单位","进程是CPU调度的基本单位","同一进程的线程共享该进程的资源","不同进程的线程可以共享资源"],ans:2,exp:"进程是资源分配基本单位（A错）；线程是CPU调度基本单位（B错）；同进程线程共享地址空间（C对）；不同进程线程一般不共享（D错）。"},
+        {q:"数据库三级模式中，保证数据物理独立性的是（　）。",opts:["外模式/概念模式映像","概念模式/内模式映像","外模式","内模式"],ans:1,exp:"概念模式/内模式映像保证物理独立性（物理存储变，概念模式不变）；外模式/概念模式映像保证逻辑独立性。口诀「外概逻辑，概内物理」。"},
+        {q:"若关系R属于1NF但不属于2NF，则R中一定存在（　）。",opts:["传递函数依赖","部分函数依赖","多值依赖","连接依赖"],ans:1,exp:"1NF→2NF：消除部分函数依赖。2NF→3NF：消除传递函数依赖。属于1NF但不属于2NF，说明还存在部分函数依赖。"},
+        {q:"事务的ACID特性中，（　）是指从一个一致性状态到另一个一致性状态。",opts:["原子性","一致性","隔离性","持久性"],ans:1,exp:"原子性：全做或全不做；一致性：从一个一致状态到另一个一致状态；隔离性：互不干扰；持久性：提交后永久有效。"},
+        {q:"在OSI参考模型中，路由器工作在（　）。",opts:["物理层","数据链路层","网络层","传输层"],ans:2,exp:"物理层：集线器；数据链路层：交换机/网桥；网络层：路由器；传输层及以上：网关。"},
+        {q:"以下关于TCP和UDP的对比，错误的是（　）。",opts:["TCP是面向连接的，UDP是无连接的","TCP提供可靠传输，UDP提供不可靠传输","TCP传输效率高于UDP","TCP有流量控制和拥塞控制，UDP没有"],ans:2,exp:"TCP因为要建立连接、确认重传、流量控制，效率低于UDP。UDP没有这些开销，传输更快。故C错误。"},
+        {q:"分布式数据库的透明性中，级别最高的是（　）。",opts:["局部映像透明","位置透明","复制透明","分片透明"],ans:3,exp:"透明性从高到低：分片透明→复制透明→位置透明→局部映像透明。口诀「分复位局」，分片透明级别最高。"},
+        {q:"在CAP定理中，实际系统通常在（　）之间做出选择。",opts:["A和P","C和P","C和A","A、C和P都可同时满足"],ans:2,exp:"分布式环境网络分区不可避免，P是必选。所以实际在C（一致性）和A（可用性）之间选择：CP如ZooKeeper，AP如Cassandra。"},
+        {q:"采样频率44.1kHz、16位量化、双声道CD，1分钟原始数据量约为（　）MB。",opts:["1.4","5.3","10.1","20.2"],ans:2,exp:"数据量=44100×16×2×60÷8÷1024÷1024=44100×16×2×60/8388608≈10.09MB。"},
+        {q:"以下图像格式中，采用有损压缩的是（　）。",opts:["BMP","PNG","GIF","JPEG"],ans:3,exp:"BMP：无压缩；PNG：无损压缩；GIF：无损压缩（最多256色）；JPEG：有损压缩，适合照片。"},
+        {q:"根据奈奎斯特采样定理，若信号最高频率为4kHz，采样频率至少为（　）kHz。",opts:["2","4","8","16"],ans:2,exp:"奈奎斯特定理：采样频率 ≥ 2×最高信号频率 = 2×4kHz = 8kHz。"},
+        {q:"SRAM和DRAM的主要区别，正确的是（　）。",opts:["SRAM用于外存，DRAM用于内存","SRAM需要定期刷新，DRAM不需要","SRAM速度快不需刷新，常用于Cache；DRAM需刷新，常用于主存","SRAM价格便宜，DRAM价格昂贵"],ans:2,exp:"SRAM：速度快，不需刷新，价格贵，用于Cache。DRAM：需定期刷新，速度较慢，价格低，用于主存。"},
+        {q:"以下属于中间件的是（　）。①操作系统 ②消息队列 ③数据库驱动 ④事务处理监控器 ⑤编译器",opts:["①②③","②③④","①③⑤","②④⑤"],ans:1,exp:"中间件位于OS和应用程序之间：②消息队列（消息中间件）、③数据库驱动（数据库中间件）、④事务处理监控器（交易中间件）。OS和编译器是系统软件，不是中间件。"},
+        {q:"CORBA、COM/DCOM和EJB三种构件标准，其中与编程语言无关的是（　）。",opts:["COM","DCOM","CORBA","EJB"],ans:2,exp:"CORBA（OMG组织）：跨语言、跨平台，最中立；COM/DCOM（Microsoft）：Windows为主；EJB（Sun/Oracle）：基于Java语言。"},
+    ];
+
+    // ─── RENDER QUIZ ───
+    let answered = 0, correct = 0;
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        quizData.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-q';
+            div.innerHTML = `
+      <div class="quiz-num">第 ${i+1} 题 / 共 25 题</div>
+      <div class="quiz-text">${item.q}</div>
+      <div class="quiz-options" id="opts-${i}">
+        ${['A','B','C','D'].map((L,j)=>`
+          <button class="opt-btn" data-q="${i}" data-opt="${j}" onclick="handleOpt(${i},${j})">
+            <span class="opt-letter">${L}.</span>
+            <span>${item.opts[j]}</span>
+          </button>`).join('')}
+      </div>
+      <button class="reveal-btn" id="reveal-${i}" onclick="revealAns(${i})" style="display:none">💡 查看解析</button>
+      <div class="quiz-ans" id="ans-${i}">
+        <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+        <div class="ans-body">${item.exp}</div>
+      </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleOpt(qi, opt) {
+        const item = quizData[qi];
+        const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed')) return;
+        opts.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === item.ans) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt === item.ans) correct++;
+        document.getElementById('answered').textContent = answered;
+        document.getElementById('correct-count').textContent = correct;
+        document.getElementById(`reveal-${qi}`).style.display = 'inline-flex';
+    }
+
+    function revealAns(qi) {
+        const ans = document.getElementById(`ans-${qi}`);
+        ans.classList.toggle('show');
+    }
+    renderQuiz();
+
+    // ─── FLASH CARDS ───
+    const flashData = [
+        {n:"01",topic:"硬件五大件",mnemonic:"孙悟空存书",detail:"运算器·控制器·存储器·输入·输出"},
+        {n:"02",topic:"Flynn分类",mnemonic:"MISD实际不存在",detail:"SISD·SIMD·MISD(陷阱)·MIMD"},
+        {n:"03",topic:"冯·诺依曼核心",mnemonic:"存储程序，顺序执行",detail:"指令和数据统一二进制存储"},
+        {n:"04",topic:"CPU寄存器",mnemonic:"PC指路，IR读令",detail:"PC=下一条地址；IR=当前指令"},
+        {n:"05",topic:"流水线公式",mnemonic:"一条完整走，后面跟最慢",detail:"T=(t₁+…+tₖ)+(n-1)×Δt"},
+        {n:"06",topic:"CISC vs RISC",mnemonic:"复杂微程序，精简硬布线",detail:"RISC：等长指令·大量寄存器·易流水线"},
+        {n:"07",topic:"存储层次",mnemonic:"寄Cache主磁光（速↓容↑）",detail:"速度快→慢，容量小→大"},
+        {n:"08",topic:"Cache映射",mnemonic:"直接太死板，全联太自由",detail:"全相联命中率最高但硬件最复杂"},
+        {n:"09",topic:"页段碎片",mnemonic:"页内段外",detail:"页式=内部碎片；段式=外部碎片"},
+        {n:"10",topic:"进程vs线程",mnemonic:"进程分资源，线程分CPU",detail:"进程=资源分配；线程=CPU调度"},
+        {n:"11",topic:"死锁条件",mnemonic:"互不循环请求保持",detail:"互斥·不可剥夺·循环等待·请求保持"},
+        {n:"12",topic:"PV操作",mnemonic:"P减V加，P堵V放",detail:"P:信号量-1可能阻塞；V:+1可能唤醒"},
+        {n:"13",topic:"三级模式",mnemonic:"外概内→用户/逻辑/物理",detail:"外概映像=逻辑独立；概内映像=物理独立"},
+        {n:"14",topic:"范式",mnemonic:"一原子，二完全，三无传递",detail:"1NF→2NF消部分；2NF→3NF消传递"},
+        {n:"15",topic:"ACID特性",mnemonic:"原来一哥很持久",detail:"原子性·一致性·隔离性·持久性"},
+        {n:"16",topic:"OSI七层",mnemonic:"巫师往前会表演",detail:"物理·数链·网络·传输·会话·表示·应用"},
+        {n:"17",topic:"分布式透明性",mnemonic:"分复位局（从高到低）",detail:"分片最高；局部映像最低"},
+        {n:"18",topic:"中间件分类",mnemonic:"数消交对远",detail:"数据库·消息·交易·对象·远程过程调用"},
+        {n:"19",topic:"构件标准",mnemonic:"CORBA万国通",detail:"CORBA跨语言；COM微软；EJB Java"},
+        {n:"20",topic:"媒体五类",mnemonic:"赶表表存钱",detail:"感觉·表示·表现·存储·传输"},
+        {n:"21",topic:"音频数据量",mnemonic:"采样×量化×声道×时间",detail:"CD=44100×16×2 = 10.09MB/分钟"},
+        {n:"22",topic:"图像压缩",mnemonic:"GIF/PNG无损，JPEG有损",detail:"BMP无压缩；JPEG有损；PNG无损"},
+    ];
+
+    function renderFlash() {
+        const grid = document.getElementById('flash-grid');
+        flashData.forEach(fc => {
+            const div = document.createElement('div');
+            div.className = 'flash-card';
+            div.innerHTML = `<div class="fc-num"># ${fc.n}</div>
+      <div class="fc-topic">${fc.topic}</div>
+      <div class="fc-mnemonic">「${fc.mnemonic}」</div>
+      <div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>

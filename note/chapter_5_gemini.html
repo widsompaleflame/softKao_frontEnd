@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统架构设计师 - 信息安全技术通关宝典 (第5小时)</title>
+    <style>
+        :root {
+            --bg-color: #fdfaf6;
+            --text-color: #5c4a3d;
+            --accent-color: #d4a373;
+            --accent-hover: #b0895b;
+            --card-bg: #fffaf0;
+            --border-color: #e8dcc4;
+            --mnemonic-bg: #ffe4b5;
+            --analogy-bg: #e0f2f1;
+            --error-bg: #ffcdd2;
+            --error-hover: #ef9a9a;
+            --correct-color: #a7c957;
+            --wrong-color: #e63946;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #8e735b;
+            border-bottom: 2px dashed var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        h2, h3 { color: #8e735b; }
+
+        /* 顶部导航 Tabs */
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .tab:hover {
+            border-color: var(--accent-color);
+        }
+
+        .tab.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 6px rgba(212, 163, 115, 0.3);
+        }
+
+        /* 内容区 */
+        .content-section { display: none; animation: fadeIn 0.5s; }
+        .content-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(142, 115, 91, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-2px); }
+
+        /* 装饰性区块 */
+        .analogy {
+            background: var(--analogy-bg);
+            padding: 15px;
+            border-left: 5px solid #4db6ac;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            color: #004d40;
+        }
+
+        .analogy::before { content: "💡 生活类比："; font-weight: bold; }
+
+        .mnemonic {
+            background: var(--mnemonic-bg);
+            padding: 15px;
+            border-left: 5px solid var(--accent-color);
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #8d6e63;
+        }
+
+        .mnemonic::before { content: "🎤 速记口诀："; font-weight: bold; color: #5d4037;}
+
+        .error-point {
+            background: var(--error-bg);
+            padding: 15px;
+            border-left: 5px solid #e53935;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+            color: #b71c1c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .error-point:hover { background: var(--error-hover); }
+        .error-point::before { content: "⚠️ 易错点 (点击揭晓)："; font-weight: bold; }
+
+        /* 按钮与交互 */
+        .btn {
+            padding: 12px 25px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .btn:hover { background: var(--accent-hover); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* 答题区样式 */
+        .quiz-container { display: none; }
+        .quiz-question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+
+        .quiz-option {
+            padding: 15px;
+            background: #faedcd;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .quiz-option:hover { background: #e9edc9; }
+        .quiz-option.selected { background: var(--accent-color); color: white; }
+        .quiz-option.correct { background: var(--correct-color); color: white; border-color: #558b2f; }
+        .quiz-option.wrong { background: var(--wrong-color); color: white; border-color: #c62828; }
+
+        .explanation {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9edc9;
+            border-radius: 8px;
+            color: #386641;
+            font-weight: bold;
+            border-left: 5px solid var(--correct-color);
+        }
+
+        .explanation.show { display: block; animation: fadeIn 0.3s; }
+
+        .score-board {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* 底部信息 */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🛡️ 软考高级架构师：信息安全技术 (第5小时)</h1>
+
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('learn')">📖 核心知识点背诵</div>
+        <div class="tab" onclick="switchTab('quiz')">✍️ 30道通关刷题</div>
+    </div>
+
+    <!-- ================= 学习区 ================= -->
+    <div id="learn-section" class="content-section active">
+
+        <!-- 章节1 -->
+        <div class="card">
+            <h2>1. 信息安全基础与管理框架</h2>
+            <p><strong>基本要素 (CIA等)：</strong>机密性、完整性、可用性、可控性、可审查性。</p>
+            <div class="analogy">
+                把信息当成存放在银行保险箱的金条：<br>
+                • <strong>机密性</strong>：只有你拿着钥匙能开箱（别人看不到）。<br>
+                • <strong>完整性</strong>：金条还是那根金条，没被掉包（没被篡改）。<br>
+                • <strong>可用性</strong>：银行正常营业，你想取随时能取（不被拒绝服务）。
+            </div>
+            <div class="mnemonic">
+                “机完可控审”（谐音：鸡丸可口啦！）<br>
+                机密不漏，完整不改，可用不拒。
+            </div>
+            <p><strong>管理体系组成：</strong>法律管理、制度管理、培训管理。</p>
+            <div class="error-point" onclick="toggleError(this, '完整性是防篡改，机密性是防泄露。千万别选错！')">
+                <span>保护数据不被未授权的用户偷看，是完整性还是机密性？</span>
+                <span>👉</span>
+            </div>
+        </div>
+
+        <!-- 章节2 -->
+        <div class="card">
+            <h2>2. 加解密技术 (加密必考点)</h2>
+            <h3>(1) 对称加密（共享密钥）</h3>
+            <p>加密解密用同一把钥匙。主要算法：DES、3DES、IDEA、AES、SM4(国密)。</p>
+            <div class="mnemonic">
+                对称的门锁只有一把钥匙。记住他们的身价（密钥长度）：<br>
+                • <strong>DES (弟弟死)</strong>：弟弟死的时候只有56岁（密钥56位）。<br>
+                • <strong>3DES (三大爷)</strong>：三倍的DES，56 × 2 = 112位（做三次加解密：加-解-加）。<br>
+                • <strong>IDEA (好主意)</strong>：好主意值128万（密钥128位）。<br>
+                • <strong>AES (爱死)</strong>：爱死你了，送你128、192、256朵玫瑰。<br>
+                • <strong>SM4 (神秘四哥)</strong>：神秘四哥也是128斤。
+            </div>
+            <div class="error-point" onclick="toggleError(this, '其实是112位！两把56位的钥匙轮流用（加密-解密-加密）。')">
+                <span>三重DES的密钥长度是 56 × 3 = 168位吗？</span>
+                <span>👉</span>
+            </div>
+
+            <h3>(2) 非对称加密（公钥密码体制）</h3>
+            <p>有两把钥匙：公钥公开，私钥保密。主要算法：RSA、SM2(国密)。</p>
+            <div class="analogy">
+                • <strong>保密通信</strong>：大家都能把信放进你的信箱(公钥加密)，但只有你有钥匙开箱(私钥解密)。<br>
+                • <strong>数字签名</strong>：你用自己的私人印章盖章(私钥加密)，大家都可以用公布的印章样式比对真伪(公钥解密)。
+            </div>
+            <div class="mnemonic">
+                <strong>RSA (阿三哥)</strong>算数好，基于大素数分解；<br>
+                <strong>SM2 (神秘二哥)</strong>爱画图，基于椭圆曲线离散对数。
+            </div>
+        </div>
+
+        <!-- 章节3 -->
+        <div class="card">
+            <h2>3. 访问控制与数字签名</h2>
+            <p><strong>访问控制实现技术：</strong></p>
+            <ul>
+                <li><strong>ACL (访问控制表)</strong>：按列(客体)保存。最流行！(类比：景点的游客登记本)</li>
+                <li><strong>能力表 (Capabilities)</strong>：按行(主体)保存。(类比：你的员工工牌，写着能进哪些门)</li>
+                <li><strong>访问控制矩阵 (ACM)</strong>：主体为行，客体为列。</li>
+            </ul>
+            <p><strong>数字签名：</strong>条件包括可信、不可伪造、不可重用、不可改变、不可抵赖。先做摘要再签名以提速。</p>
+            <div class="mnemonic">
+                签名五原则：“信伪重改赖”（谐音：信委重改赖，信用委员会重新修改赖账规则）。
+            </div>
+            <div class="error-point" onclick="toggleError(this, '通常是对【摘要】进行签名，而不是对文件全文签名，这样速度快很多！')">
+                <span>数字签名是对整个文件全文进行加密签名吗？</span>
+                <span>👉</span>
+            </div>
+        </div>
+
+        <!-- 章节4 -->
+        <div class="card">
+            <h2>4. 网络攻击与防御</h2>
+            <p><strong>拒绝服务(DoS/DDoS)：</strong>破坏可用性。</p>
+            <div class="analogy">派一群小弟去饭店占着座位不点菜，让真正想吃饭的客人进不来。</div>
+            <p><strong>欺骗攻击 (Spoofing)：</strong></p>
+            <ul>
+                <li><strong>ARP欺骗</strong>：骗MAC地址。(类比：贴假门牌号)</li>
+                <li><strong>DNS欺骗</strong>：骗IP地址。(类比：篡改114查号台电话本)</li>
+                <li><strong>IP欺骗</strong>：伪造源IP。</li>
+            </ul>
+            <p><strong>TCP/IP堆栈攻击：</strong>SYN风暴 (攻击三次握手，占着茅坑不拉屎)；Ping of Death (ICMP攻击网络层缓冲区)。</p>
+            <div class="mnemonic">
+                “ARP骗物理(MAC)，DNS骗域名(IP)，SYN只握手”。
+            </div>
+        </div>
+
+        <!-- 章节5 -->
+        <div class="card">
+            <h2>5. 保障体系与安全协议</h2>
+            <p><strong>等级保护五级划分：</strong>(1)用户自主 (2)系统审计 (3)安全标记 (4)结构化 (5)访问验证</p>
+            <div class="mnemonic">
+                “自主(1)去审计(2)，打个标记(3)好建结构(4)，最后验证(5)通关！”
+            </div>
+            <p><strong>常用安全协议：</strong></p>
+            <ul>
+                <li><strong>PGP</strong>：用于电子邮件安全 (邮件披个皮)。</li>
+                <li><strong>IPSec</strong>：网络层，优点是透明性。</li>
+                <li><strong>SET</strong>：解决信用卡支付问题 (Set钱)。</li>
+            </ul>
+            <div class="error-point" onclick="toggleError(this, 'DLP (Data Leakage Prevention 数据泄露防护)。')">
+                <span>防止企业内部机密文件流出，应该用什么技术？</span>
+                <span>👉</span>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="switchTab('quiz')">我已经背熟了，开始刷题！ 🚀</button>
+        </div>
+    </div>
+
+    <!-- ================= 刷题区 ================= -->
+    <div id="quiz-section" class="content-section">
+        <div class="card">
+            <h2 id="quiz-title">实战演练：30道通关真题</h2>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+
+            <div id="quiz-container">
+                <div class="quiz-question" id="question-text">加载中...</div>
+                <div class="quiz-options" id="options-container">
+                    <!-- 选项由JS生成 -->
+                </div>
+                <div class="explanation" id="explanation">解析加载中...</div>
+                <button class="btn" id="next-btn" style="display:none;" onclick="nextQuestion()">下一题 ➡️</button>
+            </div>
+
+            <div class="score-board" id="score-board">
+                🎉 恭喜完成所有题目！<br>
+                你的得分：<span id="final-score" style="font-size: 40px;">0</span> / 30<br>
+                <button class="btn" onclick="restartQuiz()">再刷一遍 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 软考高级架构师通关系统 | 预祝 5月23日 考试顺利通关！
+    </div>
+
+</div>
+
+<script>
+    // 切换Tab栏
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content-section').forEach(c => c.classList.remove('active'));
+
+        if(tabId === 'learn') {
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.getElementById('learn-section').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.getElementById('quiz-section').classList.add('active');
+            if(currentQuestion === 0 && !quizStarted) startQuiz();
+        }
+    }
+
+    // 易错点交互揭晓
+    function toggleError(element, answer) {
+        element.innerHTML = `<strong>💡 真相：</strong>${answer}`;
+        element.style.background = '#c8e6c9';
+        element.style.borderLeftColor = '#4caf50';
+        element.style.color = '#2e7d32';
+        element.style.cursor = 'default';
+    }
+
+    // ======== 题库系统 ========
+    const quizData = [
+        {q: "1. 信息安全的基本要素中，保护信息在使用、传输和存储时不被泄露给未授权的用户是指什么？", options: ["机密性", "完整性", "可用性", "可控性"], answer: 0, exp: "机密性指保护信息不被泄露给未授权的用户。口诀：机密不漏。"},
+        {q: "2. 破坏系统的可用性的攻击方式是？", options: ["跨站脚本攻击(XSS)", "拒绝服务攻击(DoS)", "跨站请求伪造攻击(CSRF)", "缓冲区溢出攻击"], answer: 1, exp: "拒绝服务(DoS)利用大量合法请求占用资源瘫痪网络，破坏可用性。"},
+        {q: "3. DES加密算法的密钥长度为56位，三重DES的密钥长度为多少位？", options: ["168", "128", "112", "56"], answer: 2, exp: "三重DES采用两组56位的密钥轮流加解密，长度是56×2=112位。"},
+        {q: "4. 以下哪种属于非对称加密算法？", options: ["AES", "RSA", "IDEA", "DES"], answer: 1, exp: "AES、IDEA、DES都是对称加密。RSA是非对称加密，阿三哥算大素数。"},
+        {q: "5. 若甲、乙采用非对称密钥体系进行保密通信，甲用乙的公钥加密数据文件，乙使用什么来对数据文件进行解密？", options: ["甲的公钥", "甲的私钥", "乙的公钥", "乙的私钥"], answer: 3, exp: "保密通信中，接收方使用自己的私钥解密别人用自己公钥加密的数据。"},
+        {q: "6. 确保数据免受未授权的篡改，属于信息安全的哪一个基本要素？", options: ["机密性", "完整性", "可用性", "可控性"], answer: 1, exp: "完整性确保数据不被偶然或恶意修改。口诀：完整不改。"},
+        {q: "7. 信息系统安全的管理体系由哪三个部分组成？", options: ["硬件、软件、人员", "法律、制度、培训", "决策、管理、执行", "设备、数据、行为"], answer: 1, exp: "管理体系由法律管理、制度管理和培训管理组成。"},
+        {q: "8. DES加密算法的分组长度是多少位？", options: ["56", "64", "112", "128"], answer: 1, exp: "DES明文切分为64位的块，密钥长度为56位。"},
+        {q: "9. 以下哪种加密算法属于我国的国密对称加密算法，分组长度和密钥长度都是128位？", options: ["SM2", "SM3", "SM4", "AES"], answer: 2, exp: "SM4(神秘四哥)是国密对称加密算法，128位。SM2是非对称。"},
+        {q: "10. 非对称加密算法中，用什么加密可以实现数字签名？", options: ["私钥加密", "公钥加密", "对称密钥加密", "哈希加密"], answer: 0, exp: "私钥加密，公钥解密，可实现数字签名，因为私钥代表唯一身份（盖章）。"},
+        {q: "11. RSA的安全性基于什么数学难题？", options: ["椭圆曲线", "离散对数", "大素数分解", "哈希冲突"], answer: 2, exp: "RSA基于大素数分解困难性。阿三哥算大素数。"},
+        {q: "12. SM2算法的安全性基于什么数学难题？", options: ["椭圆曲线离散对数", "大素数分解", "素性检测", "流密码"], answer: 0, exp: "SM2基于椭圆曲线离散对数问题。"},
+        {q: "13. 密钥分配中心(KDC)属于密钥发送方式的哪一种？", options: ["物理方式", "加密方式", "第三方加密方式", "公开发布"], answer: 2, exp: "第三方加密方式，该第三方即密钥分配中心(KDC)。"},
+        {q: "14. 公钥证书的管理机构通常称为什么？", options: ["KDC", "CA", "PKI", "PGP"], answer: 1, exp: "公钥证书的管理机构为CA(Certificate Authority)。"},
+        {q: "15. 访问控制矩阵(ACM)中，行索引代表什么？", options: ["主体", "客体", "控制策略", "审计结果"], answer: 0, exp: "ACM以主体为行索引，以客体为列索引。"},
+        {q: "16. 目前最流行、使用最多的访问控制实现技术是哪一种？", options: ["访问控制矩阵", "访问控制表(ACL)", "能力表", "授权关系表"], answer: 1, exp: "访问控制表(ACL)按列保存，是最流行的实现技术。类比游客登记表。"},
+        {q: "17. 数字签名需要满足的条件不包括以下哪一项？", options: ["可信", "不可伪造", "可改变", "不可抵赖"], answer: 2, exp: "条件是：可信、不可伪造、不可重用、不可改变、不可抵赖（信伪重改赖）。"},
+        {q: "18. 实际应用数字签名时，通常先对文件做什么处理以提升速度？", options: ["压缩", "加密", "做摘要", "分片"], answer: 2, exp: "先做摘要再签名，不仅大幅提升速度，也防止原文泄露。"},
+        {q: "19. 常见的DoS攻击模式DDoS，其中D代表什么？", options: ["Data", "Distributed", "Direct", "Domain"], answer: 1, exp: "Distributed Denial of Service，分布式拒绝服务攻击。"},
+        {q: "20. ARP欺骗主要阻断的是什么层面的解析？", options: ["域名到IP", "IP到MAC", "MAC到IP", "IP到端口"], answer: 1, exp: "ARP协议解析IP地址为物理MAC地址，欺骗它即阻断网络（贴假门牌）。"},
+        {q: "21. 以下哪种检测方法用于防范DNS欺骗？", options: ["固化ARP表", "安装杀毒软件", "交叉检查查询", "升级操作系统"], answer: 2, exp: "防范DNS欺骗的方法有被动监听检测、虚假报文探测和交叉检查查询。"},
+        {q: "22. 同步包风暴(SYN Flooding)攻击的是TCP协议的哪个机制？", options: ["慢启动", "三次握手", "拥塞控制", "四次挥手"], answer: 1, exp: "攻击TCP建立连接的三次握手，只握手不连接，耗尽目标资源。"},
+        {q: "23. 旧版操作系统容易受到“Ping of Death”攻击，这属于什么攻击？", options: ["TCP攻击", "ICMP攻击", "SNMP攻击", "UDP攻击"], answer: 1, exp: "Ping of Death属于ICMP攻击，攻击操作系统的网络层缓冲区。"},
+        {q: "24. 计算机系统安全等级保护中，第3级安全保护对应的是什么级别？", options: ["用户自主保护级", "系统审计保护级", "安全标记保护级", "结构化保护级"], answer: 2, exp: "第3级是安全标记保护级(B1级)。口诀：自主去审计，打个标记好建结构。"},
+        {q: "25. 第5级访问验证保护级对应TCSEC的哪个级别？", options: ["C1", "C2", "B2", "B3"], answer: 3, exp: "第5级最高级，对应TCSEC的B3级。"},
+        {q: "26. 防止企业指定数据资产以违反策略形式流出的技术通常称为什么？", options: ["数字水印", "DLP", "IDS", "防火墙"], answer: 1, exp: "DLP (Data Leakage Prevention，数据泄露防护)。"},
+        {q: "27. PGP广泛应用于哪种安全场景？", options: ["电子邮件安全", "网络层加密", "信用卡支付", "无线网络"], answer: 0, exp: "PGP包含RSA、IDEA等，广泛用于电子邮件安全。"},
+        {q: "28. IPSec是工作在OSI模型哪一层的安全协议？", options: ["数据链路层", "网络层", "传输层", "应用层"], answer: 1, exp: "IPSec工作在网络层，主要优点是透明性，无需更改应用程序。"},
+        {q: "29. 主要用于解决信用卡支付的交易问题的协议是？", options: ["SSL", "SET", "HTTPS", "PGP"], answer: 1, exp: "SET协议主要用于信用卡支付交易。"},
+        {q: "30. 风险评估的基本要素包括脆弱性、资产、威胁、风险和什么？", options: ["安全措施", "机密性", "法律", "认证"], answer: 0, exp: "风险评估基本要素：脆弱性、资产、威胁、风险、安全措施。"}
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let quizStarted = false;
+
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const explanation = document.getElementById('explanation');
+    const nextBtn = document.getElementById('next-btn');
+    const progressBar = document.getElementById('progress');
+
+    function startQuiz() {
+        quizStarted = true;
+        currentQuestion = 0;
+        score = 0;
+        document.getElementById('quiz-container').style.display = 'block';
+        document.getElementById('score-board').style.display = 'none';
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        explanation.classList.remove('show');
+        nextBtn.style.display = 'none';
+        const q = quizData[currentQuestion];
+
+        questionText.innerText = q.q;
+        progressBar.style.width = ((currentQuestion) / quizData.length * 100) + '%';
+
+        optionsContainer.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-option';
+            div.innerText = String.fromCharCode(65 + index) + '. ' + opt;
+            div.onclick = () => selectOption(div, index);
+            optionsContainer.appendChild(div);
+        });
+    }
+
+    function selectOption(element, index) {
+        if (nextBtn.style.display === 'inline-block') return; // 已答题
+
+        const q = quizData[currentQuestion];
+        const isCorrect = (index === q.answer);
+
+        // 样式反馈
+        const options = optionsContainer.children;
+        for (let i = 0; i < options.length; i++) {
+            if (i === q.answer) {
+                options[i].classList.add('correct');
+            } else if (i === index && !isCorrect) {
+                options[i].classList.add('wrong');
+            }
+            options[i].style.cursor = 'default';
+        }
+
+        if (isCorrect) {
+            score++;
+            explanation.innerHTML = "✅ 回答正确！<br>" + q.exp;
+            explanation.style.borderLeftColor = "var(--correct-color)";
+        } else {
+            explanation.innerHTML = "❌ 回答错误！<br>" + q.exp;
+            explanation.style.borderLeftColor = "var(--wrong-color)";
+        }
+
+        explanation.classList.add('show');
+        nextBtn.style.display = 'inline-block';
+
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.innerText = "查看最终得分 🏆";
+        } else {
+            nextBtn.innerText = "下一题 ➡️";
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function showScore() {
+        progressBar.style.width = '100%';
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('score-board').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+    }
+
+    function restartQuiz() {
+        startQuiz();
+    }
+</script>
+
+</body>
+</html>
+

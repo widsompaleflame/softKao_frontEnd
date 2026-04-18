@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五章 · 信息安全技术 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbf7;
+            --bg2: #f4efe6;
+            --card: #ffffff;
+            --card2: #f9f7f2;
+            --border: #e8e2d5;
+            --border2: #d4cbb8;
+            --text: #2c2825;
+            --text2: #5e574f;
+            --text3: #8f877c;
+            --accent: #0284c7;
+            --accent2: #0369a1;
+            --gold: #d97706;
+            --gold2: #b45309;
+            --green: #059669;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --pink: #db2777;
+            --teal: #0d9488;
+            --nav-h: 56px;
+            --radius: 10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden;}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ── TOP NAV ── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+            background:rgba(253,251,247,.93);backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);z-index:1000;
+            display:flex;align-items:center;padding:0 16px;gap:2px;
+            overflow-x:auto;white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+        .nav-btn{
+            display:inline-flex;align-items:center;gap:5px;
+            padding:5px 12px;border-radius:6px;border:1px solid transparent;
+            background:transparent;color:var(--text2);font-family:inherit;
+            font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;
+            white-space:nowrap;flex-shrink:0;
+        }
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── MAIN ── */
+        main{padding-top:calc(var(--nav-h) + 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── HERO ── */
+        .section-hero{
+            text-align:center;padding:40px 20px 32px;
+            background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);
+            border:1px solid var(--border);border-radius:14px;margin-bottom:28px;
+            position:relative;overflow:hidden;
+        }
+        .section-hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:500px;margin:0 auto}
+        .section-tag{
+            display:inline-block;padding:3px 10px;
+            background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);
+            color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;
+            letter-spacing:.06em;margin-bottom:12px;
+        }
+
+        /* ── CARD ── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .card-title .icon{font-size:1.1rem}
+
+        /* ── ANALOGY ── */
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2);}
+        .analogy strong{color:var(--gold)}
+
+        /* ── MNEMONIC ── */
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple);}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ── FORMULA BOX ── */
+        .formula-box{
+            background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;
+            padding:14px 16px;font-family:'JetBrains Mono',monospace;
+            font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;
+            margin:12px 0;line-height:1.8;
+        }
+
+        /* ── TABLES ── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+        .badge-pink{color:var(--pink);font-weight:600}
+
+        /* ── KP GRID ── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem;}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ── ALERT ── */
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid;}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+
+        /* ── SUB TITLE ── */
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ── TAG ── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+        .tag-green{background:rgba(5,150,105,.1);color:var(--green);border:1px solid rgba(5,150,105,.2)}
+
+        /* ── VS GRID ── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-e .vs-title{background:rgba(217,119,6,.1);color:var(--gold)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        /* ── LAYER STACK ── */
+        .layer-stack{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .layer-row{
+            display:flex;align-items:center;gap:12px;
+            padding:10px 14px;border-radius:7px;border:1px solid var(--border);
+            background:var(--bg2);transition:border-color .15s;
+        }
+        .layer-row:hover{border-color:var(--border2)}
+        .layer-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);font-weight:700;width:20px;flex-shrink:0;text-align:center}
+        .layer-name{font-weight:700;font-size:.87rem;min-width:90px;flex-shrink:0}
+        .layer-desc{font-size:.8rem;color:var(--text2)}
+        .layer-analogy{font-size:.77rem;color:var(--text3);margin-left:auto;flex-shrink:0;max-width:160px;text-align:right}
+
+        /* ── FLOW ── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* ── QUIZ ── */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s;}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{
+            display:flex;align-items:flex-start;gap:8px;padding:8px 11px;
+            border-radius:7px;border:1px solid var(--border);background:var(--bg2);
+            color:var(--text2);font-family:inherit;font-size:.83rem;
+            cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+            border-radius:6px;border:1px solid var(--border2);background:transparent;
+            color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s;
+        }
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease;}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        #quiz-score{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ── QUIZ FILTER ── */
+        .quiz-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+        .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s;}
+        .filter-btn:hover{border-color:var(--border2);color:var(--text)}
+        .filter-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── FLASH CARDS ── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s;}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ── PROTOCOL BADGE ── */
+        .proto-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:7px;background:var(--bg2);margin-bottom:6px;font-size:.83rem;transition:border-color .15s}
+        .proto-row:hover{border-color:var(--border2)}
+        .proto-name{font-weight:700;min-width:70px;flex-shrink:0}
+        .proto-layer{padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+        .proto-desc{color:var(--text2);font-size:.8rem}
+
+        /* ── ENCRYPT COMPARE ── */
+        .enc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
+        @media(max-width:600px){.enc-grid{grid-template-columns:repeat(3,1fr)}}
+        .enc-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+        .enc-card:hover,.enc-card.active{border-color:var(--accent);background:rgba(2,132,199,.05)}
+        .enc-name{font-weight:700;color:var(--accent);font-size:.85rem;margin-bottom:4px}
+        .enc-bits{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text2)}
+        .enc-type{font-size:.7rem;padding:2px 6px;border-radius:8px;margin-top:4px;display:inline-block}
+        .enc-sym{background:rgba(5,150,105,.1);color:var(--green)}
+        .enc-asym{background:rgba(220,38,38,.1);color:var(--red)}
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:640px){
+            main{padding-left:12px;padding-right:12px}
+            .section-hero h1{font-size:1.3rem}
+            .kp-grid{grid-template-columns:1fr}
+            .flash-grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ TOP NAV ══ -->
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        架构师第五章
+    </div>
+    <button class="nav-btn active" onclick="showSection('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="showSection('s1',this)">① 安全基础</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">② 安全框架</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">③ 加解密</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">④ 密钥&签名</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">⑤ 抗攻击</button>
+    <button class="nav-btn" onclick="showSection('s6',this)">⑥ 保障体系</button>
+    <button class="nav-btn" onclick="showSection('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="showSection('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══════════ 知识地图 ══════════ -->
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 05</div>
+            <h1>信息安全技术基础知识</h1>
+            <p>系统架构师考试 · 选择题约占 3-5 分 · 概念多 · 算法细节多 ⭐⭐⭐</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>全章知识架构</div>
+            <div style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:480px">
+                    <defs>
+                        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#d4cbb8"/>
+                        </marker>
+                    </defs>
+                    <!-- Root -->
+                    <rect x="340" y="200" width="190" height="48" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="435" y="220" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第五章</text>
+                    <text x="435" y="238" text-anchor="middle" font-size="10.5" fill="#0284c7">信息安全技术基础知识</text>
+
+                    <!-- 安全基础 -->
+                    <line x1="340" y1="214" x2="195" y2="72" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="98" y="52" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="163" y="68" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 安全基础</text>
+                    <text x="163" y="83" text-anchor="middle" font-size="9.5" fill="#5e574f">五要素·四范围</text>
+
+                    <!-- 加解密 -->
+                    <line x1="340" y1="222" x2="155" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="30" y="159" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="99" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. 加解密技术</text>
+                    <text x="99" y="190" text-anchor="middle" font-size="9.5" fill="#5e574f">DES·AES·RSA·SM2/4</text>
+
+                    <!-- 密钥&签名 -->
+                    <line x1="340" y1="240" x2="155" y2="308" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="30" y="289" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="99" y="305" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 密钥&amp;数字签名</text>
+                    <text x="99" y="320" text-anchor="middle" font-size="9.5" fill="#5e574f">KDC·CA·ACL·签名</text>
+
+                    <!-- 抗攻击 -->
+                    <line x1="340" y1="248" x2="195" y2="393" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="98" y="374" width="130" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="163" y="390" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">4. 抗攻击技术</text>
+                    <text x="163" y="405" text-anchor="middle" font-size="9.5" fill="#5e574f">DoS·ARP欺骗·扫描</text>
+
+                    <!-- 保障体系 -->
+                    <line x1="530" y1="248" x2="665" y2="393" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="605" y="374" width="130" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="670" y="390" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 保障体系</text>
+                    <text x="670" y="405" text-anchor="middle" font-size="9.5" fill="#5e574f">等保·安全协议</text>
+
+                    <!-- 安全框架 -->
+                    <line x1="530" y1="222" x2="715" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="700" y="159" width="130" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="765" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">6. 安全框架</text>
+                    <text x="765" y="190" text-anchor="middle" font-size="9.5" fill="#5e574f">技术·组织·管理</text>
+
+                    <!-- 风险评估 -->
+                    <line x1="530" y1="214" x2="675" y2="72" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="642" y="52" width="130" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="707" y="68" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">7. 风险评估</text>
+                    <text x="707" y="83" text-anchor="middle" font-size="9.5" fill="#5e574f">脆资威险施</text>
+
+                    <!-- Hot badge -->
+                    <rect x="386" y="168" width="90" height="18" rx="9" fill="rgba(217,119,6,.12)" stroke="rgba(217,119,6,.28)"/>
+                    <text x="431" y="181" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">选择题 3-5分</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="kp-grid">
+            <div class="kp-item"><div class="kp-title">🔥 安全五要素</div><div class="kp-body">机完可控查<br>DoS破坏可用性！</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 对称加密参数</div><div class="kp-body">DES(64/56)、3DES(64/112)<br>AES(128/128-256)、SM4(128/128)</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 公私钥口诀</div><div class="kp-body">公加私解=保密通信<br>私加公解=数字签名</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 安全协议层次</div><div class="kp-body">IPSec=网络层（高频！）<br>SSL=应用层与TCP之间</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ ACL vs 能力表</div><div class="kp-body">ACL按列客体存，ACL最流行<br>能力表按行主体存</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ DoS攻击</div><div class="kp-body">SYN Flooding最广泛<br>Ping of Death=ICMP攻击</div></div>
+            <div class="kp-item"><div class="kp-title">📊 等保5级</div><div class="kp-body">用系安结访 → C1-C2-B1-B2-B3<br>第5级最高</div></div>
+            <div class="kp-item"><div class="kp-title">📊 风险评估</div><div class="kp-body">脆资威险施（5要素）<br>不含"成本"</div></div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 1: 安全基础 ══════════ -->
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>信息安全基础知识</h1>
+            <p>五要素 · 四范围 · 网络安全威胁 · 考点密度 ★★★☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔒</span>1.1 信息安全五要素 <span class="tag tag-hot">高频考点</span></div>
+            <div class="analogy">
+                <strong>通俗类比：保护家里的贵重物品</strong><br>
+                <strong>机密性</strong> = 保险箱锁着，外人看不到 ·
+                <strong>完整性</strong> = 东西没被人动过 ·
+                <strong>可用性</strong> = 你随时能打开保险箱 ·
+                <strong>可控性</strong> = 家里有门禁系统 ·
+                <strong>可审查性</strong> = 摄像头记录谁来过
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>要素</th><th>核心含义</th><th>被破坏的攻击类型</th></tr>
+                    <tr><td class="badge-acc">机密性</td><td>不泄露给<strong>未授权</strong>用户</td><td>窃听、嗅探</td></tr>
+                    <tr><td class="badge-acc">完整性</td><td>不被篡改</td><td>篡改攻击</td></tr>
+                    <tr><td class="badge-red">可用性</td><td>合法用户正常访问</td><td class="badge-red">DoS / DDoS攻击 ← 超高频考点</td></tr>
+                    <tr><td class="badge-acc">可控性</td><td>能够控制访问</td><td>—</td></tr>
+                    <tr><td class="badge-acc">可审查性</td><td>可追溯审计</td><td>—</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ DoS攻击破坏的是<strong>可用性</strong>！不是机密性或完整性 — 这是超高频陷阱！</div>
+            <div class="alert alert-warn">⚠️ 机密性 = 不被泄露给<strong>未授权</strong>的用户（注意：是"授权"不是"注册"）</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「机完可控查」</strong> → 谐音 <strong>「机关可控查」</strong><br>
+                故事联想：<strong>机</strong>关部门设立<strong>关</strong>卡，一切都<strong>可</strong>以被<strong>控</strong>制和审<strong>查</strong>！
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🌐</span>1.2 信息安全四大范围</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(2,1fr)">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">① 设备安全</div>
+                    <div class="vs-item"><span>硬件</span><span class="label">物理层面</span></div>
+                    <div class="vs-item"><span>稳定性/可靠性</span><span class="label">保障基础</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">② 数据安全</div>
+                    <div class="vs-item"><span>秘密性</span><span class="label">保密</span></div>
+                    <div class="vs-item"><span>完整性 + 可用性</span><span class="label">数据三要素</span></div>
+                </div>
+                <div class="vs-card vs-d">
+                    <div class="vs-title">③ 内容安全</div>
+                    <div class="vs-item"><span>信息内容合法合规</span><span class="label">—</span></div>
+                </div>
+                <div class="vs-card vs-e">
+                    <div class="vs-title">④ 行为安全</div>
+                    <div class="vs-item"><span>操作行为可控审计</span><span class="label">—</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「设数内行」</strong> → 谐音 <strong>「设数内行（家）」</strong> — 设备·数据·内容·行为<br>
+                <span style="margin-top:4px;display:block"><strong>数据安全三方面：「秘完可」</strong> → 秘密性 + 完整性 + 可用性</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>1.3 安全措施目标 & 网络安全威胁</div>
+            <div class="sub-title">安全措施5目标</div>
+            <div class="kp-grid" style="grid-template-columns:repeat(5,1fr)">
+                <div class="kp-item" style="text-align:center"><div class="kp-title">访问控制</div><div class="kp-body" style="text-align:center">访</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">认证</div><div class="kp-body" style="text-align:center">认</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">完整性</div><div class="kp-body" style="text-align:center">完</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">审计</div><div class="kp-body" style="text-align:center">审</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">保密</div><div class="kp-body" style="text-align:center">保</div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「访认完审保」</strong> → 谐音 <strong>「访人完神保」</strong></div>
+            <div class="sub-title">网络安全威胁5种</div>
+            <div class="flow">
+                <div class="flow-step">非授权访问</div><div class="flow-arrow">+</div>
+                <div class="flow-step">信息泄露/丢失</div><div class="flow-arrow">+</div>
+                <div class="flow-step">破坏完整性</div><div class="flow-arrow">+</div>
+                <div class="flow-step">拒绝服务攻击</div><div class="flow-arrow">+</div>
+                <div class="flow-step">利用网络传播病毒</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「非信破拒病」</strong> → 非授权 + 信息泄露 + 破坏完整性 + 拒绝服务 + 病毒</div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 2: 安全框架 ══════════ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>信息安全系统的组成框架</h1>
+            <p>三大体系 · 组织机构 · 管理体系 · 考点密度 ★★☆☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏛️</span>2.1 三大体系框架</div>
+            <div class="analogy">
+                <strong>类比：保护国家安全的三大体系</strong><br>
+                <strong>技术体系</strong> = 武器装备（硬实力）·
+                <strong>组织机构体系</strong> = 军队编制（指挥链）·
+                <strong>管理体系</strong> = 法律法规（软实力）
+            </div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#0284c7;background:rgba(2,132,199,.04)">
+                    <div class="layer-num" style="color:#0284c7">技</div>
+                    <div class="layer-name" style="color:#0284c7">技术体系</div>
+                    <div class="layer-desc">基础安全设备 · 计算机网络安全 · 操作系统安全 · 数据库安全 · 终端设备安全</div>
+                </div>
+                <div class="layer-row" style="border-color:#d97706;background:rgba(217,119,6,.04)">
+                    <div class="layer-num" style="color:#d97706">组</div>
+                    <div class="layer-name" style="color:#d97706">组织机构体系</div>
+                    <div class="layer-desc">决策层 → 管理层 → 执行层（自上而下3层）</div>
+                </div>
+                <div class="layer-row" style="border-color:#059669;background:rgba(5,150,105,.04)">
+                    <div class="layer-num" style="color:#059669">管</div>
+                    <div class="layer-name" style="color:#059669">管理体系</div>
+                    <div class="layer-desc">法律管理 + 制度管理 + 培训管理（3部分）</div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>三大体系：「技组管」</strong><br>
+                <strong>组织层次：「决管执」</strong> → 决策层 · 管理层 · 执行层（自上而下）<br>
+                <strong>管理3部分：「法制培」</strong> → 谐音 <strong>「法制陪」</strong> → 法律管理 + 制度管理 + 培训管理
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 3: 加解密 ══════════ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>信息加解密技术</h1>
+            <p>对称加密 · 非对称加密 · 算法参数 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔑</span>3.1 对称 vs 非对称 — 核心对比 <span class="tag tag-hot">★★必考</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-c">
+                    <div class="vs-title">对称加密（共享密钥算法）</div>
+                    <div class="vs-item"><span class="label">密钥关系</span><span class="badge-green">加密=解密（同一密钥）</span></div>
+                    <div class="vs-item"><span class="label">速度</span><span class="badge-green">快</span></div>
+                    <div class="vs-item"><span class="label">主要用途</span><span>大量数据加密</span></div>
+                    <div class="vs-item"><span class="label">缺点</span><span class="badge-red">密钥分发困难</span></div>
+                    <div class="vs-item"><span class="label">代表算法</span><span>DES / 3DES / IDEA / AES / SM4</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>夫妻共用一把家门钥匙</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">非对称加密（公钥加密算法）</div>
+                    <div class="vs-item"><span class="label">密钥关系</span><span class="badge-red">加密≠解密（公钥+私钥）</span></div>
+                    <div class="vs-item"><span class="label">速度</span><span class="badge-red">慢（比对称慢约1000倍）</span></div>
+                    <div class="vs-item"><span class="label">主要用途</span><span>密钥交换、数字签名</span></div>
+                    <div class="vs-item"><span class="label">优点</span><span class="badge-green">无密钥分发问题</span></div>
+                    <div class="vs-item"><span class="label">代表算法</span><span>RSA / SM2 / ECC</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>邮箱：公开投递口 + 私人钥匙</span></div>
+                </div>
+            </div>
+            <div class="alert alert-info">💡 非对称加密比对称加密慢约 <strong>1000 倍</strong>，所以大量数据加密用对称，密钥交换用非对称</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🛡️</span>3.2 对称加密算法参数 <span class="tag tag-hot">高频考点</span></div>
+            <div class="analogy">
+                <strong>类比：不同保险箱规格</strong> — 分组长度=保险箱大小，密钥长度=钥匙复杂度
+            </div>
+            <!-- Interactive algorithm cards -->
+            <div class="enc-grid" id="enc-sym-cards">
+                <div class="enc-card" onclick="showEncDetail('des')">
+                    <div class="enc-name">DES</div>
+                    <div class="enc-bits">分组 64位<br>密钥 56位</div>
+                    <div class="enc-type enc-sym">对称</div>
+                </div>
+                <div class="enc-card" onclick="showEncDetail('3des')">
+                    <div class="enc-name">3DES</div>
+                    <div class="enc-bits">分组 64位<br>密钥 112位</div>
+                    <div class="enc-type enc-sym">对称</div>
+                </div>
+                <div class="enc-card" onclick="showEncDetail('idea')">
+                    <div class="enc-name">IDEA</div>
+                    <div class="enc-bits">分组 64位<br>密钥 128位</div>
+                    <div class="enc-type enc-sym">对称</div>
+                </div>
+                <div class="enc-card" onclick="showEncDetail('aes')">
+                    <div class="enc-name">AES</div>
+                    <div class="enc-bits">分组 128位<br>密钥 128/192/256位</div>
+                    <div class="enc-type enc-sym">对称</div>
+                </div>
+                <div class="enc-card" onclick="showEncDetail('sm4')">
+                    <div class="enc-name">SM4</div>
+                    <div class="enc-bits">分组 128位<br>密钥 128位</div>
+                    <div class="enc-type enc-sym">对称·国密</div>
+                </div>
+            </div>
+            <div id="enc-detail" style="display:none;margin-top:10px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.85rem;line-height:1.7;color:var(--text2)"></div>
+            <div class="mnemonic">
+                <div class="label">🧠 超强记忆口诀</div>
+                <strong>「DES三重变112，IDEA 128全球通，AES替代脆DES，SM4国密双128」</strong>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>算法</th><th>分组长度</th><th>密钥长度</th><th>关键特点</th></tr>
+                    <tr><td class="badge-acc">DES</td><td>64位</td><td class="badge-red">56位</td><td>最基础，已脆弱</td></tr>
+                    <tr><td class="badge-acc">3DES</td><td>64位</td><td class="badge-gold">112位（2×56）</td><td>DES改进版</td></tr>
+                    <tr><td class="badge-acc">IDEA</td><td>64位</td><td>128位</td><td>全球通用标准</td></tr>
+                    <tr><td class="badge-red">AES</td><td class="badge-green">128位</td><td class="badge-green">128/192/256位</td><td>替代DES，可软硬件实现</td></tr>
+                    <tr><td class="badge-acc">SM4</td><td class="badge-green">128位</td><td class="badge-green">128位</td><td class="badge-pink">国密对称算法</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 3DES密钥长度是<strong>112位</strong>（2把56位），不是168位！</div>
+            <div class="alert alert-warn">⚠️ AES支持128/192/256位密钥，<strong>不支持512位</strong>！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📮</span>3.3 非对称加密算法 <span class="tag tag-hot">★★必考</span></div>
+            <div class="analogy">
+                <strong>类比：邮箱系统</strong><br>
+                <strong>公钥</strong> = 邮箱投递口（谁都能往里投信）·
+                <strong>私钥</strong> = 开邮箱的钥匙（只有你有）
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">🔐 保密通信</div>
+                    <div class="vs-item"><span>加密者</span><span class="badge-acc">用接收方的公钥加密</span></div>
+                    <div class="vs-item"><span>解密者</span><span class="badge-green">用接收方的私钥解密</span></div>
+                    <div class="vs-item"><span>效果</span><span>只有接收方能看</span></div>
+                    <div class="vs-item"><span>类比</span><span>用对方邮箱投信</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">✍️ 数字签名</div>
+                    <div class="vs-item"><span>签名者</span><span class="badge-red">用发送方的私钥签名</span></div>
+                    <div class="vs-item"><span>验证者</span><span class="badge-acc">用发送方的公钥验证</span></div>
+                    <div class="vs-item"><span>效果</span><span>证明是我发的</span></div>
+                    <div class="vs-item"><span>类比</span><span>在合同上按手印</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「公加私解为保密，私加公解为签名」</strong><br>
+                <span style="margin-top:4px;display:block">保密：用<strong>接收方</strong>的公钥 · 签名：用<strong>发送方</strong>的私钥</span>
+            </div>
+            <div class="sub-title">两大非对称算法</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>算法</th><th>安全性基础</th><th>特点</th></tr>
+                    <tr><td class="badge-red">RSA</td><td class="badge-gold">大素数分解困难性</td><td>国际通用，密钥2048位，比对称慢1000倍</td></tr>
+                    <tr><td class="badge-pink">SM2</td><td class="badge-acc">椭圆曲线离散对数</td><td>国密算法，同等安全下密钥比RSA更短</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 保密通信中，甲发给乙，甲用<strong>乙的公钥</strong>加密，乙用<strong>乙自己的私钥</strong>解密！</div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 4: 密钥管理 & 数字签名 ══════════ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>密钥管理 · 访问控制 · 数字签名</h1>
+            <p>KDC · CA · ACL · 签名五条件 · 考点密度 ★★★☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🗝️</span>4.1 密钥管理技术</div>
+            <div class="analogy">
+                <strong>类比：管理一家公司的所有钥匙</strong><br>
+                每把钥匙有<strong>标签</strong>（密钥标签）· 有<strong>使用规则</strong>（控制矢量）· 有<strong>钥匙管理员</strong>（KDC）· 公钥像<strong>对外公示的名片</strong>（公钥证书CA）
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>概念</th><th>全称</th><th>说明</th></tr>
+                    <tr><td class="badge-acc">KDC</td><td>Key Distribution Center</td><td class="badge-acc">密钥分配中心（第三方）</td></tr>
+                    <tr><td class="badge-red">CA</td><td>Certificate Authority</td><td class="badge-red">证书颁发机构（管公钥证书）</td></tr>
+                    <tr><td class="badge-gold">PGP</td><td>Pretty Good Privacy</td><td>直接公开发布方式的代表</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">密钥分配3种方式</div>
+            <div class="flow">
+                <div class="flow-step">①物理方式</div><div class="flow-arrow">→</div>
+                <div class="flow-step">②加密方式</div><div class="flow-arrow">→</div>
+                <div class="flow-step">③第三方加密方式（KDC）</div>
+            </div>
+            <div class="sub-title">公钥体制4种管理方式</div>
+            <div class="flow">
+                <div class="flow-step">直接公开发布（PGP）</div><div class="flow-arrow">+</div>
+                <div class="flow-step">公用目录表</div><div class="flow-arrow">+</div>
+                <div class="flow-step">公钥管理机构</div><div class="flow-arrow">+</div>
+                <div class="flow-step">公钥证书（CA）</div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「物加三」</strong> → 物理 + 加密 + 第三方<br>
+                <strong>「直目机证」</strong> → 直接发布 + 公用目录 + 管理机构 + 证书（CA）<br>
+                <span style="color:var(--red);margin-top:4px;display:block">⚠️ KDC是<strong>密钥分配中心</strong>，CA是<strong>证书颁发机构</strong>，别搞混！</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🚪</span>4.2 访问控制 <span class="tag tag-key">★考点</span></div>
+            <div class="analogy">
+                <strong>类比：小区门禁系统</strong><br>
+                <strong>主体</strong> = 来访者 · <strong>客体</strong> = 要进入的场所 · <strong>控制策略</strong> = 门禁规则 · <strong>审计</strong> = 监控录像（防止门卫滥用权力）
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>三要素：「主客策」</strong> → 主体 + 客体 + 控制策略<br>
+                <strong>三内容：「认策审」</strong> → 认证 + 控制策略实现 + 审计（防止滥用权力）
+            </div>
+            <div class="sub-title">4种访问控制实现技术 <span class="tag tag-hot">易混淆考点</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>技术</th><th>存储方式</th><th>特点</th></tr>
+                    <tr><td class="badge-acc">访问控制矩阵（ACM）</td><td>矩阵（行=主体，列=客体）</td><td>基础形式，元素多时存储困难</td></tr>
+                    <tr><td class="badge-red">访问控制表（ACL）</td><td class="badge-red">按列（客体）保存</td><td class="badge-red">最流行、使用最多！</td></tr>
+                    <tr><td class="badge-acc">能力表（Capabilities）</td><td class="badge-gold">按行（主体）保存</td><td>—</td></tr>
+                    <tr><td class="badge-acc">授权关系表</td><td>只存非空元素</td><td>适合稀疏矩阵，用于<strong>安全数据库</strong></td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「ACL按列客，能力按行主，授权取非空，矩阵是基础」</strong><br>
+                ACL = Access Control <strong>L</strong>ist（列表 = 按<strong>列</strong>存）
+            </div>
+            <div class="alert alert-red">⚠️ ACL按<strong>客体（列）</strong>存储，能力表按<strong>主体（行）</strong>存储 — 别搞反！</div>
+            <div class="alert alert-warn">⚠️ ACL是<strong>最流行、使用最多</strong>的访问控制实现技术！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">✍️</span>4.3 数字签名 <span class="tag tag-hot">★★高频</span></div>
+            <div class="analogy">
+                <strong>类比：在合同上按手印</strong><br>
+                证明这份文件确实是你发的（不可抵赖）· 别人不能伪造（不可伪造）· 合同不能被改（不可改变）
+            </div>
+            <div class="sub-title">数字签名5个必须满足的条件</div>
+            <div class="kp-grid" style="grid-template-columns:repeat(5,1fr)">
+                <div class="kp-item" style="text-align:center;border-color:var(--accent)"><div class="kp-title">可信</div><div class="kp-body" style="font-size:.75rem">信</div></div>
+                <div class="kp-item" style="text-align:center;border-color:var(--red)"><div class="kp-title">不可伪造</div><div class="kp-body" style="font-size:.75rem">造</div></div>
+                <div class="kp-item" style="text-align:center;border-color:var(--gold)"><div class="kp-title">不可重用</div><div class="kp-body" style="font-size:.75rem">用</div></div>
+                <div class="kp-item" style="text-align:center;border-color:var(--purple)"><div class="kp-title">不可改变</div><div class="kp-body" style="font-size:.75rem">变</div></div>
+                <div class="kp-item" style="text-align:center;border-color:var(--pink)"><div class="kp-title">不可抵赖</div><div class="kp-body" style="font-size:.75rem">赖</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「信造用变赖」</strong> → "相信造出来<strong>用</strong>着<strong>变赖</strong>了" 😂
+            </div>
+            <div class="sub-title">数字签名 = 公钥加密技术 + 数字摘要技术</div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#059669">
+                    <div class="layer-num" style="color:#059669">①</div>
+                    <div class="layer-name" style="color:#059669">对文件做摘要</div>
+                    <div class="layer-desc">用哈希函数（MD5/SHA）对原文生成固定长度摘要</div>
+                    <div class="layer-analogy">先把文件压缩成指纹</div>
+                </div>
+                <div class="layer-row" style="border-color:#0284c7">
+                    <div class="layer-num" style="color:#0284c7">②</div>
+                    <div class="layer-name" style="color:#0284c7">私钥签名摘要</div>
+                    <div class="layer-desc">用<strong>发送方的私钥</strong>对摘要加密（签名）</div>
+                    <div class="layer-analogy">用私章盖在指纹上</div>
+                </div>
+                <div class="layer-row" style="border-color:#d97706">
+                    <div class="layer-num" style="color:#d97706">③</div>
+                    <div class="layer-name" style="color:#d97706">公钥验证签名</div>
+                    <div class="layer-desc">接收方用<strong>发送方的公钥</strong>解密，重新计算摘要比对</div>
+                    <div class="layer-analogy">用公开信息验证私章</div>
+                </div>
+            </div>
+            <div class="alert alert-info">💡 先对文件做<strong>摘要</strong>再签名，是为了提升速度（摘要比原文小得多）</div>
+            <div class="alert alert-red">⚠️ 数字签名用到<strong>两种技术</strong>：公钥加密技术 + 数字摘要技术！</div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 5: 抗攻击 ══════════ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>信息安全的抗攻击技术</h1>
+            <p>DoS/DDoS · 欺骗攻击 · TCP/IP攻击 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">💀</span>5.1 拒绝服务（DoS / DDoS）攻击 <span class="tag tag-hot">高频考点</span></div>
+            <div class="analogy">
+                <strong>类比：往餐厅塞满假客人</strong><br>
+                真客人进不来（合法用户无法访问）· 餐厅资源被耗尽（可用性被破坏）<br>
+                <strong>DDoS（分布式）</strong> = 从四面八方同时涌来的假客人大军
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>要素</th><th>内容</th></tr>
+                    <tr><td class="badge-red">破坏的安全要素</td><td class="badge-red">可用性（最常见考点！）</td></tr>
+                    <tr><td class="badge-acc">DDoS三级结构</td><td>Client（客户端）→ Handler（主控端）→ Agent（代理端）</td></tr>
+                    <tr><td class="badge-gold">最广泛DoS方式</td><td class="badge-gold">SYN Flooding（同步包风暴）</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>DDoS三级结构：「客主代」</strong> → 客户端 + 主控端 + 代理端<br>
+                <strong>传统DoS4种模式：「耗破物错」</strong> → 耗资源 + 破坏配置 + 物理破坏 + 利用错误<br>
+                <strong>DoS防御4方法：「特防统修」</strong> → 特征识别 + 防火墙 + 统计流量 + 修正漏洞
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎭</span>5.2 欺骗攻击 — 三大对比 <span class="tag tag-key">★考点</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>攻击类型</th><th>攻击原理</th><th>防范方法</th></tr>
+                    <tr>
+                        <td class="badge-acc">ARP欺骗</td>
+                        <td>解析 IP→MAC 地址机制被欺骗</td>
+                        <td>固化ARP表 · ARP服务器 · 双向绑定 · 防护软件</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">DNS欺骗</td>
+                        <td>解析域名→IP 机制被欺骗</td>
+                        <td>被动监听检测 · 虚假报文探测 · 交叉检查查询</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-red">IP欺骗</td>
+                        <td>修改IP报头，伪装来源IP</td>
+                        <td>防火墙</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「ARP骗MAC，DNS骗域名，IP改报头」</strong><br>
+                <strong>DNS欺骗3种检测：「被虚叉」</strong> → 被动监听 + 虚假报文探测 + 交叉检查查询
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">💻</span>5.3 针对TCP/IP堆栈的攻击</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>攻击类型</th><th>原理</th><th>防范措施</th></tr>
+                    <tr>
+                        <td class="badge-red">SYN Flooding<br>（同步包风暴）</td>
+                        <td>攻击TCP三次握手，耗尽连接资源</td>
+                        <td class="badge-acc">减少等待超时时间</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">Ping of Death<br>（ICMP攻击）</td>
+                        <td>攻击操作系统网络层缓冲区</td>
+                        <td>打补丁、升级系统</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-acc">SNMP攻击</td>
+                        <td>SNMP V1缺少认证机制</td>
+                        <td>升级到V2以上，设置访问密码</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>SYN Flooding</strong> 是应用<strong>最广泛</strong>的DoS攻击方式！</div>
+            <div class="alert alert-warn">⚠️ <strong>Ping of Death</strong> 属于 <strong>ICMP攻击</strong>，不是SYN攻击！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔍</span>5.4 端口扫描 & 漏洞扫描</div>
+            <div class="sub-title">端口扫描4种方式</div>
+            <div class="flow">
+                <div class="flow-step">全TCP连接</div><div class="flow-arrow">+</div>
+                <div class="flow-step">半打开式（SYN扫描）</div><div class="flow-arrow">+</div>
+                <div class="flow-step">FIN扫描</div><div class="flow-arrow">+</div>
+                <div class="flow-step">第三方扫描</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「全半FIN三」</strong></div>
+            <div class="sub-title">漏洞扫描2种类型对比</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">基于网络的漏洞扫描</div>
+                    <div class="vs-item"><span>特点</span><span>通过网络远程扫描</span></div>
+                    <div class="vs-item"><span>缺点</span><span class="badge-red">常被边界防护封堵</span></div>
+                    <div class="vs-item"><span>信息量</span><span class="badge-red">有限</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">基于主机的漏洞扫描</div>
+                    <div class="vs-item"><span>方式</span><span>安装代理或服务</span></div>
+                    <div class="vs-item"><span>漏洞数量</span><span class="badge-green">多</span></div>
+                    <div class="vs-item"><span>其他优点</span><span class="badge-green">集中化管理·流量负载小</span></div>
+                </div>
+            </div>
+            <div class="alert alert-info">💡 基于主机的扫描<strong>需要在目标系统安装代理(Agent)或服务</strong>——这是它的特点，不是缺点！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔐</span>5.5 密钥的选择</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">DK — 数据加密密钥</div>
+                    <div class="vs-item"><span>全称</span><span>Data Key</span></div>
+                    <div class="vs-item"><span>用途</span><span>直接加密用户数据</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">KK — 密钥加密密钥</div>
+                    <div class="vs-item"><span>全称</span><span>Key Encryption Key</span></div>
+                    <div class="vs-item"><span>用途</span><span class="badge-red">用于保护其他密钥</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>密钥生成3要素：「空强随」</strong> → 增大密钥<strong>空</strong>间 + 选择<strong>强</strong>钥 + 密钥的<strong>随</strong>机性<br>
+                <span style="margin-top:4px;display:block">⚠️ <strong>加密算法是公开的，安全性在于密钥！</strong></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 6: 保障体系 ══════════ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>信息安全的保障体系与评估方法</h1>
+            <p>等级保护 · 安全协议 · 风险评估 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏅</span>6.1 等级保护 GB 17859—1999 <span class="tag tag-hot">高频考点</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>等级</th><th>名称</th><th>对应TCSEC</th><th>记忆</th></tr>
+                    <tr><td class="badge-acc">第1级</td><td>用户自主保护级</td><td>C1</td><td>用</td></tr>
+                    <tr><td class="badge-acc">第2级</td><td>系统审计保护级</td><td>C2</td><td>系</td></tr>
+                    <tr><td class="badge-gold">第3级</td><td>安全标记保护级</td><td>B1</td><td>安</td></tr>
+                    <tr><td class="badge-gold">第4级</td><td>结构化保护级</td><td>B2</td><td>结</td></tr>
+                    <tr><td class="badge-red">第5级</td><td>访问验证保护级</td><td>B3</td><td class="badge-red">访（最高！）</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「用系安结访」</strong> → 谐音 <strong>「用细岸结访」</strong><br>
+                故事联想：<strong>用</strong>心<strong>细</strong>致地在<strong>岸</strong>边<strong>结</strong>伴拜<strong>访</strong>！<br>
+                <span style="margin-top:4px;display:block">TCSEC对应：两个C级（C1→C2）+ 三个B级（B1→B2→B3）</span>
+            </div>
+            <div class="alert alert-red">⚠️ 第5级（访问验证保护级）是<strong>最高</strong>级别，对应TCSEC的B3！</div>
+            <div class="alert alert-warn">⚠️ 对应关系是C1-C2-B1-B2-B3，<strong>没有A级，没有C3级</strong>！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🌐</span>6.2 安全协议对比 <span class="tag tag-hot">★★高频</span></div>
+            <div class="proto-row">
+                <div class="proto-name" style="color:var(--accent)">SSL</div>
+                <div class="proto-layer" style="background:rgba(2,132,199,.1);color:var(--accent)">应用层↔TCP层之间</div>
+                <div class="proto-desc">保密性通信 · 点对点身份认证 · 可靠性通信（三种服务：<strong>保点可</strong>）</div>
+            </div>
+            <div class="proto-row">
+                <div class="proto-name" style="color:var(--gold)">PGP</div>
+                <div class="proto-layer" style="background:rgba(217,119,6,.1);color:var(--gold)">应用层</div>
+                <div class="proto-desc"><strong>电子邮件</strong>安全 · 使用RSA + IDEA + 完整性检测 + 数字签名 · 直接公开发布代表</div>
+            </div>
+            <div class="proto-row" style="border-color:var(--red)">
+                <div class="proto-name" style="color:var(--red)">IPSec</div>
+                <div class="proto-layer" style="background:rgba(220,38,38,.1);color:var(--red)">⚡ 网络层</div>
+                <div class="proto-desc">透明提供安全服务，<strong>不需更改应用程序</strong>（高频考点！）</div>
+            </div>
+            <div class="proto-row">
+                <div class="proto-name" style="color:var(--purple)">SET</div>
+                <div class="proto-layer" style="background:rgba(124,58,237,.1);color:var(--purple)">应用层</div>
+                <div class="proto-desc"><strong>信用卡支付</strong>交易专用 · 涉及用户、商家、银行三方</div>
+            </div>
+            <div class="proto-row">
+                <div class="proto-name" style="color:var(--green)">HTTPS</div>
+                <div class="proto-layer" style="background:rgba(5,150,105,.1);color:var(--green)">应用层</div>
+                <div class="proto-desc">Web安全（HTTP + SSL）</div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「SSL在中间，PGP邮件安，IPSec在网络，SET管信用卡，HTTPS保Web」</strong>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>IPSec工作在网络层</strong>，不是应用层 — 超高频考点！</div>
+            <div class="alert alert-warn">⚠️ SSL介于<strong>应用层和TCP层之间</strong>，不是纯应用层！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>6.3 信息系统安全风险评估</div>
+            <div class="analogy">
+                <strong>类比：给身体做体检</strong><br>
+                <strong>资产</strong> = 你的身体 · <strong>脆弱性</strong> = 薄弱部位（胃不好）· <strong>威胁</strong> = 外界病原 · <strong>风险</strong> = 可能生病概率 · <strong>安全措施</strong> = 预防针
+            </div>
+            <div class="kp-grid" style="grid-template-columns:repeat(5,1fr)">
+                <div class="kp-item" style="text-align:center"><div class="kp-title">脆弱性</div><div class="kp-body" style="font-size:.75rem">脆</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">资产</div><div class="kp-body" style="font-size:.75rem">资</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">威胁</div><div class="kp-body" style="font-size:.75rem">威</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">风险</div><div class="kp-body" style="font-size:.75rem">险</div></div>
+                <div class="kp-item" style="text-align:center"><div class="kp-title">安全措施</div><div class="kp-body" style="font-size:.75rem">施</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「脆资威险施」</strong> → 谐音 <strong>「脆紫威险狮」</strong> — 脆弱的紫色威严危险狮子！
+            </div>
+            <div class="alert alert-red">⚠️ 风险评估5基本要素中<strong>不包含"成本"</strong>！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🛡️</span>6.4 其他安全技术</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>技术</th><th>作用</th></tr>
+                    <tr><td class="badge-acc">DLP（数据泄密防护）</td><td>防止指定数据违规流出企业</td></tr>
+                    <tr><td class="badge-acc">数字水印</td><td>在媒体中嵌入特定标记（可感知 / 不易感知两种）</td></tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ QUIZ ══════════ -->
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>30道练习题</h1>
+            <p>点击选项即时判断 · 点击「查看解析」获取详细讲解</p>
+        </div>
+
+        <div id="quiz-score" style="font-size:.85rem;color:var(--text2);margin-bottom:12px">
+            已答：<span id="answered">0</span> 题 &nbsp;·&nbsp; 正确：<span id="correct-count">0</span> 题 &nbsp;·&nbsp; 正确率：<span id="accuracy">—</span>
+        </div>
+
+        <div class="quiz-filter">
+            <button class="filter-btn active" onclick="filterQuiz('all',this)">全部 (30)</button>
+            <button class="filter-btn" onclick="filterQuiz(0,this)">基础概念 (1-8)</button>
+            <button class="filter-btn" onclick="filterQuiz(1,this)">加密算法 (9-16)</button>
+            <button class="filter-btn" onclick="filterQuiz(2,this)">密钥&签名 (17-22)</button>
+            <button class="filter-btn" onclick="filterQuiz(3,this)">抗攻击 (23-27)</button>
+            <button class="filter-btn" onclick="filterQuiz(4,this)">协议&体系 (28-30)</button>
+        </div>
+
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══════════ FLASH CARDS ══════════ -->
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">FLASH CARDS</div>
+            <h1>⚡ 速记卡 — 考前必背</h1>
+            <p>悬停查看详情 · 每张卡片对应一个核心考点</p>
+        </div>
+
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id, btn) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // ─── ENCRYPT DETAIL ───
+    const encDetails = {
+        des: '<strong>DES（数据加密标准）</strong><br>分组长度：64位 · 密钥长度：56位（实际只有56位有效位）<br>特点：最基础的对称加密算法，已被证明不够安全（可被暴力破解）<br>⚠️ 注意：分组64位，密钥<strong>只有56位</strong>，不是64位！',
+        '3des': '<strong>3DES（三重DES）</strong><br>分组长度：64位 · 密钥长度：<span style="color:var(--red)">112位（2把×56位）</span><br>特点：对数据进行三次DES加密（加密→解密→加密），是DES的安全改进版本<br>⚠️ 注意：密钥长度是<strong>112位</strong>，不是168位（168位是3把独立密钥的理论情况）！',
+        idea: '<strong>IDEA（国际数据加密算法）</strong><br>分组长度：64位 · 密钥长度：128位<br>特点：全球通用的对称加密标准，安全性高于DES<br>应用：PGP邮件加密系统使用IDEA算法',
+        aes: '<strong>AES（高级加密标准）</strong><br>分组长度：<span style="color:var(--green)">128位</span> · 密钥长度：<span style="color:var(--green)">128 / 192 / 256位</span><br>特点：用于替代脆弱的DES，可软硬件实现，目前最主流的对称加密算法<br>⚠️ 注意：<strong>不支持512位密钥</strong>！只有128/192/256三种。',
+        sm4: '<strong>SM4（国密对称算法）</strong><br>分组长度：<span style="color:var(--green)">128位</span> · 密钥长度：<span style="color:var(--green)">128位</span><br>特点：中国国家标准密码算法，专为无线局域网设计<br>口诀：<strong>SM4全128</strong> — 分组和密钥都是128位！',
+    };
+    function showEncDetail(key) {
+        const box = document.getElementById('enc-detail');
+        const cards = document.querySelectorAll('.enc-card');
+        cards.forEach(c => c.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        box.style.display = 'block';
+        box.innerHTML = encDetails[key];
+    }
+
+    // ─── QUIZ DATA ───
+    const quizData = [
+        // 基础概念 0-7
+        {cat:0,q:"信息安全的基本要素不包括（ ）。",opts:["机密性","完整性","可用性","可移植性"],ans:3,exp:"信息安全5要素：机密性、完整性、可用性、可控性、可审查性。「可移植性」是软件质量属性，不属于信息安全要素。"},
+        {cat:0,q:"拒绝服务攻击（DoS）主要破坏信息系统的（ ）。",opts:["机密性","完整性","可用性","可审查性"],ans:2,exp:"DoS攻击让合法用户无法访问服务，破坏的是「可用性」。这是超高频考点！机密性=不被泄露，完整性=不被篡改，都与DoS无关。"},
+        {cat:0,q:"信息安全的范围包括（ ）。",opts:["设备安全、数据安全、内容安全、行为安全","设备安全、网络安全、数据安全、内容安全","数据安全、网络安全、行为安全、系统安全","硬件安全、软件安全、数据安全、系统安全"],ans:0,exp:"信息安全范围4类口诀「设数内行」——设备安全、数据安全、内容安全、行为安全。注意不含「网络安全」这个选项！"},
+        {cat:0,q:"数据安全包括（ ）3个方面。",opts:["机密性、完整性、可控性","秘密性、完整性、可用性","机密性、真实性、可用性","完整性、可用性、不可抵赖性"],ans:1,exp:"数据安全3方面口诀「秘完可」——秘密性、完整性、可用性。注意是「秘密性」不是「机密性」，这是细节区别。"},
+        {cat:0,q:"信息系统安全的组织机构分为（ ）3个层次。",opts:["高层、中层、基层","决策层、管理层、执行层","领导层、管理层、技术层","战略层、战术层、操作层"],ans:1,exp:"组织机构3层次口诀「决管执」——决策层、管理层、执行层（自上而下）。"},
+        {cat:0,q:"信息系统安全管理体系由（ ）3个部分组成。",opts:["法律管理、制度管理、培训管理","技术管理、法律管理、人员管理","制度管理、技术管理、人员管理","策略管理、制度管理、培训管理"],ans:0,exp:"管理体系3部分口诀「法制培」——法律管理、制度管理、培训管理。"},
+        {cat:0,q:"以下关于机密性的描述，正确的是（ ）。",opts:["保护信息不被泄露给已注册用户","保护信息不被泄露给未授权的用户","保护信息不被泄露给未注册的用户","保护信息不被泄露给已授权用户"],ans:1,exp:"机密性 = 不被泄露给「未授权」的用户。关键词是「授权」不是「注册」——未注册≠未授权！"},
+        {cat:0,q:"安全措施的目标不包括（ ）。",opts:["访问控制","认证","完整性","可移植性"],ans:3,exp:"安全措施5目标口诀「访认完审保」——访问控制、认证、完整性、审计、保密。「可移植性」是软件工程质量属性，不是安全措施目标。"},
+        // 加密算法 8-15
+        {cat:1,q:"以下加密算法中，属于非对称加密算法的是（ ）。",opts:["DES","IDEA","RSA","AES"],ans:2,exp:"RSA是非对称加密算法（公钥加密）。DES、IDEA、AES都是对称加密算法（共享密钥）。记住：非对称算法代表为RSA、SM2、ECC。"},
+        {cat:1,q:"DES加密算法的分组长度和密钥长度分别是（ ）。",opts:["64位、56位","64位、64位","128位、56位","128位、128位"],ans:0,exp:"DES：分组长度64位，密钥长度56位（注意！密钥56位不是64位！）"},
+        {cat:1,q:"三重DES（Triple-DES）的密钥长度是（ ）位。",opts:["56","112","128","168"],ans:1,exp:"3DES使用两把56位密钥，总有效密钥长度为 2×56 = 112位。（168位是3把独立密钥的情况，考试默认答112位！）"},
+        {cat:1,q:"AES加密算法支持的密钥长度不包括（ ）位。",opts:["128","192","256","512"],ans:3,exp:"AES支持三种密钥长度：128、192、256位。不支持512位！记住：AES最大256位。"},
+        {cat:1,q:"国密SM4算法的分组长度和密钥长度分别是（ ）。",opts:["64位、128位","128位、128位","128位、256位","64位、64位"],ans:1,exp:"SM4：分组长度128位，密钥长度128位——「SM4全128」。注意与DES（64/56）区分！"},
+        {cat:1,q:"甲向乙发送保密信息，采用非对称加密算法。甲应使用（ ）对信息加密，乙应使用（ ）对信息解密。",opts:["甲的公钥；乙的私钥","乙的公钥；乙的私钥","甲的私钥；甲的公钥","乙的私钥；乙的公钥"],ans:1,exp:"保密通信口诀：「公加私解，用接收方的钥匙」。甲发给乙，用乙的公钥加密，乙用乙自己的私钥解密。这样只有乙能读！"},
+        {cat:1,q:"RSA算法的安全性基于（ ）。",opts:["椭圆曲线离散对数问题","大素数分解的困难性","离散对数问题","背包问题"],ans:1,exp:"RSA安全性基于「大素数分解的困难性」——分解两个超大素数的乘积在计算上极其困难。SM2基于椭圆曲线离散对数问题。"},
+        {cat:1,q:"以下关于SM2算法的描述，正确的是（ ）。",opts:["SM2是对称加密算法","SM2基于大素数分解问题","SM2基于椭圆曲线离散对数问题，比RSA密钥更短","SM2是哈希算法"],ans:2,exp:"SM2是国密非对称算法，基于椭圆曲线离散对数问题。同等安全级别下，SM2的密钥长度比RSA更短（256位 vs 2048位）。"},
+        // 密钥&签名 16-21
+        {cat:2,q:"密钥分配中心的英文缩写是（ ）。",opts:["CA","KDC","PGP","DLP"],ans:1,exp:"KDC = Key Distribution Center，密钥分配中心（第三方）。CA = Certificate Authority，证书颁发机构。两者别搞混！"},
+        {cat:2,q:"数字签名使用的技术是（ ）。",opts:["公钥加密技术","对称加密技术","公钥加密技术与数字摘要技术","哈希校验技术"],ans:2,exp:"数字签名 = 公钥加密技术 + 数字摘要技术（两种技术的结合！）。先对文件做摘要（哈希），再对摘要进行私钥加密（签名）。"},
+        {cat:2,q:"在数字签名中，发送方用（ ）对文件摘要签名，接收方用（ ）验证。",opts:["自己的公钥；发送方的私钥","自己的私钥；发送方的公钥","接收方的公钥；接收方的私钥","接收方的私钥；接收方的公钥"],ans:1,exp:"数字签名口诀「私加公解为签名」：发送方用「自己的私钥」签名，接收方用「发送方的公钥」验证。"},
+        {cat:2,q:"以下不是数字签名必须满足条件的是（ ）。",opts:["可信","不可伪造","不可重用","可重复使用"],ans:3,exp:"数字签名5条件口诀「信造用变赖」——可信、不可伪造、不可重用、不可改变、不可抵赖。「可重复使用」与「不可重用」相矛盾，不是数字签名的条件！"},
+        {cat:2,q:"访问控制包括的3个要素是（ ）。",opts:["主体、客体、控制策略","用户、资源、权限","管理员、用户、数据","认证、授权、审计"],ans:0,exp:"访问控制3要素口诀「主客策」——主体（来访者）、客体（被访问资源）、控制策略（访问规则）。"},
+        {cat:2,q:"目前最流行、使用最多的访问控制实现技术是（ ）。",opts:["访问控制矩阵（ACM）","访问控制表（ACL）","能力表（Capabilities）","授权关系表"],ans:1,exp:"ACL（访问控制表）是目前最流行、使用最多的访问控制实现技术！ACL按客体（列）保存，能力表按主体（行）保存。"},
+        // 抗攻击 22-26
+        {cat:3,q:"应用最广泛的DoS攻击方式是（ ）。",opts:["Ping of Death","SYN Flooding","SNMP攻击","IP欺骗"],ans:1,exp:"SYN Flooding（同步包风暴）是应用最广泛的DoS攻击方式！它攻击TCP三次握手过程，防范方法是减少等待超时时间。"},
+        {cat:3,q:"\"Ping of Death\"攻击属于（ ）。",opts:["SYN Flooding攻击","ICMP攻击","SNMP攻击","DNS欺骗"],ans:1,exp:"Ping of Death属于ICMP攻击，它通过发送超大ICMP报文来攻击操作系统网络层的缓冲区。防范方法：打补丁、升级系统。"},
+        {cat:3,q:"DDoS攻击工具一般采用的三级结构是（ ）。",opts:["客户端、主控端、代理端","客户端、服务端、代理端","主控端、代理端、执行端","攻击端、中转端、受害端"],ans:0,exp:"DDoS三级结构口诀「客主代」——Client（客户端）→ Handler（主控端）→ Agent（代理端）。"},
+        {cat:3,q:"基于主机的漏洞扫描相比基于网络的漏洞扫描，优点不包括（ ）。",opts:["扫描的漏洞数量多","集中化管理","网络流量负载小","不需要在目标系统安装代理"],ans:3,exp:"基于主机的扫描需要安装代理(Agent)或服务(Services)——这正是它的工作方式特点，不是缺点。因为有代理所以才能扫描到更多漏洞！"},
+        {cat:3,q:"密钥生成需要考虑的3个因素是（ ）。",opts:["增大密钥空间、选择强钥、密钥的随机性","密钥长度、密钥格式、密钥算法","密钥存储、密钥传输、密钥销毁","密钥生成、密钥分发、密钥更新"],ans:0,exp:"密钥生成3要素口诀「空强随」——增大密钥空间 + 选择强钥 + 密钥的随机性。记住：加密算法是公开的，安全性在于密钥！"},
+        // 协议&体系 27-29
+        {cat:4,q:"根据GB 17859—1999，计算机系统安全保护能力的最高等级是（ ）。",opts:["第3级：安全标记保护级","第4级：结构化保护级","第5级：访问验证保护级","第5级：强制访问保护级"],ans:2,exp:"最高等级是第5级「访问验证保护级」（对应TCSEC的B3级）。口诀「用系安结访」，第5个是「访」。注意没有「强制访问保护级」这个名称！"},
+        {cat:4,q:"以下安全协议中，工作在网络层的是（ ）。",opts:["SSL","PGP","IPSec","HTTPS"],ans:2,exp:"IPSec工作在网络层！这是超高频考点。SSL在应用层和TCP层之间；PGP用于应用层邮件；HTTPS在应用层。"},
+        {cat:4,q:"信息系统安全风险评估的基本要素不包括（ ）。",opts:["脆弱性","资产","威胁","成本"],ans:3,exp:"风险评估5基本要素口诀「脆资威险施」——脆弱性、资产、威胁、风险、安全措施。「成本」不在5要素之中！"},
+    ];
+
+    // ─── RENDER QUIZ ───
+    let answered = 0, correct = 0;
+    function renderQuiz(items) {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        items.forEach((item, i) => {
+            const globalIdx = quizData.indexOf(item);
+            const div = document.createElement('div');
+            div.className = 'quiz-q';
+            div.dataset.cat = item.cat;
+            div.innerHTML = `
+        <div class="quiz-num">第 ${globalIdx+1} 题 / 共 30 题</div>
+        <div class="quiz-text">${item.q}</div>
+        <div class="quiz-options" id="opts-${globalIdx}">
+          ${['A','B','C','D'].map((L,j)=>`
+            <button class="opt-btn" data-q="${globalIdx}" data-opt="${j}" onclick="handleOpt(${globalIdx},${j})">
+              <span class="opt-letter">${L}.</span>
+              <span>${item.opts[j]}</span>
+            </button>`).join('')}
+        </div>
+        <button class="reveal-btn" id="reveal-${globalIdx}" onclick="revealAns(${globalIdx})" style="display:none">💡 查看解析</button>
+        <div class="quiz-ans" id="ans-${globalIdx}">
+          <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+          <div class="ans-body">${item.exp}</div>
+        </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleOpt(qi, opt) {
+        const item = quizData[qi];
+        const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed')) return;
+        opts.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === item.ans) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt === item.ans) correct++;
+        document.getElementById('answered').textContent = answered;
+        document.getElementById('correct-count').textContent = correct;
+        document.getElementById('accuracy').textContent = Math.round(correct/answered*100) + '%';
+        document.getElementById(`reveal-${qi}`).style.display = 'inline-flex';
+    }
+
+    function revealAns(qi) {
+        document.getElementById(`ans-${qi}`).classList.toggle('show');
+    }
+
+    function filterQuiz(cat, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filtered = cat === 'all' ? quizData : quizData.filter(q => q.cat === cat);
+        renderQuiz(filtered);
+    }
+
+    renderQuiz(quizData);
+
+    // ─── FLASH CARDS ───
+    const flashData = [
+        {n:"01",topic:"信息安全五要素",mnemonic:"机完可控查",detail:"DoS破坏可用性！机密性=未授权不是未注册"},
+        {n:"02",topic:"信息安全四范围",mnemonic:"设数内行",detail:"设备·数据·内容·行为，不含「网络安全」"},
+        {n:"03",topic:"数据安全三方面",mnemonic:"秘完可",detail:"秘密性·完整性·可用性（是秘密性不是机密性）"},
+        {n:"04",topic:"安全措施五目标",mnemonic:"访认完审保",detail:"访问控制·认证·完整性·审计·保密"},
+        {n:"05",topic:"三大体系",mnemonic:"技组管",detail:"技术体系·组织机构体系·管理体系"},
+        {n:"06",topic:"组织机构三层",mnemonic:"决管执",detail:"决策层→管理层→执行层（自上而下）"},
+        {n:"07",topic:"管理体系三部分",mnemonic:"法制培",detail:"法律管理·制度管理·培训管理"},
+        {n:"08",topic:"DES参数",mnemonic:"DES 64/56",detail:"分组64位，密钥56位（注意密钥不是64！）"},
+        {n:"09",topic:"3DES参数",mnemonic:"三重DES密钥112",detail:"分组64位，密钥112位（2×56），不是168！"},
+        {n:"10",topic:"AES参数",mnemonic:"AES 128/128-256",detail:"分组128位，密钥128/192/256位，不支持512！"},
+        {n:"11",topic:"SM4参数",mnemonic:"SM4全128",detail:"分组128位，密钥128位，国密对称算法"},
+        {n:"12",topic:"保密通信公私钥",mnemonic:"公加私解为保密",detail:"用接收方公钥加密，接收方私钥解密"},
+        {n:"13",topic:"数字签名公私钥",mnemonic:"私加公解为签名",detail:"用发送方私钥签名，发送方公钥验证"},
+        {n:"14",topic:"RSA vs SM2",mnemonic:"RSA素数分解，SM2椭圆曲线",detail:"RSA比对称慢1000倍，SM2密钥更短"},
+        {n:"15",topic:"数字签名5条件",mnemonic:"信造用变赖",detail:"可信·不可伪造·不可重用·不可改变·不可抵赖"},
+        {n:"16",topic:"KDC vs CA",mnemonic:"KDC=分配密钥，CA=颁发证书",detail:"别搞混！PGP是直接公开发布的代表"},
+        {n:"17",topic:"ACL vs 能力表",mnemonic:"ACL按列客，能力按行主",detail:"ACL最流行！授权关系表用于安全数据库"},
+        {n:"18",topic:"DoS破坏什么",mnemonic:"DoS破坏可用性",detail:"SYN Flooding最广泛，DDoS=客主代三级"},
+        {n:"19",topic:"欺骗攻击三类",mnemonic:"ARP骗MAC，DNS骗域名，IP改报头",detail:"DNS防御：被虚叉；ARP：固化ARP表"},
+        {n:"20",topic:"TCP/IP攻击",mnemonic:"SYN Flooding最广泛，Ping of Death=ICMP",detail:"SYN防御减超时，ICMP防御打补丁"},
+        {n:"21",topic:"等保五级",mnemonic:"用系安结访 → C1-C2-B1-B2-B3",detail:"第5级最高！没有A级，没有C3级"},
+        {n:"22",topic:"安全协议层次",mnemonic:"IPSec=网络层！SSL=应用层↔TCP",detail:"SET管信用卡，PGP管邮件，HTTPS保Web"},
+        {n:"23",topic:"风险评估五要素",mnemonic:"脆资威险施",detail:"不含「成本」！这是高频陷阱"},
+        {n:"24",topic:"密钥生成三要素",mnemonic:"空强随",detail:"增大密钥空间·选强钥·随机性"},
+    ];
+
+    function renderFlash() {
+        const grid = document.getElementById('flash-grid');
+        flashData.forEach(fc => {
+            const div = document.createElement('div');
+            div.className = 'flash-card';
+            div.innerHTML = `<div class="fc-num"># ${fc.n}</div>
+      <div class="fc-topic">${fc.topic}</div>
+      <div class="fc-mnemonic">「${fc.mnemonic}」</div>
+      <div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>

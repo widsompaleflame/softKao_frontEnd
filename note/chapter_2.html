@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二章 · 嵌入式基础知识 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbf7;
+            --bg2: #f4efe6;
+            --card: #ffffff;
+            --card2: #f9f7f2;
+            --border: #e8e2d5;
+            --border2: #d4cbb8;
+            --text: #2c2825;
+            --text2: #5e574f;
+            --text3: #8f877c;
+            --accent: #0284c7;
+            --accent2: #0369a1;
+            --gold: #d97706;
+            --gold2: #b45309;
+            --green: #059669;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --pink: #db2777;
+            --teal: #0d9488;
+            --nav-h: 56px;
+            --radius: 10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden;}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ── TOP NAV ── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+            background:rgba(253,251,247,.93);backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);z-index:1000;
+            display:flex;align-items:center;padding:0 16px;gap:2px;
+            overflow-x:auto;white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+        .nav-brand svg{flex-shrink:0}
+        .nav-btn{
+            display:inline-flex;align-items:center;gap:5px;
+            padding:5px 12px;border-radius:6px;border:1px solid transparent;
+            background:transparent;color:var(--text2);font-family:inherit;
+            font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;
+            white-space:nowrap;flex-shrink:0;
+        }
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── MAIN ── */
+        main{padding-top:calc(var(--nav-h) + 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── HERO ── */
+        .section-hero{
+            text-align:center;padding:40px 20px 32px;
+            background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);
+            border:1px solid var(--border);border-radius:14px;margin-bottom:28px;
+            position:relative;overflow:hidden;
+        }
+        .section-hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:500px;margin:0 auto}
+        .section-tag{
+            display:inline-block;padding:3px 10px;
+            background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);
+            color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;
+            letter-spacing:.06em;margin-bottom:12px;
+        }
+
+        /* ── CARD ── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .card-title .icon{font-size:1.1rem}
+
+        /* ── ANALOGY ── */
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2);}
+        .analogy strong{color:var(--gold)}
+
+        /* ── MNEMONIC ── */
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple);}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ── FORMULA BOX ── */
+        .formula-box{
+            background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;
+            padding:14px 16px;font-family:'JetBrains Mono',monospace;
+            font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;
+            margin:12px 0;line-height:1.8;
+        }
+
+        /* ── TABLES ── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+
+        /* ── KP GRID ── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem;}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ── ALERT ── */
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid;}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+
+        /* ── SUB TITLE ── */
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ── TAG ── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+
+        /* ── VS GRID ── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        /* ── LAYER STACK ── */
+        .layer-stack{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .layer-row{
+            display:flex;align-items:center;gap:12px;
+            padding:10px 14px;border-radius:7px;border:1px solid var(--border);
+            background:var(--bg2);transition:border-color .15s;
+        }
+        .layer-row:hover{border-color:var(--border2)}
+        .layer-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);font-weight:700;width:20px;flex-shrink:0;text-align:center}
+        .layer-name{font-weight:700;font-size:.87rem;min-width:100px;flex-shrink:0}
+        .layer-desc{font-size:.8rem;color:var(--text2)}
+        .layer-analogy{font-size:.77rem;color:var(--text3);margin-left:auto;flex-shrink:0;max-width:160px;text-align:right}
+
+        /* ── DO-178 LEVEL BARS ── */
+        .do178-grid{display:flex;flex-direction:column;gap:4px;margin:12px 0}
+        .do178-row{
+            display:grid;grid-template-columns:36px 130px 1fr auto;
+            gap:8px;align-items:center;padding:8px 12px;
+            border-radius:7px;border:1px solid var(--border);background:var(--bg2);
+            font-size:.83rem;transition:border-color .15s;
+        }
+        .do178-row:hover{border-color:var(--border2)}
+        .do178-level{font-weight:900;font-family:'JetBrains Mono',monospace;font-size:1rem;text-align:center}
+        .do178-name{font-weight:600}
+        .do178-effect{color:var(--text2);font-size:.8rem}
+        .do178-badge{padding:3px 9px;border-radius:12px;font-size:.72rem;font-weight:700;white-space:nowrap}
+
+        /* ── FLOW ── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* ── QUIZ ── */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s;}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{
+            display:flex;align-items:flex-start;gap:8px;padding:8px 11px;
+            border-radius:7px;border:1px solid var(--border);background:var(--bg2);
+            color:var(--text2);font-family:inherit;font-size:.83rem;
+            cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+            border-radius:6px;border:1px solid var(--border2);background:transparent;
+            color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s;
+        }
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease;}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        #quiz-score{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ── FLASH CARDS ── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s;}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:640px){
+            main{padding-left:12px;padding-right:12px}
+            .section-hero h1{font-size:1.3rem}
+            .kp-grid{grid-template-columns:1fr}
+            .flash-grid{grid-template-columns:1fr}
+            .do178-row{grid-template-columns:28px 1fr;grid-template-rows:auto auto}
+            .do178-effect,.do178-badge{grid-column:1/3;font-size:.77rem}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ TOP NAV ══ -->
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        架构师第二章
+    </div>
+    <button class="nav-btn active" onclick="showSection('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="showSection('s1',this)">① 系统概述</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">② 系统分类</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">③ 嵌入式软件</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">④ 嵌入式硬件</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">⑤ 安全性设计</button>
+    <button class="nav-btn" onclick="showSection('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="showSection('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══════════ 知识地图 ══════════ -->
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 02</div>
+            <h1>嵌入式基础知识</h1>
+            <p>系统架构师考试 · 选择题约占 3-5 分 · 以记忆为主 ⭐⭐</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>全章知识架构</div>
+            <div style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:500px">
+                    <defs>
+                        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#d4cbb8"/>
+                        </marker>
+                    </defs>
+                    <!-- Root -->
+                    <rect x="355" y="220" width="170" height="46" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="440" y="239" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第二章</text>
+                    <text x="440" y="257" text-anchor="middle" font-size="10.5" fill="#0284c7">嵌入式基础知识</text>
+
+                    <!-- Branch 1: 系统概述 -->
+                    <line x1="355" y1="240" x2="210" y2="88" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="112" y="68" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="177" y="84" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 系统概述</text>
+                    <text x="177" y="99" text-anchor="middle" font-size="9.5" fill="#5e574f">定义·特点·组成</text>
+
+                    <!-- Branch 2: 分类 -->
+                    <line x1="355" y1="232" x2="168" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="44" y="159" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="113" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. 系统分类</text>
+                    <text x="113" y="190" text-anchor="middle" font-size="9.5" fill="#5e574f">MCU/MPU/DSP/SoC</text>
+
+                    <!-- Branch 3: 软件 -->
+                    <line x1="355" y1="252" x2="168" y2="312" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="44" y="293" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="113" y="309" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 嵌入式软件</text>
+                    <text x="113" y="324" text-anchor="middle" font-size="9.5" fill="#5e574f">BSP·RTOS·交叉开发</text>
+
+                    <!-- Branch 4: 硬件 -->
+                    <line x1="355" y1="262" x2="210" y2="402" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="112" y="383" width="130" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="177" y="399" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">4. 嵌入式硬件</text>
+                    <text x="177" y="414" text-anchor="middle" font-size="9.5" fill="#5e574f">存储器分类·NOR/NAND</text>
+
+                    <!-- Branch 5: 安全性 -->
+                    <line x1="525" y1="262" x2="658" y2="402" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="604" y="383" width="130" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="669" y="399" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 安全性设计</text>
+                    <text x="669" y="414" text-anchor="middle" font-size="9.5" fill="#5e574f">DO-178B · A灾B危</text>
+
+                    <!-- sub-nodes left -->
+                    <line x1="113" y1="159" x2="113" y2="106" stroke="#e8e2d5" stroke-width="1"/>
+                    <rect x="60" y="80" width="88" height="26" rx="5" fill="#fff" stroke="#e8e2d5"/>
+                    <text x="104" y="97" text-anchor="middle" font-size="9.5" fill="#5e574f">硬/软实时</text>
+
+                    <line x1="44" y1="178" x2="8" y2="152" stroke="#e8e2d5" stroke-width="1"/>
+                    <rect x="2" y="139" width="70" height="26" rx="5" fill="#fff" stroke="#e8e2d5"/>
+                    <text x="37" y="156" text-anchor="middle" font-size="9.5" fill="#5e574f">安全攸关系统</text>
+
+                    <line x1="44" y1="196" x2="8" y2="218" stroke="#e8e2d5" stroke-width="1"/>
+                    <rect x="2" y="205" width="68" height="26" rx="5" fill="#fff" stroke="#e8e2d5"/>
+                    <text x="36" y="222" text-anchor="middle" font-size="9.5" fill="#5e574f">MCU vs MPU</text>
+
+                    <line x1="44" y1="310" x2="8" y2="284" stroke="#e8e2d5" stroke-width="1"/>
+                    <rect x="2" y="271" width="68" height="26" rx="5" fill="#fff" stroke="#e8e2d5"/>
+                    <text x="36" y="288" text-anchor="middle" font-size="9.5" fill="#5e574f">四层架构</text>
+
+                    <line x1="44" y1="318" x2="8" y2="322" stroke="#e8e2d5" stroke-width="1"/>
+                    <rect x="2" y="309" width="68" height="26" rx="5" fill="#fff" stroke="#e8e2d5"/>
+                    <text x="36" y="326" text-anchor="middle" font-size="9.5" fill="#5e574f">常见RTOS</text>
+
+                    <line x1="44" y1="327" x2="8" y2="360" stroke="#e8e2d5" stroke-width="1"/>
+                    <rect x="2" y="347" width="68" height="26" rx="5" fill="#fff" stroke="#e8e2d5"/>
+                    <text x="36" y="364" text-anchor="middle" font-size="9.5" fill="#5e574f">交叉开发</text>
+
+                    <!-- sub-nodes right -->
+                    <line x1="525" y1="232" x2="710" y2="160" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="672" y="142" width="130" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="737" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">NOR vs NAND</text>
+                    <text x="737" y="173" text-anchor="middle" font-size="9.5" fill="#5e574f">XIP特性</text>
+
+                    <line x1="525" y1="243" x2="730" y2="243" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="694" y="225" width="130" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="759" y="241" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">RAM vs ROM</text>
+                    <text x="759" y="256" text-anchor="middle" font-size="9.5" fill="#5e574f">SRAM/DRAM/Flash</text>
+
+                    <line x1="525" y1="253" x2="710" y2="320" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="672" y="302" width="130" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="737" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">DO-178B等级</text>
+                    <text x="737" y="333" text-anchor="middle" font-size="9.5" fill="#5e574f">A灾B危C重D轻E无</text>
+
+                    <!-- Hot badge -->
+                    <rect x="800" y="48" width="56" height="18" rx="9" fill="rgba(220,38,38,.1)" stroke="rgba(220,38,38,.25)"/>
+                    <text x="828" y="61" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">高频考点</text>
+                    <line x1="798" y1="57" x2="755" y2="75" stroke="rgba(220,38,38,.25)" stroke-width=".8" stroke-dasharray="3,3"/>
+
+                    <!-- Score badge -->
+                    <rect x="374" y="192" width="90" height="18" rx="9" fill="rgba(217,119,6,.12)" stroke="rgba(217,119,6,.28)"/>
+                    <text x="419" y="205" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">选择题 3-5分</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="kp-grid">
+            <div class="kp-item"><div class="kp-title">🔥 实时系统分类</div><div class="kp-body">硬实时：超时要命<br>软实时：超时要脸</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 DO-178B等级</div><div class="kp-body">A灾B危C重D轻E无<br>只有A级要MC/DC</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 处理器四分类</div><div class="kp-body">MCU全家桶 / MPU光杆<br>DSP算术 / SoC融合</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ NOR vs NAND</div><div class="kp-body">NOR能跑代码（XIP）<br>NAND能装数据</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 软件四层结构</div><div class="kp-body">BSP → RTOS → 中间件 → 应用<br>板上搭戏</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 嵌入式八特点</div><div class="kp-body">专省快稳裁低小交<br>注意：通用性强是陷阱</div></div>
+            <div class="kp-item"><div class="kp-title">📊 SRAM vs DRAM</div><div class="kp-body">静姐快贵小→Cache<br>动弟慢便宜大→主存</div></div>
+            <div class="kp-item"><div class="kp-title">📊 安全性设计</div><div class="kp-body">冗多检失降狗<br>六大安全技术</div></div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 1: 系统概述 ══════════ -->
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>嵌入式系统的组成及特点</h1>
+            <p>定义 · 八大特点 · 组成结构 · 考点密度 ★★☆☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📖</span>1.1 嵌入式系统定义</div>
+            <div class="analogy">
+                <strong>通俗理解：藏在设备里的"专用小电脑"</strong><br>
+                洗衣机、空调遥控器、汽车仪表盘里都藏着一个小电脑。它不像桌上的PC可以打游戏，它<strong>只干一件事</strong>——控制这台设备。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>对比</th><th>类比</th><th>说明</th></tr>
+                    <tr><td>PC电脑</td><td>全能选手</td><td>什么都能干</td></tr>
+                    <tr><td class="badge-acc">嵌入式系统</td><td>专科医生</td><td>只看一种病，但看得又快又准</td></tr>
+                    <tr><td>洗衣机控制板</td><td>典型嵌入式</td><td>只管洗衣流程</td></tr>
+                    <tr><td>智能手表</td><td>典型嵌入式</td><td>极小空间完成健康监测</td></tr>
+                </table>
+            </div>
+            <div class="formula-box">标准定义：
+                嵌入式系统 = 以应用为中心 + 以计算机技术为基础
+                + 软硬件可裁剪
+                + 对功能/可靠性/成本/体积/功耗有严格要求的
+                + 专用计算机系统</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>1.2 八大核心特点 <span class="tag tag-hot">考试陷阱</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>#</th><th>特点</th><th>解释</th><th>关键词</th></tr>
+                    <tr><td>①</td><td class="badge-acc">专用性强</td><td>针对特定应用设计，非通用计算机</td><td>专</td></tr>
+                    <tr><td>②</td><td class="badge-acc">资源受限</td><td>CPU性能、内存、存储都很有限</td><td>省</td></tr>
+                    <tr><td>③</td><td class="badge-acc">实时性要求</td><td>很多场景要求在规定时间内响应</td><td>快</td></tr>
+                    <tr><td>④</td><td class="badge-acc">高可靠性</td><td>7×24小时运行，不能随便死机</td><td>稳</td></tr>
+                    <tr><td>⑤</td><td class="badge-acc">软硬件可裁剪</td><td>根据需求定制，不需要的功能去掉</td><td>裁</td></tr>
+                    <tr><td>⑥</td><td class="badge-acc">低功耗</td><td>很多靠电池供电，必须省电</td><td>低</td></tr>
+                    <tr><td>⑦</td><td class="badge-acc">体积小</td><td>要塞进各种设备里</td><td>小</td></tr>
+                    <tr><td>⑧</td><td class="badge-acc">交叉开发</td><td>在PC上写代码，下载到目标板运行</td><td>交</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 考试陷阱：选项出现「通用性强」时选错误——嵌入式系统恰恰是「专用性强」！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「专省快稳裁低小交」</strong><br>
+                故事联想：一个<strong>低调的小哥</strong>，是个<strong>专门</strong>做<strong>裁缝</strong>的，他<strong>省钱</strong>又<strong>稳当</strong>，每次<strong>快递交货</strong>都很准时。
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🧩</span>1.3 嵌入式系统组成结构</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">硬件层</div>
+                    <div class="vs-item"><span>微处理器（CPU）</span><span class="label">核心</span></div>
+                    <div class="vs-item"><span>存储器</span><span class="label">ROM + RAM</span></div>
+                    <div class="vs-item"><span>I/O接口</span><span class="label">GPIO/UART</span></div>
+                    <div class="vs-item"><span>电源 + 时钟</span><span class="label">基础支撑</span></div>
+                    <div class="vs-item"><span>传感器/外设</span><span class="label">感知层</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">软件层</div>
+                    <div class="vs-item"><span>嵌入式OS（RTOS）</span><span class="label">可选</span></div>
+                    <div class="vs-item"><span>板级支持包（BSP）</span><span class="label">必须</span></div>
+                    <div class="vs-item"><span>中间件</span><span class="label">可选</span></div>
+                    <div class="vs-item"><span>应用软件</span><span class="label">核心功能</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 2: 系统分类 ══════════ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>嵌入式系统的分类</h1>
+            <p>处理器四类 · 实时系统 · 安全攸关系统 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎮</span>2.1 处理器分类 <span class="tag tag-hot">高频考点</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>类型</th><th>全称</th><th>核心特点</th><th>典型产品</th><th>应用场景</th></tr>
+                    <tr><td class="badge-acc">MCU</td><td>微控制器（单片机）</td><td>CPU+RAM+ROM+I/O <strong>集成在一个芯片</strong></td><td>STM32 / Arduino</td><td>家电·玩具·小型设备</td></tr>
+                    <tr><td class="badge-acc">MPU</td><td>微处理器</td><td>只有CPU核心，需<strong>外接</strong>存储器和外设</td><td>ARM Cortex-A系列</td><td>手机·平板·路由器</td></tr>
+                    <tr><td class="badge-acc">DSP</td><td>数字信号处理器</td><td>专门优化<strong>乘加运算（MAC）</strong></td><td>TI TMS320系列</td><td>音频·图像·雷达·通信</td></tr>
+                    <tr><td class="badge-acc">SoC</td><td>片上系统</td><td>CPU+DSP+GPU+存储+接口<strong>全部集成</strong></td><td>骁龙·麒麟·苹果A系列</td><td>智能手机·智能家居</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">MCU vs MPU 核心对比 <span class="tag tag-key">★必考</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-a">
+                    <div class="vs-title">MCU 微控制器</div>
+                    <div class="vs-item"><span class="label">集成度</span><span class="badge-green">高（CPU+存储+I/O一体）</span></div>
+                    <div class="vs-item"><span class="label">外围电路</span><span class="badge-green">少（自带很多）</span></div>
+                    <div class="vs-item"><span class="label">性能</span><span>相对较低</span></div>
+                    <div class="vs-item"><span class="label">功耗</span><span class="badge-green">低</span></div>
+                    <div class="vs-item"><span class="label">成本</span><span class="badge-green">低</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>瑞士军刀（小巧全能）</span></div>
+                </div>
+                <div class="vs-card vs-b">
+                    <div class="vs-title">MPU 微处理器</div>
+                    <div class="vs-item"><span class="label">集成度</span><span class="badge-red">低（只有CPU核心）</span></div>
+                    <div class="vs-item"><span class="label">外围电路</span><span class="badge-red">多（需要外接）</span></div>
+                    <div class="vs-item"><span class="label">性能</span><span class="badge-green">相对较高</span></div>
+                    <div class="vs-item"><span class="label">功耗</span><span>较高</span></div>
+                    <div class="vs-item"><span class="label">成本</span><span>较高</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>专业厨刀（锋利需配套）</span></div>
+                </div>
+            </div>
+            <div class="sub-title">DSP的特殊能力</div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">哈佛结构</div><div class="kp-body">程序和数据分开存储，可同时访问</div></div>
+                <div class="kp-item"><div class="kp-title">硬件乘法器</div><div class="kp-body">一个时钟周期完成乘加运算（MAC）</div></div>
+                <div class="kp-item"><div class="kp-title">位倒序寻址</div><div class="kp-body">专为FFT运算优化</div></div>
+                <div class="kp-item"><div class="kp-title">零开销循环</div><div class="kp-body">循环控制不占用额外指令周期</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「MCU全家桶(小)，MPU光杆司令，DSP算术天才，SoC终极融合」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⏰</span>2.2 实时系统 <span class="tag tag-hot">★★高频</span></div>
+            <div class="analogy">
+                <strong>类比考试交卷：</strong>
+                <strong>硬实时</strong>：铃响那一秒必须交，晚一秒试卷作废（导弹·心脏起搏器）
+                <br><strong>软实时</strong>：晚交几分钟扣点分，但不至于作废（视频播放·网页加载）
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>维度</th><th>硬实时（Hard RT）</th><th>软实时（Soft RT）</th></tr>
+                    <tr><td>超时后果</td><td class="badge-red">灾难性（系统失效/人员伤亡）</td><td>性能下降（用户体验变差）</td></tr>
+                    <tr><td>响应时间</td><td>微秒～毫秒级</td><td>毫秒～秒级</td></tr>
+                    <tr><td>确定性</td><td>100%确定性</td><td>统计意义上的确定性</td></tr>
+                    <tr><td>类比</td><td>高空走钢丝（一步不能错）</td><td>外卖送餐（晚几分钟不会死）</td></tr>
+                    <tr><td>典型例子</td><td class="badge-red">导弹·ABS·心脏起搏器·飞控·核电站</td><td class="badge-gold">视频播放·在线订票·多媒体·网络交换机</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ 陷阱1：ATM取款机 → <strong>软实时</strong>（晚几秒不会死人）</div>
+            <div class="alert alert-red">⚠️ 陷阱2：汽车安全气囊 → <strong>硬实时</strong>（晚0.1秒人就撞上了）</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「硬要命，软要脸」</strong> — 判断标准：超时后果是否「灾难性」
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🚨</span>2.3 安全攸关系统</div>
+            <div class="analogy">
+                <strong>安全攸关系统 = 出了bug会死人的系统</strong><br>
+                手机APP崩溃→重启就好。但<strong>飞机飞控系统</strong>崩溃→几百条人命！
+                注意：这里的「安全」是 <strong>Safety（人身安全）</strong>，不是 Security（信息安全）！
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>概念</th><th>解释</th></tr>
+                    <tr><td class="badge-acc">定义</td><td>系统故障可能导致人员伤亡、重大财产损失或环境破坏</td></tr>
+                    <tr><td class="badge-acc">典型领域</td><td>航空航天、核电站、医疗设备、铁路信号、汽车电子</td></tr>
+                    <tr><td class="badge-gold">DO-178B/C</td><td>航空软件认证标准</td></tr>
+                    <tr><td class="badge-gold">IEC 61508</td><td>工业安全标准</td></tr>
+                    <tr><td class="badge-gold">ISO 26262</td><td>汽车电子安全标准</td></tr>
+                </table>
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">可靠性（Reliability）</div>
+                    <div class="vs-item"><span>关注</span><span>失效概率</span></div>
+                    <div class="vs-item"><span>类比</span><span>一把锁10年不坏</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">安全性（Safety）</div>
+                    <div class="vs-item"><span>关注</span><span>失效后果</span></div>
+                    <div class="vs-item"><span>类比</span><span>锁坏了不会自动打开</span></div>
+                </div>
+            </div>
+            <div class="alert alert-info">💡 失效安全（Fail-Safe）：电梯断电自动停在最近楼层，而不是自由落体</div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 3: 软件 ══════════ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>嵌入式软件的组成及特点</h1>
+            <p>四层结构 · BSP · RTOS · 交叉开发 · 考点密度 ★★★☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🧱</span>3.2 嵌入式软件四层架构 <span class="tag tag-key">★重要</span></div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#db2777;background:rgba(219,39,119,.04)">
+                    <div class="layer-num" style="color:#db2777">④</div>
+                    <div class="layer-name" style="color:#db2777">应用软件层</div>
+                    <div class="layer-desc">用户看到的具体功能（如显示界面、业务逻辑）</div>
+                    <div class="layer-analogy">汽车的方向盘和仪表盘</div>
+                </div>
+                <div class="layer-row" style="border-color:#0d9488;background:rgba(13,148,136,.04)">
+                    <div class="layer-num" style="color:#0d9488">③</div>
+                    <div class="layer-name" style="color:#0d9488">中间件层（可选）</div>
+                    <div class="layer-desc">网络通信、文件系统、图形引擎等通用服务</div>
+                    <div class="layer-analogy">汽车的导航系统</div>
+                </div>
+                <div class="layer-row" style="border-color:#7c3aed;background:rgba(124,58,237,.04)">
+                    <div class="layer-num" style="color:#7c3aed">②</div>
+                    <div class="layer-name" style="color:#7c3aed">RTOS操作系统（可选）</div>
+                    <div class="layer-desc">管理任务调度、内存分配、中断处理</div>
+                    <div class="layer-analogy">汽车的自动变速箱</div>
+                </div>
+                <div class="layer-row" style="border-color:#0284c7;background:rgba(2,132,199,.04)">
+                    <div class="layer-num" style="color:#0284c7">①</div>
+                    <div class="layer-name" style="color:#0284c7">BSP 板级支持包</div>
+                    <div class="layer-desc">最底层，直接操作硬件；屏蔽硬件差异，提供统一接口</div>
+                    <div class="layer-analogy">汽车的发动机控制单元</div>
+                </div>
+            </div>
+            <div style="text-align:center;padding:8px;font-size:.8rem;color:var(--text3)">↕ 硬件平台（微处理器·存储器·外设）</div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">BSP的核心作用</div><div class="kp-body">屏蔽硬件差异，为上层提供统一的硬件访问接口（类似PC的BIOS+驱动）</div></div>
+                <div class="kp-item"><div class="kp-title">RTOS非必须</div><div class="kp-body">简单系统可以用「裸机程序」（无OS直接运行）</div></div>
+                <div class="kp-item"><div class="kp-title">中间件可选</div><div class="kp-body">小型系统通常没有中间件层</div></div>
+                <div class="kp-item"><div class="kp-title">固化存储</div><div class="kp-body">嵌入式软件通常烧录在ROM/Flash中，上电即运行</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「板(BSP)上(OS)搭(中间件)戏(应用)」</strong> → 在板子上面搭台唱戏<br>
+                软件七特点：<strong>「专实高资交固裁」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔄</span>3.4 交叉开发环境 <span class="tag tag-key">★考点</span></div>
+            <div class="analogy">
+                <strong>交叉开发 = 在A电脑上写程序，让B设备去运行</strong><br>
+                在<strong>电脑上</strong>写好了菜谱（代码），发给<strong>厨房机器人</strong>（目标板）去做菜。不在机器人上写菜谱，因为它没有键盘屏幕。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>术语</th><th>含义</th><th>类比</th></tr>
+                    <tr><td class="badge-acc">宿主机（Host）</td><td>开发用的PC电脑</td><td>写菜谱的书房</td></tr>
+                    <tr><td class="badge-acc">目标机（Target）</td><td>嵌入式设备本身</td><td>做菜的厨房</td></tr>
+                    <tr><td class="badge-gold">交叉编译器</td><td>在Host上编译出Target能运行的代码</td><td>把中文菜谱翻译成机器人指令</td></tr>
+                    <tr><td class="badge-gold">交叉调试器</td><td>在Host上调试Target运行的程序</td><td>通过摄像头远程指导机器人</td></tr>
+                    <tr><td>JTAG/串口</td><td>Host与Target之间的连接方式</td><td>书房和厨房之间的对讲机</td></tr>
+                </table>
+            </div>
+            <div class="flow">
+                <div class="flow-step">宿主机(Host)</div>
+                <div class="flow-arrow">编写代码</div>
+                <div class="flow-step">交叉编译</div>
+                <div class="flow-arrow">JTAG/串口/网络</div>
+                <div class="flow-step">目标机(Target)</div>
+                <div class="flow-arrow">运行+反馈</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⚙️</span>3.5 常见嵌入式实时操作系统</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>RTOS</th><th>特点</th><th>适用场景</th></tr>
+                    <tr><td class="badge-acc">VxWorks</td><td>商用·高可靠·硬实时</td><td class="badge-red">航空航天·军工·医疗（火星探测器用的就是它！）</td></tr>
+                    <tr><td class="badge-acc">μC/OS</td><td>开源（教育免费）·抢占式·小巧</td><td>教学·小型嵌入式设备</td></tr>
+                    <tr><td class="badge-acc">FreeRTOS</td><td>开源免费·轻量级·社区活跃</td><td>IoT设备·小型控制系统</td></tr>
+                    <tr><td class="badge-acc">RT-Linux</td><td>Linux实时扩展版</td><td>工业控制·机器人</td></tr>
+                    <tr><td>HarmonyOS</td><td>华为出品·分布式架构</td><td>全场景IoT设备</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「VxWorks上天（火星），μC/OS入门（教学），FreeRTOS免费（IoT），RT-Linux工控」</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 4: 硬件 ══════════ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>嵌入式系统硬件体系结构</h1>
+            <p>存储器完整分类 · NOR vs NAND · 看门狗 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏭</span>4.1 硬件组成</div>
+            <div class="analogy">
+                嵌入式硬件 = 一个<strong>微型工厂</strong>：微处理器=大脑、存储器=仓库、I/O=大门、总线=传送带、电源=电力、时钟=上班铃声
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">微处理器</div><div class="kp-body">决策中心，MCU/MPU/DSP/SoC</div></div>
+                <div class="kp-item"><div class="kp-title">存储器</div><div class="kp-body">ROM（程序）+ RAM（运行数据）</div></div>
+                <div class="kp-item"><div class="kp-title">I/O接口</div><div class="kp-body">GPIO/UART/SPI/I²C 等</div></div>
+                <div class="kp-item"><div class="kp-title">时钟 + 复位</div><div class="kp-body">统一节奏·系统初始化</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">💾</span>4.3 存储器完整分类 <span class="tag tag-hot">★重要考点</span></div>
+            <div class="sub-title">RAM — 易失性（断电丢数据）</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">SRAM 静态RAM（静姐）</div>
+                    <div class="vs-item"><span class="label">刷新</span><span class="badge-green">不需要刷新</span></div>
+                    <div class="vs-item"><span class="label">速度</span><span class="badge-green">快</span></div>
+                    <div class="vs-item"><span class="label">容量</span><span class="badge-red">小</span></div>
+                    <div class="vs-item"><span class="label">成本</span><span class="badge-red">高</span></div>
+                    <div class="vs-item"><span class="label">用途</span><span class="badge-gold">Cache缓存</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">DRAM 动态RAM（动弟）</div>
+                    <div class="vs-item"><span class="label">刷新</span><span class="badge-red">需要定期刷新</span></div>
+                    <div class="vs-item"><span class="label">速度</span><span>较慢</span></div>
+                    <div class="vs-item"><span class="label">容量</span><span class="badge-green">大</span></div>
+                    <div class="vs-item"><span class="label">成本</span><span class="badge-green">低</span></div>
+                    <div class="vs-item"><span class="label">用途</span><span class="badge-gold">主存（DDR4/DDR5）</span></div>
+                </div>
+            </div>
+
+            <div class="sub-title">ROM — 非易失性（断电不丢数据）</div>
+            <div class="analogy">
+                <strong>ROM演进路线：</strong>
+                面具(Mask) → 一次性筷子(PROM) → 晒掉重写(EPROM) → 电擦重写(EEPROM) → 闪存(Flash)
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>类型</th><th>可否修改</th><th>擦写方式</th><th>特点</th></tr>
+                    <tr><td>Mask ROM（掩膜）</td><td class="badge-red">不可修改</td><td>出厂写死</td><td>大批量量产</td></tr>
+                    <tr><td>PROM</td><td>一次性</td><td>熔断丝（一次）</td><td>只能写一次</td></tr>
+                    <tr><td>EPROM</td><td>可擦写</td><td>紫外线照射</td><td>需拆下用UV灯照射</td></tr>
+                    <tr><td>EEPROM</td><td>可擦写</td><td class="badge-gold">电信号，按字节擦写</td><td>操作精细但容量小</td></tr>
+                    <tr><td class="badge-acc">Flash（闪存）</td><td>可擦写</td><td class="badge-gold">电信号，按块擦除</td><td>最常用！U盘/SSD/手机存储</td></tr>
+                </table>
+            </div>
+
+            <div class="sub-title">NOR Flash vs NAND Flash <span class="tag tag-hot">★★必考</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-c">
+                    <div class="vs-title">NOR Flash（能跑代码）</div>
+                    <div class="vs-item"><span class="label">XIP支持</span><span class="badge-green">✅ 支持就地执行</span></div>
+                    <div class="vs-item"><span class="label">读速度</span><span class="badge-green">快（随机读）</span></div>
+                    <div class="vs-item"><span class="label">写速度</span><span class="badge-red">慢</span></div>
+                    <div class="vs-item"><span class="label">容量</span><span class="badge-red">小（1~32MB）</span></div>
+                    <div class="vs-item"><span class="label">成本</span><span class="badge-red">高</span></div>
+                    <div class="vs-item"><span class="label">典型用途</span><span class="badge-gold">BIOS / Bootloader</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">NAND Flash（能装数据）</div>
+                    <div class="vs-item"><span class="label">XIP支持</span><span class="badge-red">❌ 不支持</span></div>
+                    <div class="vs-item"><span class="label">读速度</span><span>较慢（页读取）</span></div>
+                    <div class="vs-item"><span class="label">写速度</span><span class="badge-green">快</span></div>
+                    <div class="vs-item"><span class="label">容量</span><span class="badge-green">大（GB~TB级）</span></div>
+                    <div class="vs-item"><span class="label">成本</span><span class="badge-green">低</span></div>
+                    <div class="vs-item"><span class="label">典型用途</span><span class="badge-gold">U盘 / SSD / 手机存储</span></div>
+                </div>
+            </div>
+            <div class="alert alert-warn">⚠️ EEPROM vs Flash 区别：EEPROM 可按<strong>字节</strong>擦写；Flash 只能按<strong>块</strong>擦除，操作灵活性低但成本低容量大。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                RAM：<strong>「静姐(SRAM)快贵小→Cache；动弟(DRAM)慢便宜大→主存」</strong><br>
+                ROM演进：<strong>「面(Mask)包(PROM)一(E)块(EE)闪(Flash)」</strong><br>
+                Flash：<strong>「NOR能跑(代码)，NAND能装(数据)」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🐕</span>4.4 看门狗（Watchdog）</div>
+            <div class="analogy">
+                <strong>看门狗 = 系统的"保安定时巡逻"</strong><br>
+                系统正常时需要定期「喂狗」（复位计数器）。
+                如果系统死机，未能及时喂狗，看门狗就会<strong>自动复位系统</strong>。
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">工作原理</div><div class="kp-body">定时器倒计时，正常时定期复位，超时自动重启系统</div></div>
+                <div class="kp-item"><div class="kp-title">用途</div><div class="kp-body">防止系统死机、程序跑飞，提高可靠性</div></div>
+                <div class="kp-item"><div class="kp-title">类比</div><div class="kp-body">保安每小时打卡一次，超时没打卡→触发警报</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECTION 5: 安全性 ══════════ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>安全攸关软件的安全性设计</h1>
+            <p>DO-178B五等级 · MC/DC覆盖 · 六大安全技术 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">✈️</span>5.2 DO-178B 标准 <span class="tag tag-hot">★★★必背</span></div>
+            <div class="analogy">
+                <strong>DO-178B = 航空软件的"高考评分标准"</strong><br>
+                按<strong>危险程度</strong>分5个等级（A~E），等级越高（A最高），要求越严格，需要做的测试和文档越多。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>项目</th><th>说明</th></tr>
+                    <tr><td>全称</td><td>Software Considerations in Airborne Systems and Equipment Certification</td></tr>
+                    <tr><td>发布机构</td><td>RTCA（美国航空无线电技术委员会）</td></tr>
+                    <tr><td class="badge-red">适用领域</td><td class="badge-red">仅限机载（航空）软件安全性认证</td></tr>
+                    <tr><td>升级版本</td><td>DO-178C（2012年，增加模型驱动、面向对象、形式化方法补充）</td></tr>
+                </table>
+            </div>
+
+            <div class="sub-title">五个安全等级 <span class="tag tag-hot">★★★必背</span></div>
+            <div class="do178-grid">
+                <div class="do178-row" style="border-color:#dc2626;background:rgba(220,38,38,.04)">
+                    <div class="do178-level" style="color:#dc2626">A</div>
+                    <div class="do178-name" style="color:#dc2626">灾难的 Catastrophic</div>
+                    <div class="do178-effect">飞机坠毁 / 人员死亡 · 飞行控制·自动驾驶</div>
+                    <div class="do178-badge" style="background:rgba(220,38,38,.12);color:#dc2626">最严格</div>
+                </div>
+                <div class="do178-row" style="border-color:#d97706;background:rgba(217,119,6,.04)">
+                    <div class="do178-level" style="color:#d97706">B</div>
+                    <div class="do178-name" style="color:#d97706">危险的 Hazardous</div>
+                    <div class="do178-effect">严重伤害 / 大幅降低安全裕度 · 发动机控制·导航</div>
+                    <div class="do178-badge" style="background:rgba(217,119,6,.12);color:#d97706">很严格</div>
+                </div>
+                <div class="do178-row" style="border-color:#d97706">
+                    <div class="do178-level" style="color:#b45309">C</div>
+                    <div class="do178-name" style="color:#b45309">重大的 Major</div>
+                    <div class="do178-effect">显著增加机组工作负担 · 通信系统·部分显示系统</div>
+                    <div class="do178-badge" style="background:rgba(180,83,9,.1);color:#b45309">较严格</div>
+                </div>
+                <div class="do178-row">
+                    <div class="do178-level" style="color:#0284c7">D</div>
+                    <div class="do178-name" style="color:#0284c7">轻微的 Minor</div>
+                    <div class="do178-effect">轻微影响，乘客有些不便 · 客舱娱乐·照明系统</div>
+                    <div class="do178-badge" style="background:rgba(2,132,199,.1);color:#0284c7">一般</div>
+                </div>
+                <div class="do178-row" style="border-color:#059669;background:rgba(5,150,105,.04)">
+                    <div class="do178-level" style="color:#059669">E</div>
+                    <div class="do178-name" style="color:#059669">无影响 No Effect</div>
+                    <div class="do178-effect">对飞机运行和安全无影响 · 部分维护工具软件</div>
+                    <div class="do178-badge" style="background:rgba(5,150,105,.12);color:#059669">最宽松</div>
+                </div>
+            </div>
+
+            <div class="sub-title">各等级验证要求对比</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>验证活动</th><th>A级</th><th>B级</th><th>C级</th><th>D级</th><th>E级</th></tr>
+                    <tr><td>需求覆盖测试</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-red">—</td></tr>
+                    <tr><td>判定覆盖（DC）</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-red">—</td><td class="badge-red">—</td></tr>
+                    <tr><td class="badge-red">修改条件/判定覆盖（MC/DC）</td><td class="badge-red">✅ 仅A级！</td><td class="badge-red">—</td><td class="badge-red">—</td><td class="badge-red">—</td><td class="badge-red">—</td></tr>
+                    <tr><td>结构覆盖分析</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-red">—</td><td class="badge-red">—</td></tr>
+                    <tr><td>独立审核</td><td class="badge-green">✅</td><td class="badge-green">✅</td><td class="badge-red">—</td><td class="badge-red">—</td><td class="badge-red">—</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 高频考点：MC/DC（修改条件/判定覆盖）<strong>只有A级</strong>才要求！B级以下不要求。</div>
+            <div class="alert alert-warn">⚠️ 陷阱：「DO-178B适用于所有嵌入式系统」→ 错！<strong>只适用于机载（航空）软件</strong>。汽车用ISO 26262，工业用IEC 61508。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「A灾B危C重D轻E无」</strong><br>
+                谐音：A仔(灾)B位(危)C虫(重)D情(轻)E无(无)
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🛡️</span>5.3 安全性设计技术</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>技术</th><th>解释</th><th>类比</th></tr>
+                    <tr><td class="badge-acc">冗余设计</td><td>关键部件做多份备份</td><td>飞机有多个引擎，坏一个还能飞</td></tr>
+                    <tr><td class="badge-acc">多样性设计</td><td>用不同方法实现同一功能</td><td>不同团队用不同语言写同一功能</td></tr>
+                    <tr><td class="badge-acc">故障检测与隔离</td><td>自动发现故障并隔离</td><td>保险丝烧断，保护其他电路</td></tr>
+                    <tr><td class="badge-acc">失效安全（Fail-Safe）</td><td>故障时进入安全状态</td><td>交通灯坏了变全红（而不是全绿）</td></tr>
+                    <tr><td class="badge-acc">降级运行</td><td>故障时降低功能但不停机</td><td>一个引擎坏了，用剩下的继续飞</td></tr>
+                    <tr><td class="badge-acc">看门狗（Watchdog）</td><td>定时检测系统是否正常，异常则复位</td><td>保安定时巡逻，发现异常就报警</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「冗多检失降狗」</strong> → 一只荣耀的多才检察官，失足降级成了看门狗
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ QUIZ ══════════ -->
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>配套练习题</h1>
+            <p>30道精选选择题 · 含解析 · 覆盖全章知识点</p>
+        </div>
+        <div id="quiz-score">已作答：<span id="answered">0</span> / 30 题 &nbsp;|&nbsp; 答对：<span id="correct-count">0</span> 题</div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══════════ FLASH CARDS ══════════ -->
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">QUICK REF</div>
+            <h1>全章核心速记卡</h1>
+            <p>12个高频考点 · 口诀对照 · 考前冲刺</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id, btn) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // ─── QUIZ DATA (30 questions) ───
+    const quizData = [
+        // 第一部分：系统概述
+        {q:"以下关于嵌入式系统的描述，错误的是（　）。",opts:["嵌入式系统是以应用为中心的专用计算机系统","嵌入式系统的软硬件可裁剪，以适应不同应用需求","嵌入式系统具有通用性强的特点，可以运行各种应用程序","嵌入式系统通常对功能、可靠性、成本、体积、功耗有严格要求"],ans:2,exp:"嵌入式系统的核心特点是「专用性强」，是为特定应用量身定做的，而不是通用的。C选项「通用性强」恰好与嵌入式系统的本质相矛盾。"},
+        {q:"嵌入式系统开发通常采用（　）方式，即在通用计算机上编写程序，编译后下载到目标嵌入式设备上运行。",opts:["本地开发","交叉开发","远程开发","并行开发"],ans:1,exp:"嵌入式系统的开发模式是交叉开发——在宿主机（Host，PC）上编写和编译代码，然后下载到目标机（Target，嵌入式设备）上运行。因为嵌入式设备资源受限，不适合直接在上面开发。"},
+        {q:"以下不属于嵌入式系统特点的是（　）。",opts:["资源受限","实时性要求","大容量存储","低功耗"],ans:2,exp:"嵌入式系统八大特点是「专省快稳裁低小交」，「资源受限」是核心约束，存储空间通常很小。「大容量存储」是通用计算机的特点，不是嵌入式系统的特点。"},
+        {q:"在嵌入式系统的交叉开发环境中，「宿主机」是指（　）。",opts:["嵌入式目标设备","用于开发的通用计算机","嵌入式系统的服务器","嵌入式系统的存储设备"],ans:1,exp:"交叉开发中：宿主机（Host）是开发用的通用PC电脑，目标机（Target）是嵌入式设备本身。开发者在宿主机上编写、编译、调试代码，然后下载到目标机运行。"},
+        {q:"嵌入式系统与通用计算机系统的最主要区别是（　）。",opts:["是否使用操作系统","是否具有专用性","处理器性能高低","是否联网"],ans:1,exp:"嵌入式系统与通用计算机最本质的区别在于专用性——嵌入式是「以应用为中心」的专用系统，通用计算机可以运行各种应用。OS不是必须的，性能和联网都不是本质区别。"},
+        {q:"以下关于嵌入式系统组成的描述，正确的是（　）。",opts:["嵌入式系统只包含硬件，不包含软件","嵌入式系统由硬件层和软件层组成","嵌入式系统必须包含操作系统","嵌入式系统不需要电源模块"],ans:1,exp:"嵌入式系统由硬件层（微处理器、存储器、I/O接口等）和软件层（BSP、RTOS、中间件、应用软件）组成。简单系统可以裸机运行（无OS）。"},
+        // 第二部分：实时系统与安全攸关
+        {q:"以下属于硬实时系统的是（　）。",opts:["视频点播系统","在线订票系统","飞机自动驾驶系统","网络交换机"],ans:2,exp:"记住口诀「硬要命，软要脸」。飞机自动驾驶系统超时响应后果是灾难性的，属于硬实时。视频点播、在线订票、网络交换机超时只是性能下降，属于软实时。"},
+        {q:"硬实时系统和软实时系统的根本区别在于（　）。",opts:["响应速度的快慢","超过截止时间后的后果严重程度","系统的复杂程度","是否使用操作系统"],ans:1,exp:"硬/软实时的根本区别不在于速度快慢，而在于超时后果的严重程度。硬实时超时后果是灾难性的（可能导致人员伤亡），软实时超时只是性能下降。"},
+        {q:"以下属于软实时系统的是（　）。",opts:["心脏起搏器","核电站控制系统","多媒体播放系统","汽车安全气囊"],ans:2,exp:"心脏起搏器（晚一拍人就没了）、核电站控制（延迟可能核泄漏）、安全气囊（晚0.1秒人就撞上了）都是硬实时。多媒体播放系统偶尔卡顿只影响体验，属于软实时。"},
+        {q:"安全攸关系统（Safety-Critical System）是指（　）。",opts:["对数据加密要求高的系统","系统故障可能导致人员伤亡或重大财产损失的系统","需要用户密码登录的系统","具有防火墙保护的系统"],ans:1,exp:"安全攸关系统中的「安全」是Safety（人身安全），不是Security（信息安全）。ACD描述的都是信息安全（Security）的概念。"},
+        {q:"DO-178B标准将机载软件按安全等级从高到低分为（　）。",opts:["1级、2级、3级、4级、5级","A级、B级、C级、D级、E级","甲级、乙级、丙级、丁级、戊级","Ⅰ级、Ⅱ级、Ⅲ级、Ⅳ级、Ⅴ级"],ans:1,exp:"DO-178B将机载软件分为A、B、C、D、E五个等级，A级最严格（灾难的），E级最宽松（无影响）。记住口诀「A灾B危C重D轻E无」。"},
+        {q:"在DO-178B标准中，A级（灾难级）软件的失效可能导致（　）。",opts:["乘客感到不便","机组工作负担增加","飞机坠毁或人员死亡","对飞行安全无影响"],ans:2,exp:"DO-178B的A级是灾难的（Catastrophic），失效后果是最严重的——飞机坠毁/人员死亡。B选项对应C级（重大），A选项对应D级（轻微），D选项对应E级（无影响）。"},
+        {q:"DO-178B标准中，只有（　）级软件要求进行MC/DC（修改条件/判定覆盖）测试。",opts:["A级","A级和B级","A级、B级和C级","所有等级"],ans:0,exp:"MC/DC（Modified Condition/Decision Coverage）是最严格的代码覆盖标准，只有A级（灾难级）才要求。B级要求判定覆盖（DC），C级要求语句覆盖。这是DO-178B的高频考点！"},
+        {q:"DO-178B标准适用于（　）领域的软件安全认证。",opts:["所有嵌入式系统","机载（航空）软件","汽车电子软件","医疗设备软件"],ans:1,exp:"DO-178B是专门针对机载（航空）软件的安全认证标准。汽车电子用ISO 26262，工业系统用IEC 61508，医疗设备用IEC 62304。"},
+        // 第三部分：嵌入式软件
+        {q:"嵌入式软件的层次结构中，最底层（直接与硬件交互）的是（　）。",opts:["应用软件","中间件","实时操作系统（RTOS）","板级支持包（BSP）"],ans:3,exp:"嵌入式软件四层结构从下到上：BSP → RTOS → 中间件 → 应用软件。BSP是最底层，直接操作硬件，为上层提供统一的硬件访问接口，类似PC的BIOS+驱动程序。"},
+        {q:"BSP（板级支持包）的主要作用是（　）。",opts:["实现用户界面","提供网络通信服务","屏蔽硬件差异，为上层软件提供统一接口","管理数据库"],ans:2,exp:"BSP的核心作用是作为硬件和软件之间的「桥梁」，屏蔽底层硬件的差异，为上层的操作系统和应用软件提供统一的硬件访问接口。这样当硬件更换时，只需修改BSP，上层软件不用改。"},
+        {q:"以下关于嵌入式实时操作系统（RTOS）的描述，错误的是（　）。",opts:["RTOS能够保证任务在规定时间内完成","所有嵌入式系统都必须使用RTOS","RTOS通常采用抢占式调度策略","VxWorks是一种常见的商用RTOS"],ans:1,exp:"并非所有嵌入式系统都需要RTOS。简单的嵌入式系统可以采用「裸机程序」（无操作系统，直接在硬件上运行应用代码）。只有功能复杂、需要多任务管理和实时调度的系统才需要RTOS。"},
+        {q:"以下哪个是嵌入式实时操作系统？（　）",opts:["Windows 10","VxWorks","Ubuntu","macOS"],ans:1,exp:"VxWorks是最著名的商用嵌入式实时操作系统，广泛应用于航空航天、军工、医疗等领域（NASA的火星探测器就用的VxWorks）。Windows 10、Ubuntu、macOS都是通用桌面操作系统。"},
+        {q:"嵌入式软件通常固化在（　）中。",opts:["硬盘","ROM或Flash","光盘","磁带"],ans:1,exp:"嵌入式软件的「固化存储」特点——软件通常烧录在ROM或Flash等非易失性存储器中，上电即可运行，不像PC需要从硬盘加载。嵌入式设备通常没有硬盘、光盘、磁带。"},
+        {q:"在嵌入式软件层次结构中，中间件层的作用是（　）。",opts:["直接操作硬件","管理任务调度","提供通用服务（如网络通信、数据库等）","实现系统启动引导"],ans:2,exp:"中间件层位于RTOS和应用软件之间，提供通用的服务功能，如网络通信协议栈、文件系统、数据库、图形界面引擎等。A是BSP的功能，B是RTOS的功能，D是Bootloader的功能。"},
+        // 第四部分：处理器与存储器
+        {q:"将CPU、存储器、I/O接口集成在单个芯片上的是（　）。",opts:["MPU（微处理器）","MCU（微控制器）","DSP（数字信号处理器）","GPU（图形处理器）"],ans:1,exp:"MCU（微控制器/单片机）的核心特点就是「高集成度」——将CPU、RAM、ROM、I/O接口等集成在单个芯片上。MPU只有CPU核心，需要外接存储器和外设。记住「MCU全家桶，MPU光杆司令」。"},
+        {q:"DSP处理器最擅长的运算是（　）。",opts:["逻辑判断","字符串处理","数字信号处理（乘加运算）","图形渲染"],ans:2,exp:"DSP（Digital Signal Processor）专门为数字信号处理优化，配备硬件乘法器，能在一个时钟周期内完成乘加运算（MAC），非常适合音频处理、图像处理、雷达信号处理、通信调制解调等场景。"},
+        {q:"SoC（片上系统）的主要特点是（　）。",opts:["只包含CPU核心","将CPU、存储器、DSP、外设接口等全部集成在一个芯片上","只能处理模拟信号","不能运行操作系统"],ans:1,exp:"SoC（System on Chip）是「片上系统」，把CPU、DSP、GPU、存储器、各种外设接口等全部集成在一个芯片上，是集成度最高的方案。典型代表：高通骁龙、华为麒麟、苹果A系列芯片。"},
+        {q:"以下关于SRAM和DRAM的描述，正确的是（　）。",opts:["SRAM需要定期刷新，DRAM不需要","SRAM速度比DRAM慢","SRAM常用作Cache，DRAM常用作主存","DRAM比SRAM成本更高"],ans:2,exp:"记住「静姐(SRAM)快但贵，动弟(DRAM)大但慢」。SRAM速度快、不需刷新、成本高、容量小→用作Cache；DRAM速度慢、需要刷新、成本低、容量大→用作主存。A说反了，B说反了，D说反了。"},
+        {q:"Flash存储器属于（　）。",opts:["易失性存储器（RAM）","非易失性存储器（ROM家族）","只能读不能写的存储器","需要定期刷新的存储器"],ans:1,exp:"Flash（闪存）属于ROM家族，是非易失性存储器（断电不丢数据）。虽然Flash可以读写，但它本质上属于ROM的演进版本（Mask ROM→PROM→EPROM→EEPROM→Flash）。A和D描述的是RAM的特点。"},
+        {q:"以下关于NOR Flash和NAND Flash的描述，正确的是（　）。",opts:["NAND Flash支持XIP（就地执行），NOR Flash不支持","NOR Flash容量通常比NAND Flash大","NOR Flash支持XIP（就地执行），可直接运行代码","NAND Flash成本比NOR Flash高"],ans:2,exp:"记住「NOR能跑(代码)，NAND能装(数据)」。NOR Flash支持XIP（eXecute In Place，就地执行），CPU可以直接从NOR Flash中读取并执行代码。NAND Flash不支持XIP，但容量大、成本低。A说反了，B说反了，D说反了。"},
+        {q:"在嵌入式系统中，Bootloader（引导加载程序）通常存储在（　）中。",opts:["DRAM","SRAM","NOR Flash","硬盘"],ans:2,exp:"Bootloader是系统上电后最先运行的代码，需要就地执行（XIP）。NOR Flash支持XIP，CPU可以直接从中读取并执行代码，所以Bootloader通常存放在NOR Flash中。DRAM和SRAM是易失性的（断电丢数据），不适合存放Bootloader。"},
+        {q:"EEPROM与Flash存储器的主要区别是（　）。",opts:["EEPROM是易失性的，Flash是非易失性的","EEPROM可以按字节擦写，Flash只能按块擦除","Flash可以按字节擦写，EEPROM只能按块擦除","两者没有区别"],ans:1,exp:"EEPROM和Flash都是非易失性存储器，但擦写粒度不同：EEPROM可以按字节擦写（精细操作），Flash只能按块擦除（整块擦除后再写入）。Flash的块擦除使其成本更低、容量更大，但操作灵活性不如EEPROM。"},
+        {q:"以下关于看门狗（Watchdog）的描述，正确的是（　）。",opts:["看门狗是一种软件加密技术","看门狗定时器用于检测系统是否正常运行，异常时自动复位系统","看门狗只能用于通用计算机","看门狗是一种网络防火墙"],ans:1,exp:"看门狗（Watchdog Timer）是嵌入式系统中常用的安全机制。系统正常运行时需要定期「喂狗」（复位计数器）。如果系统死机导致未能及时「喂狗」，看门狗就会自动复位系统。"},
+        {q:"以下关于嵌入式微处理器分类的描述，错误的是（　）。",opts:["MCU将CPU、存储器、I/O接口集成在单个芯片上","MPU只包含CPU核心，需要外接存储器和外设","DSP采用哈佛结构，程序和数据分开存储","SoC集成度低，只包含CPU和存储器"],ans:3,exp:"SoC（片上系统）是集成度最高的方案，不仅包含CPU和存储器，还集成了DSP、GPU、各种外设接口、通信模块等。D选项说「集成度低，只包含CPU和存储器」是错误的。ABC描述都是正确的。"},
+    ];
+
+    // ─── RENDER QUIZ ───
+    let answered = 0, correct = 0;
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        quizData.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-q';
+            div.innerHTML = `
+      <div class="quiz-num">第 ${i+1} 题 / 共 30 题</div>
+      <div class="quiz-text">${item.q}</div>
+      <div class="quiz-options" id="opts-${i}">
+        ${['A','B','C','D'].map((L,j)=>`
+          <button class="opt-btn" data-q="${i}" data-opt="${j}" onclick="handleOpt(${i},${j})">
+            <span class="opt-letter">${L}.</span>
+            <span>${item.opts[j]}</span>
+          </button>`).join('')}
+      </div>
+      <button class="reveal-btn" id="reveal-${i}" onclick="revealAns(${i})" style="display:none">💡 查看解析</button>
+      <div class="quiz-ans" id="ans-${i}">
+        <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+        <div class="ans-body">${item.exp}</div>
+      </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleOpt(qi, opt) {
+        const item = quizData[qi];
+        const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed')) return;
+        opts.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === item.ans) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt === item.ans) correct++;
+        document.getElementById('answered').textContent = answered;
+        document.getElementById('correct-count').textContent = correct;
+        document.getElementById(`reveal-${qi}`).style.display = 'inline-flex';
+    }
+
+    function revealAns(qi) {
+        document.getElementById(`ans-${qi}`).classList.toggle('show');
+    }
+    renderQuiz();
+
+    // ─── FLASH CARDS ───
+    const flashData = [
+        {n:"01",topic:"嵌入式系统八大特点",mnemonic:"专省快稳裁低小交",detail:"注意：「通用性强」是考试陷阱，选错误项"},
+        {n:"02",topic:"硬实时 vs 软实时",mnemonic:"硬要命，软要脸",detail:"判断标准：超时后果是否「灾难性」"},
+        {n:"03",topic:"处理器四分类",mnemonic:"MCU全家桶，MPU光杆，DSP算术，SoC融合",detail:"MCU：CPU+存储+IO一体；MPU：只有CPU核"},
+        {n:"04",topic:"嵌入式软件四层",mnemonic:"板(BSP)上(OS)搭(中间件)戏(应用)",detail:"从下到上：BSP → RTOS → 中间件 → 应用"},
+        {n:"05",topic:"BSP的作用",mnemonic:"屏蔽硬件差异，提供统一接口",detail:"类似PC的BIOS+驱动，嵌入式软硬件桥梁"},
+        {n:"06",topic:"RTOS必要性",mnemonic:"简单系统可以裸机运行",detail:"VxWorks·μC/OS·FreeRTOS·RT-Linux"},
+        {n:"07",topic:"交叉开发",mnemonic:"Host写代码，Target跑程序",detail:"交叉编译 + 交叉调试 + JTAG/串口连接"},
+        {n:"08",topic:"SRAM vs DRAM",mnemonic:"静姐快贵小→Cache；动弟慢便宜大→主存",detail:"SRAM不需刷新；DRAM需要定期刷新"},
+        {n:"09",topic:"ROM演进路线",mnemonic:"面(Mask)包(PROM)一(E)块(EE)闪(Flash)",detail:"Flash是最常用的非易失性存储器"},
+        {n:"10",topic:"NOR vs NAND Flash",mnemonic:"NOR能跑(代码)，NAND能装(数据)",detail:"NOR支持XIP就地执行；NAND容量大成本低"},
+        {n:"11",topic:"DO-178B五等级",mnemonic:"A灾B危C重D轻E无",detail:"仅限机载（航空）软件；MC/DC只有A级要求"},
+        {n:"12",topic:"安全性设计技术",mnemonic:"冗多检失降狗",detail:"冗余·多样·检测隔离·失效安全·降级·看门狗"},
+    ];
+
+    function renderFlash() {
+        const grid = document.getElementById('flash-grid');
+        flashData.forEach(fc => {
+            const div = document.createElement('div');
+            div.className = 'flash-card';
+            div.innerHTML = `<div class="fc-num"># ${fc.n}</div>
+      <div class="fc-topic">${fc.topic}</div>
+      <div class="fc-mnemonic">「${fc.mnemonic}」</div>
+      <div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>

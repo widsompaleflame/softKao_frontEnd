@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第六章 · 系统工程基础知识 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#fdfbf7;--bg2:#f4efe6;--card:#ffffff;--card2:#f9f7f2;
+            --border:#e8e2d5;--border2:#d4cbb8;--text:#2c2825;--text2:#5e574f;--text3:#8f877c;
+            --accent:#0284c7;--accent2:#0369a1;--gold:#d97706;--gold2:#b45309;
+            --green:#059669;--red:#dc2626;--purple:#7c3aed;--pink:#db2777;--teal:#0d9488;
+            --nav-h:56px;--radius:10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* NAV */
+        #topnav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(253,251,247,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);z-index:1000;display:flex;align-items:center;padding:0 16px;gap:2px;overflow-x:auto;white-space:nowrap}
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px}
+        .nav-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* MAIN */
+        main{padding-top:calc(var(--nav-h)+24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* HERO */
+        .section-hero{text-align:center;padding:40px 20px 32px;background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;position:relative;overflow:hidden}
+        .section-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);pointer-events:none}
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:500px;margin:0 auto}
+        .section-tag{display:inline-block;padding:3px 10px;background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:12px}
+
+        /* CARD */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .card-title .icon{font-size:1.1rem}
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2)}
+        .analogy strong{color:var(--gold)}
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple)}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+        .formula-box{background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;margin:12px 0;line-height:1.8}
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+        .badge-pink{color:var(--pink);font-weight:600}
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-e .vs-title{background:rgba(217,119,6,.1);color:var(--gold)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+        .layer-stack{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .layer-row{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);transition:border-color .15s}
+        .layer-row:hover{border-color:var(--border2)}
+        .layer-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);font-weight:700;width:26px;flex-shrink:0;text-align:center;margin-top:2px}
+        .layer-name{font-weight:700;font-size:.87rem;min-width:120px;flex-shrink:0}
+        .layer-desc{font-size:.8rem;color:var(--text2);flex:1}
+        .layer-analogy{font-size:.77rem;color:var(--text3);margin-left:auto;flex-shrink:0;max-width:140px;text-align:right}
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* TIMELINE */
+        .timeline{position:relative;margin:16px 0;padding-left:32px}
+        .timeline::before{content:'';position:absolute;left:12px;top:8px;bottom:8px;width:2px;background:var(--border2);border-radius:2px}
+        .tl-item{position:relative;margin-bottom:10px}
+        .tl-dot{position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:var(--card);display:flex;align-items:center;justify-content:center}
+        .tl-num{font-size:.6rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+        .tl-body{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:.83rem;transition:border-color .15s}
+        .tl-body:hover{border-color:var(--border2)}
+        .tl-title{font-weight:700;color:var(--text);margin-bottom:2px}
+        .tl-desc{color:var(--text2);font-size:.8rem}
+
+        /* FORMULA INTERACTIVE */
+        .calc-box{background:linear-gradient(135deg,#f0f6fa,#fdfbf7);border:1px solid rgba(2,132,199,.2);border-radius:10px;padding:18px;margin:14px 0}
+        .calc-title{font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:12px}
+        .calc-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+        .calc-label{font-size:.82rem;color:var(--text2);min-width:80px}
+        .calc-input{width:90px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.85rem;background:var(--card);color:var(--text);outline:none;transition:border-color .15s}
+        .calc-input:focus{border-color:var(--accent)}
+        .calc-result{margin-top:10px;padding:10px 14px;background:rgba(5,150,105,.07);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:var(--green);min-height:36px}
+        .calc-btn{padding:7px 18px;border-radius:6px;border:none;background:var(--accent2);color:#fff;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .18s}
+        .calc-btn:hover{background:var(--accent)}
+
+        /* BENCHMARK BAR */
+        .bench-bar-wrap{margin:14px 0}
+        .bench-bar-item{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.83rem}
+        .bench-bar-label{min-width:90px;color:var(--text2)}
+        .bench-bar-track{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
+        .bench-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+        .bench-bar-val{min-width:32px;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+
+        /* QUIZ */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-hint{font-size:.78rem;color:var(--text3);margin-bottom:10px;font-style:italic}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.83rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4}
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        .quiz-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+        .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .filter-btn:hover{border-color:var(--border2);color:var(--text)}
+        .filter-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* FLASH */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* METHOD CARD */
+        .method-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+        .method-card{border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--bg2);cursor:pointer;transition:all .2s;text-align:center}
+        .method-card:hover,.method-card.active{border-color:var(--accent);background:rgba(2,132,199,.05)}
+        .method-name{font-weight:700;font-size:.88rem;color:var(--accent);margin-bottom:4px}
+        .method-key{font-size:.78rem;color:var(--gold);font-weight:600}
+        .method-detail{display:none;margin-top:12px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.84rem;line-height:1.7;color:var(--text2)}
+
+        /* RESPONSIVE */
+        @media(max-width:640px){
+            main{padding-left:12px;padding-right:12px}
+            .section-hero h1{font-size:1.3rem}
+            .kp-grid{grid-template-columns:1fr}
+            .flash-grid{grid-template-columns:1fr}
+            .calc-row{flex-direction:column;align-items:flex-start}
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 1 1-14.14 0"/></svg>
+        架构师第六章
+    </div>
+    <button class="nav-btn active" onclick="showSection('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="showSection('s1',this)">① 霍尔三维</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">② 其他方法</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">③ 生命周期&MBSE</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">④ 性能指标</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">⑤ 性能计算</button>
+    <button class="nav-btn" onclick="showSection('s6',this)">⑥ 性能评估</button>
+    <button class="nav-btn" onclick="showSection('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="showSection('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══ 知识地图 ══ -->
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 06</div>
+            <h1>系统工程基础知识</h1>
+            <p>系统架构师考试 · 选择题 + 计算题约占 2-5 分 · 方法论 + 公式 ⭐⭐⭐</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>全章知识架构</div>
+            <div style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 900 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:440px">
+                    <defs>
+                        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#d4cbb8"/>
+                        </marker>
+                    </defs>
+                    <rect x="345" y="190" width="180" height="46" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="435" y="209" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第六章</text>
+                    <text x="435" y="227" text-anchor="middle" font-size="10.5" fill="#0284c7">系统工程基础知识</text>
+
+                    <line x1="345" y1="205" x2="200" y2="68" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="105" y="48" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="170" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 霍尔三维结构</text>
+                    <text x="170" y="79" text-anchor="middle" font-size="9.5" fill="#5e574f">时间·逻辑·知识维</text>
+
+                    <line x1="345" y1="210" x2="155" y2="168" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="28" y="150" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="97" y="166" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. 其他方法论</text>
+                    <text x="97" y="181" text-anchor="middle" font-size="9.5" fill="#5e574f">切克兰德·并行·钱学森</text>
+
+                    <line x1="345" y1="225" x2="155" y2="292" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="28" y="274" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="97" y="290" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 生命周期&amp;MBSE</text>
+                    <text x="97" y="305" text-anchor="middle" font-size="9.5" fill="#5e574f">7阶段·建模三支柱</text>
+
+                    <line x1="345" y1="232" x2="200" y2="373" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="105" y="354" width="130" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="170" y="370" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">4. 性能指标</text>
+                    <text x="170" y="385" text-anchor="middle" font-size="9.5" fill="#5e574f">各类系统指标对比</text>
+
+                    <line x1="525" y1="232" x2="660" y2="373" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="605" y="354" width="130" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="670" y="370" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 性能计算</text>
+                    <text x="670" y="385" text-anchor="middle" font-size="9.5" fill="#5e574f">MIPS·Amdahl·吉普森</text>
+
+                    <line x1="525" y1="225" x2="715" y2="292" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="698" y="274" width="130" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="763" y="290" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">6. 性能评估</text>
+                    <text x="763" y="305" text-anchor="middle" font-size="9.5" fill="#5e574f">基准测试·真核小合</text>
+
+                    <line x1="525" y1="205" x2="670" y2="68" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="638" y="48" width="130" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="703" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">7. 性能调整</text>
+                    <text x="703" y="79" text-anchor="middle" font-size="9.5" fill="#5e574f">查消瓶颈</text>
+
+                    <rect x="385" y="158" width="90" height="18" rx="9" fill="rgba(217,119,6,.12)" stroke="rgba(217,119,6,.28)"/>
+                    <text x="430" y="171" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">计算题 2-5分</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="kp-grid">
+            <div class="kp-item"><div class="kp-title">🔥 霍尔三维</div><div class="kp-body">时间+逻辑+知识（不是空间！）<br>时间维7阶段：规拟研生安运更</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 切克兰德</div><div class="kp-body">核心是"比较与探寻"<br>不是最优化！（超高频陷阱）</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 Amdahl公式</div><div class="kp-body">总加速比 = 1/[(1-F)+F/S]<br>加速比有上限 1/(1-F)</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 交换机 vs 路由器</div><div class="kp-body">交换机→MAC地址表<br>路由器→路由表（别搞混）</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ MIPS快速算法</div><div class="kp-body">指令时间(μs)的倒数 = MIPS<br>μs与10⁶恰好抵消</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 基准测试准确度</div><div class="kp-body">真实 > 核心 > 小型 > 合成<br>口诀：真核小合</div></div>
+            <div class="kp-item"><div class="kp-title">📊 MBSE产物</div><div class="kp-body">需求→需求图/用例图/包图<br>功能→顺序/活动/状态机图</div></div>
+            <div class="kp-item"><div class="kp-title">📊 钱学森</div><div class="kp-body">综合集成法<br>开放的复杂巨系统</div></div>
+        </div>
+    </section>
+
+    <!-- ══ S1: 霍尔三维 ══ -->
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>霍尔三维结构</h1>
+            <p>时间维 · 逻辑维 · 知识维 · 7阶段 · 7步骤 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📐</span>1.1 三维结构全貌 <span class="tag tag-hot">★★高频考点</span></div>
+            <div class="analogy">
+                <strong>类比：3D打印模型的三个维度</strong><br>
+                <strong>时间维</strong> = 项目进程的时间轴（什么时候做什么）<br>
+                <strong>逻辑维</strong> = 做事的思考步骤（怎么思考）<br>
+                <strong>知识维</strong> = 需要哪些专业知识（用什么知识）
+            </div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">⏰ 时间维</div>
+                    <div class="vs-item"><span>阶段数</span><span class="badge-red">7个</span></div>
+                    <div class="vs-item"><span>口诀</span><span>规拟研生安运更</span></div>
+                    <div class="vs-item"><span>类比</span><span>产品全生命线</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">🧠 逻辑维</div>
+                    <div class="vs-item"><span>步骤数</span><span class="badge-red">7步</span></div>
+                    <div class="vs-item"><span>口诀</span><span>明确综分优决实</span></div>
+                    <div class="vs-item"><span>类比</span><span>解决问题的思路</span></div>
+                </div>
+                <div class="vs-card vs-d">
+                    <div class="vs-title">📚 知识维</div>
+                    <div class="vs-item"><span>内容</span><span>多学科专业知识</span></div>
+                    <div class="vs-item"><span>类比</span><span>工具箱里的工具</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 三维是"时间维、<strong>逻辑维</strong>、知识维"——不是"空间维"或"组织维"！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⏰</span>1.2 时间维7阶段 <span class="tag tag-hot">易错考点</span></div>
+            <div class="timeline">
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#0284c7"><div class="tl-num" style="color:#0284c7">①</div></div>
+                    <div class="tl-body">
+                        <div class="tl-title">规划阶段</div>
+                        <div class="tl-desc">调研、程序设计阶段，谋求活动规划与战略</div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#d97706"><div class="tl-num" style="color:#d97706">②</div></div>
+                    <div class="tl-body">
+                        <div class="tl-title">拟订方案</div>
+                        <div class="tl-desc">提出具体的计划方案</div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#dc2626"><div class="tl-num" style="color:#dc2626">③</div></div>
+                    <div class="tl-body" style="border-color:rgba(220,38,38,.3)">
+                        <div class="tl-title" style="color:var(--red)">研制阶段 ⭐ <span style="font-size:.75rem;font-weight:400">← 高频考点</span></div>
+                        <div class="tl-desc">作出<strong>研制方案及生产计划</strong>（注意：是生产"计划"，不是真正生产！）</div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#dc2626"><div class="tl-num" style="color:#dc2626">④</div></div>
+                    <div class="tl-body" style="border-color:rgba(220,38,38,.2)">
+                        <div class="tl-title" style="color:var(--red)">生产阶段 ⭐ <span style="font-size:.75rem;font-weight:400">← 高频考点</span></div>
+                        <div class="tl-desc">生产零部件及整个系统，提出<strong>安装计划</strong>（注意：是安装"计划"！）</div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#d97706"><div class="tl-num" style="color:#d97706">⑤</div></div>
+                    <div class="tl-body">
+                        <div class="tl-title">安装阶段</div>
+                        <div class="tl-desc">系统安装完毕，完成<strong>运行计划</strong></div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#059669"><div class="tl-num" style="color:#059669">⑥</div></div>
+                    <div class="tl-body">
+                        <div class="tl-title">运行阶段</div>
+                        <div class="tl-desc">系统按<strong>预期用途</strong>开展服务</div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot" style="border-color:#7c3aed"><div class="tl-num" style="color:#7c3aed">⑦</div></div>
+                    <div class="tl-body">
+                        <div class="tl-title">更新阶段</div>
+                        <div class="tl-desc">取消旧系统代之以新系统，或改进原系统</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「规拟研生安运更」</strong> — 像产品的完整生命线<br>
+                <span style="margin-top:6px;display:block">
+                ⚠️ 关键：<strong>研制</strong>出方案（研制方案+生产计划）→ <strong>生产</strong>后提安装（安装计划）→ <strong>安装</strong>后做运行（运行计划）
+            </span>
+            </div>
+            <div class="alert alert-warn">⚠️ "提出安装计划"是在<strong>生产阶段</strong>，不是安装阶段！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🧠</span>1.3 逻辑维7步骤</div>
+            <div class="flow">
+                <div class="flow-step">①明确问题</div><div class="flow-arrow">→</div>
+                <div class="flow-step">②确定目标</div><div class="flow-arrow">→</div>
+                <div class="flow-step">③系统综合</div><div class="flow-arrow">→</div>
+                <div class="flow-step">④系统分析</div><div class="flow-arrow">→</div>
+                <div class="flow-step">⑤优化</div><div class="flow-arrow">→</div>
+                <div class="flow-step">⑥决策</div><div class="flow-arrow">→</div>
+                <div class="flow-step">⑦实施</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「明确综分优决实」</strong> → 谐音 <strong>「明确总分有决心实施」</strong></div>
+        </div>
+    </section>
+
+    <!-- ══ S2: 其他方法 ══ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>其他系统工程方法</h1>
+            <p>切克兰德 · 并行工程 · 综合集成法 · WSR · 考点密度 ★★★☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔬</span>2.1 五大方法对比 <span class="tag tag-key">点击展开详情</span></div>
+            <div class="method-grid" id="method-cards">
+                <div class="method-card" onclick="showMethodDetail('hall')">
+                    <div class="method-name">霍尔三维结构</div>
+                    <div class="method-key">时间/逻辑/知识</div>
+                </div>
+                <div class="method-card" onclick="showMethodDetail('check')">
+                    <div class="method-name">切克兰德方法</div>
+                    <div class="method-key" style="color:var(--red)">比较与探寻</div>
+                </div>
+                <div class="method-card" onclick="showMethodDetail('parallel')">
+                    <div class="method-name">并行工程</div>
+                    <div class="method-key">缩短上市时间</div>
+                </div>
+                <div class="method-card" onclick="showMethodDetail('qian')">
+                    <div class="method-name">综合集成法</div>
+                    <div class="method-key" style="color:var(--pink)">钱学森</div>
+                </div>
+                <div class="method-card" onclick="showMethodDetail('wsr')">
+                    <div class="method-name">WSR系统方法</div>
+                    <div class="method-key">物理·事理·人理</div>
+                </div>
+            </div>
+            <div id="method-detail" class="method-detail"></div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「霍切并综W」</strong> → 谐音 <strong>「火切并综W」</strong></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⚠️</span>2.2 关键区别 — 考试高频陷阱</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>方法</th><th>核心思想</th><th>来源/提出者</th><th>特点</th></tr>
+                    <tr><td class="badge-acc">霍尔三维</td><td>三维空间方法论</td><td>霍尔 (1969，美国)</td><td>时间/逻辑/知识三维</td></tr>
+                    <tr><td class="badge-red">切克兰德</td><td class="badge-red">比较与探寻（不是最优化！）</td><td>切克兰德（英国）</td><td>软系统方法论，适合模糊问题</td></tr>
+                    <tr><td class="badge-gold">并行工程</td><td>并行、集成化处理</td><td>Concurrent Engineering</td><td>提高质量·降低成本·缩短周期</td></tr>
+                    <tr><td class="badge-pink">综合集成法</td><td>简单系统 vs 巨系统</td><td class="badge-pink">钱学森（中国）</td><td>开放复杂巨系统</td></tr>
+                    <tr><td class="badge-purple">WSR</td><td>物理-事理-人理</td><td>中国传统哲学</td><td>定性与定量综合</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>切克兰德方法</strong>的核心是"<strong>比较</strong>与<strong>探寻</strong>"，不是"最优化"！这是超高频陷阱！</div>
+            <div class="alert alert-warn">⚠️ <strong>综合集成法</strong>由<strong>钱学森</strong>提出，WSR是中国特色方法（物理-事理-人理）</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📋</span>2.3 各方法详细步骤速记</div>
+            <div class="sub-title">切克兰德方法7步骤</div>
+            <div class="flow">
+                <div class="flow-step">认识问题</div><div class="flow-arrow">→</div>
+                <div class="flow-step">根底定义</div><div class="flow-arrow">→</div>
+                <div class="flow-step">建立概念模型</div><div class="flow-arrow">→</div>
+                <div class="flow-step">比较及探寻</div><div class="flow-arrow">→</div>
+                <div class="flow-step">选择</div><div class="flow-arrow">→</div>
+                <div class="flow-step">设计与实施</div><div class="flow-arrow">→</div>
+                <div class="flow-step">评估与反馈</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「认根念比选设评」</strong></div>
+            <div class="sub-title">WSR系统方法7步骤</div>
+            <div class="flow">
+                <div class="flow-step">理解意图</div><div class="flow-arrow">→</div>
+                <div class="flow-step">制定目标</div><div class="flow-arrow">→</div>
+                <div class="flow-step">调查分析</div><div class="flow-arrow">→</div>
+                <div class="flow-step">构造策略</div><div class="flow-arrow">→</div>
+                <div class="flow-step">选择方案</div><div class="flow-arrow">→</div>
+                <div class="flow-step">协调关系</div><div class="flow-arrow">→</div>
+                <div class="flow-step">实现构想</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「理制调构选协实」</strong></div>
+            <div class="sub-title">综合集成法（钱学森）关键概念</div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">系统分类</div><div class="kp-body">简单系统 + 巨系统</div></div>
+                <div class="kp-item"><div class="kp-title">复杂巨系统基本原则</div><div class="kp-body">「整联序动」→ 整体论·相互联系·有序性·动态</div></div>
+                <div class="kp-item"><div class="kp-title">主要性质</div><div class="kp-body">「开复进层巨」→ 开放性·复杂性·进化与涌现性·层次性·巨量性</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ S3: 生命周期 & MBSE ══ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>系统生命周期 & MBSE</h1>
+            <p>7个生命周期阶段 · MBSE三大支柱 · 三类产物图 · 考点密度 ★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔄</span>3.1 系统工程生命周期7阶段</div>
+            <div class="analogy">
+                <strong>类比：产品从概念到退役的完整旅程</strong> — 手机从设计到停产报废
+            </div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#0284c7">
+                    <div class="layer-num" style="color:#0284c7">探</div>
+                    <div class="layer-name" style="color:#0284c7">探索研究</div>
+                    <div class="layer-desc">可行性研究，确定系统是否值得做</div>
+                </div>
+                <div class="layer-row" style="border-color:#0284c7">
+                    <div class="layer-num" style="color:#0284c7">概</div>
+                    <div class="layer-name" style="color:#0284c7">概念阶段</div>
+                    <div class="layer-desc">确定需求和可行的系统概念</div>
+                </div>
+                <div class="layer-row" style="border-color:#d97706">
+                    <div class="layer-num" style="color:#d97706">开</div>
+                    <div class="layer-name" style="color:#d97706">开发阶段</div>
+                    <div class="layer-desc">详细设计和开发系统</div>
+                </div>
+                <div class="layer-row" style="border-color:#d97706">
+                    <div class="layer-num" style="color:#d97706">生</div>
+                    <div class="layer-name" style="color:#d97706">生产阶段</div>
+                    <div class="layer-desc">制造或构建系统</div>
+                </div>
+                <div class="layer-row" style="border-color:#059669">
+                    <div class="layer-num" style="color:#059669">使</div>
+                    <div class="layer-name" style="color:#059669">使用阶段</div>
+                    <div class="layer-desc">系统投入使用，执行其设计任务</div>
+                </div>
+                <div class="layer-row" style="border-color:#059669">
+                    <div class="layer-num" style="color:#059669">保</div>
+                    <div class="layer-name" style="color:#059669">保障阶段</div>
+                    <div class="layer-desc">维护和支持系统运行</div>
+                </div>
+                <div class="layer-row" style="border-color:#7c3aed">
+                    <div class="layer-num" style="color:#7c3aed">退</div>
+                    <div class="layer-name" style="color:#7c3aed">退役阶段</div>
+                    <div class="layer-desc">系统报废，资源回收处理</div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「探概开生使保退」</strong> → 故事：探险先要概念清晰，开发后生产，使用要保障，最后退役</div>
+            <div class="alert alert-red">⚠️ 生命周期7阶段中<strong>没有"营销阶段"</strong>！</div>
+            <div class="sub-title">4种生命周期方法</div>
+            <div class="flow">
+                <div class="flow-step">计划驱动方法</div><div class="flow-arrow">+</div>
+                <div class="flow-step">渐进迭代式开发</div><div class="flow-arrow">+</div>
+                <div class="flow-step">精益开发</div><div class="flow-arrow">+</div>
+                <div class="flow-step">敏捷开发</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「计渐精敏」</strong></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>3.2 基于模型的系统工程（MBSE） <span class="tag tag-key">★高频</span></div>
+            <div class="analogy">
+                <strong>类比：建筑师用BIM软件盖楼</strong> — 不再只靠纸质图纸，用数字模型贯穿全流程
+            </div>
+            <div class="sub-title">MBSE三大支柱</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">建模语言</div>
+                    <div class="vs-item"><span>作用</span><span>统一的表达规范</span></div>
+                    <div class="vs-item"><span>例子</span><span>SysML, UML</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">建模工具</div>
+                    <div class="vs-item"><span>作用</span><span>操作和管理模型</span></div>
+                    <div class="vs-item"><span>例子</span><span>MagicDraw, EA</span></div>
+                </div>
+                <div class="vs-card vs-d">
+                    <div class="vs-title">建模思路</div>
+                    <div class="vs-item"><span>作用</span><span>建模方法和过程</span></div>
+                    <div class="vs-item"><span>例子</span><span>OOSEM, RFLP</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「语具思」</strong> → 建模语言 + 建模工具 + 建模思路 → 谐音「鱼具思」→ 钓鱼用工具要思考</div>
+            <div class="sub-title">MBSE各阶段产物（产出哪种图）<span class="tag tag-hot">易混淆考点！</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>阶段</th><th>产物（图类型）</th><th>记忆口诀</th></tr>
+                    <tr>
+                        <td class="badge-acc">需求分析阶段</td>
+                        <td class="badge-green">需求图 · 用例图 · 包图</td>
+                        <td class="badge-green">「需用包」</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">功能分析与分配阶段</td>
+                        <td class="badge-gold">顺序图 · 活动图 · 状态机图</td>
+                        <td class="badge-gold">「顺活状」</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-purple">设计综合阶段</td>
+                        <td class="badge-purple">模块定义图 · 内部块图 · 参数图</td>
+                        <td class="badge-purple">「模内参」</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>状态机图</strong>在<strong>功能分析阶段</strong>，不在需求分析阶段！</div>
+            <div class="alert alert-warn">⚠️ 设计综合阶段 = 结构相关图（模块定义图、内部块图、参数图）</div>
+        </div>
+    </section>
+
+    <!-- ══ S4: 性能指标 ══ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>系统性能评价指标</h1>
+            <p>各类系统指标对比 · 易混淆 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>4.1 各类系统性能指标对比 <span class="tag tag-hot">★★高频</span></div>
+            <div class="analogy">
+                <strong>类比：不同类型的车有不同评价标准</strong><br>
+                跑车看加速（CPU看主频）· 卡车看载重（网络看吞吐量）· 出租车看响应（Web服务器看响应延迟）
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>系统类型</th><th>关键性能指标</th><th>独有/易混淆指标</th></tr>
+                    <tr>
+                        <td class="badge-acc">计算机</td>
+                        <td>时钟频率(主频)、运算速度、运算精度、数据处理速率(PDR)、吞吐率</td>
+                        <td class="badge-acc">运算精度 ← 是计算机的！</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">路由器</td>
+                        <td>设备/端口吞吐量、全双工线速转发、路由表能力、背板能力、丢包率、时延、时延抖动、协议支持</td>
+                        <td class="badge-gold">路由表能力 · 时延抖动</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-teal">交换机</td>
+                        <td>端口速率、背板吞吐量、缓冲区大小、MAC地址表大小</td>
+                        <td class="badge-red">MAC地址表大小 ← 是交换机！</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-purple">操作系统</td>
+                        <td>系统上下文切换、响应时间、吞吐率、资源利用率、可靠性、可移植性</td>
+                        <td class="badge-purple">可移植性</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-pink">数据库管理系统</td>
+                        <td>最大并发事务处理能力、负载均衡能力、最大连接数</td>
+                        <td class="badge-red">并发事务处理能力 ← 是数据库！</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-red">Web服务器</td>
+                        <td>最大并发连接数、响应延迟、吞吐量</td>
+                        <td class="badge-red">并发连接数（≠并发事务数）</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>计算机：「频速精数吞」</strong> → 主频·速度·精度·数据速率·吞吐率<br>
+                <strong>交换机：「端背缓MAC」</strong> → 交换机有MAC地址表，路由器有路由表！<br>
+                <strong>数据库：「并发事务」</strong> → 最大并发事务处理能力 = 数据库专属<br>
+                <strong>Web服务器：「并响吞」</strong> → 并发连接·响应延迟·吞吐量
+            </div>
+            <div class="alert alert-red">⚠️ <strong>MAC地址表</strong> = 交换机 · <strong>路由表</strong> = 路由器 — 这是超高频混淆考点！</div>
+            <div class="alert alert-warn">⚠️ <strong>时延抖动</strong>是路由器的指标，不是数据库的！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔧</span>4.2 性能调整</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">数据库系统性能调整</div>
+                    <div class="vs-item"><span>CPU/内存</span><span class="badge-acc">使用情况</span></div>
+                    <div class="vs-item"><span>数据库设计</span><span>优化结构</span></div>
+                    <div class="vs-item"><span>进程/线程</span><span>状态监控</span></div>
+                    <div class="vs-item"><span>硬盘I/O</span><span>及剩余空间</span></div>
+                    <div class="vs-item"><span>日志文件</span><span>大小监控</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">应用系统性能调整</div>
+                    <div class="vs-item"><span>可用性</span><span class="badge-green">系统稳定运行</span></div>
+                    <div class="vs-item"><span>响应时间</span><span>用户体验关键</span></div>
+                    <div class="vs-item"><span>并发用户数</span><span>负载能力</span></div>
+                    <div class="vs-item"><span>资源占用</span><span>特定应用维度</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「查消瓶颈」</strong> → 性能调整的本质：<strong>查找</strong>和<strong>消除</strong>瓶颈</div>
+        </div>
+    </section>
+
+    <!-- ══ S5: 性能计算 ══ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>性能指标计算</h1>
+            <p>MIPS公式 · Amdahl定律 · 吉普森法 · 必考计算题 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⚡</span>5.1 MIPS计算 <span class="tag tag-hot">必考计算题</span></div>
+            <div class="formula-box">MIPS = 指令条数 / (执行时间 × 10⁶)
+
+                💡 快速技巧：MIPS = 1 / 指令执行时间(μs)
+                因为 μs = 10⁻⁶秒，与分母的10⁶恰好抵消！
+
+                例：一条指令执行时间 = 5个机器周期 × 3μs/周期 = 15μs
+                MIPS = 1/15 ≈ 0.067 MIPS</div>
+            <div class="mnemonic">
+                <div class="label">🧠 超快记忆</div>
+                <strong>μs和MIPS中的10⁶恰好抵消！</strong><br>
+                所以：<strong>MIPS = 1 / 指令执行时间(μs)</strong>，直接算倒数！
+            </div>
+            <!-- Interactive MIPS Calculator -->
+            <div class="calc-box">
+                <div class="calc-title">🖩 MIPS在线计算器</div>
+                <div class="calc-row">
+                    <span class="calc-label">机器周期数</span>
+                    <input class="calc-input" id="mips-cycles" type="number" value="5" min="1">
+                    <span style="font-size:.82rem;color:var(--text3)">个</span>
+                </div>
+                <div class="calc-row">
+                    <span class="calc-label">每周期时间</span>
+                    <input class="calc-input" id="mips-time" type="number" value="3" min="0.01" step="0.01">
+                    <select id="mips-unit" style="padding:6px 8px;border:1px solid var(--border2);border-radius:6px;font-size:.82rem;background:var(--card);color:var(--text)">
+                        <option value="1">μs（微秒）</option>
+                        <option value="0.001">ns（纳秒）</option>
+                        <option value="1000">ms（毫秒）</option>
+                    </select>
+                </div>
+                <button class="calc-btn" onclick="calcMIPS()">计算 MIPS</button>
+                <div class="calc-result" id="mips-result">点击计算…</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📈</span>5.2 阿姆达尔（Amdahl）定律 <span class="tag tag-hot">★★必考</span></div>
+            <div class="analogy">
+                <strong>类比：优化通勤时间</strong><br>
+                通勤100分钟 = 走路10分钟 + 地铁90分钟。<br>
+                你买跑车把走路缩到1分钟，总时间只从100分钟→91分钟，提升有限！<br>
+                <strong>瓶颈在地铁（占比大的部分），优化小比例部分效果有限！</strong>
+            </div>
+            <div class="formula-box">总加速比 = 原执行时间 / 新执行时间
+
+                ┌─────────────────────────┐
+                │        1                │
+                总加速比 = │  ─────────────────────  │
+                │  (1 - F) + F/S          │
+                └─────────────────────────┘
+
+                其中：F = 增强比例（被优化部分占原总时间的比例）
+                S = 增强加速比（优化部分的加速倍数）
+
+                极限分析：
+                当 S → ∞，总加速比上限 = 1/(1-F)
+                当 F = 1，总加速比 = S（理想情况）
+                当 F = 0，总加速比 = 1（没有改进）</div>
+            <!-- Interactive Amdahl Calculator -->
+            <div class="calc-box">
+                <div class="calc-title">🖩 Amdahl定律计算器</div>
+                <div class="calc-row">
+                    <span class="calc-label">增强比例 F</span>
+                    <input class="calc-input" id="amdahl-f" type="number" value="0.6" min="0" max="1" step="0.01">
+                    <span style="font-size:.82rem;color:var(--text3)">（0~1之间，如0.6表示60%）</span>
+                </div>
+                <div class="calc-row">
+                    <span class="calc-label">增强加速比 S</span>
+                    <input class="calc-input" id="amdahl-s" type="number" value="4" min="1" step="0.1">
+                    <span style="font-size:.82rem;color:var(--text3)">倍</span>
+                </div>
+                <button class="calc-btn" onclick="calcAmdahl()">计算总加速比</button>
+                <div class="calc-result" id="amdahl-result">点击计算…</div>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>增强比例F</strong>是被改进部分<strong>占原来总执行时间</strong>的比例，不是提升比例！</div>
+            <div class="alert alert-warn">⚠️ 公式分母是 <strong>(1-F) + F/S</strong>，不要写错！加速比<strong>总小于等于</strong>增强加速比S</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⚖️</span>5.3 吉普森法（等效指令速度）</div>
+            <div class="formula-box">T等效 = Σ(Wi × Ti)
+
+                Wi = 第i种指令占总指令的比例
+                Ti = 第i种指令的执行时间
+
+                固定权重（必背！）：
+                加法/减法指令  → W = 50%（0.50）
+                乘法指令       → W = 15%（0.15）
+                除法指令       → W =  5%（0.05）
+                程序控制指令   → W = 15%（0.15）
+                其他指令       → W = 15%（0.15）
+                合计           = 100% ✓</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「加减五十，乘五程五，除五其五」</strong><br>
+                即：50 + 15 + 5 + 15 + 15 = 100%<br>
+                <span style="margin-top:4px;display:block">⚠️ Wi相加必须等于1（100%），否则计算错误！</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🖥️</span>5.4 理论浮点峰值</div>
+            <div class="formula-box">理论浮点峰值（FLOPS）= 主频 × 每个时钟周期浮点运算次数 × CPU数量
+
+                例：主频 3GHz，每周期4次浮点运算，4个CPU：
+                FLOPS = 3×10⁹ × 4 × 4 = 48 GFLOPS</div>
+            <div class="alert alert-warn">⚠️ 计算时要<strong>乘以CPU数量</strong>，别遗漏！</div>
+        </div>
+    </section>
+
+    <!-- ══ S6: 性能评估 ══ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>性能评估方法</h1>
+            <p>基准测试 · 准确度排名 · Dhrystone/Linpack · 考点密度 ★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏆</span>6.1 基准测试程序准确度排名 <span class="tag tag-hot">高频考点</span></div>
+            <div class="bench-bar-wrap">
+                <div class="bench-bar-item">
+                    <span class="bench-bar-label">真实的程序</span>
+                    <div class="bench-bar-track"><div class="bench-bar-fill" style="width:100%;background:var(--green)"></div></div>
+                    <span class="bench-bar-val" style="color:var(--green)">最高</span>
+                </div>
+                <div class="bench-bar-item">
+                    <span class="bench-bar-label">核心程序</span>
+                    <div class="bench-bar-track"><div class="bench-bar-fill" style="width:75%;background:var(--accent)"></div></div>
+                    <span class="bench-bar-val" style="color:var(--accent)">较高</span>
+                </div>
+                <div class="bench-bar-item">
+                    <span class="bench-bar-label">小型基准程序</span>
+                    <div class="bench-bar-track"><div class="bench-bar-fill" style="width:50%;background:var(--gold)"></div></div>
+                    <span class="bench-bar-val" style="color:var(--gold)">中等</span>
+                </div>
+                <div class="bench-bar-item">
+                    <span class="bench-bar-label">合成基准程序</span>
+                    <div class="bench-bar-track"><div class="bench-bar-fill" style="width:25%;background:var(--red)"></div></div>
+                    <span class="bench-bar-val" style="color:var(--red)">最低</span>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「真核小合」</strong> → 真实 > 核心 > 小型 > 合成<br>
+                越具体越接近真实使用场景，准确度越高！
+            </div>
+            <div class="alert alert-info">💡 <strong>基准测试程序</strong>定义：应用程序中用得<strong>最多、最频繁</strong>的核心程序</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔬</span>6.2 常见基准测试程序 <span class="tag tag-key">★易混淆</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>程序名</th><th>用途</th><th>记忆口诀</th></tr>
+                    <tr><td class="badge-acc">Dhrystone</td><td class="badge-acc">整数测试程序</td><td>D → 整数（D谐音"得"整数）</td></tr>
+                    <tr><td class="badge-gold">Linpack</td><td class="badge-gold">浮点测试程序</td><td>Lin → 浮点（Linear Pack）</td></tr>
+                    <tr><td class="badge-acc">Whetstone</td><td>早期浮点测试程序</td><td>早期基准</td></tr>
+                    <tr><td class="badge-purple">SPEC</td><td>综合基准测试程序</td><td>Spec = 规格，综合</td></tr>
+                    <tr><td class="badge-pink">TPC</td><td>事务处理基准程序</td><td>T = Transaction（事务）</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「D整L浮W早，SPEC综TPC事务」</strong></div>
+            <div class="alert alert-red">⚠️ <strong>Dhrystone = 整数</strong>，<strong>Linpack = 浮点</strong>，别搞反！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🌐</span>6.3 Web服务器性能评测 & 系统监视</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">Web性能评测3方法</div>
+                    <div class="vs-item"><span class="badge-acc">基准性能测试</span><span class="label">基</span></div>
+                    <div class="vs-item"><span class="badge-red">压力测试</span><span class="label">压</span></div>
+                    <div class="vs-item"><span class="badge-green">可靠性测试</span><span class="label">可</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">系统监视3方式</div>
+                    <div class="vs-item"><span>系统内置命令</span><span class="label">令</span></div>
+                    <div class="vs-item"><span>查阅系统日志</span><span class="label">日</span></div>
+                    <div class="vs-item"><span>可视化技术</span><span class="label">视</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>Web评测：「基压可」</strong> → 基准 + 压力 + 可靠性测试<br>
+                <strong>系统监视：「令日视」</strong> → 内置命令 + 查阅日志 + 可视化技术
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ QUIZ ══ -->
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>30道练习题</h1>
+            <p>点击选项即时判断 · 点击「查看解析」获取详细讲解</p>
+        </div>
+        <div id="quiz-score" style="font-size:.85rem;color:var(--text2);margin-bottom:12px">
+            已答：<span id="answered">0</span> 题 &nbsp;·&nbsp; 正确：<span id="correct-count">0</span> 题 &nbsp;·&nbsp; 正确率：<span id="accuracy">—</span>
+        </div>
+        <div class="quiz-filter">
+            <button class="filter-btn active" onclick="filterQuiz('all',this)">全部 (30)</button>
+            <button class="filter-btn" onclick="filterQuiz(0,this)">系统工程方法 (1-10)</button>
+            <button class="filter-btn" onclick="filterQuiz(1,this)">MBSE&性能指标 (11-22)</button>
+            <button class="filter-btn" onclick="filterQuiz(2,this)">Amdahl&评估 (23-30)</button>
+        </div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══ FLASH CARDS ══ -->
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">FLASH CARDS</div>
+            <h1>⚡ 速记卡 — 考前必背</h1>
+            <p>悬停查看详情 · 每张卡片对应一个核心考点</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id,btn){
+        document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // ─── METHOD DETAIL ───
+    const methodDetails = {
+        hall:'<strong>霍尔三维结构（Hall, 1969）</strong><br>提出者：Arthur D. Hall，美国工程师<br>三维：时间维（7阶段：规拟研生安运更）+ 逻辑维（7步骤：明确综分优决实）+ 知识维（多学科知识）<br>本质：<strong>硬系统方法论</strong>，适合有明确目标的工程问题',
+        check:'<strong>切克兰德方法（Checkland）</strong><br>核心：<span style="color:var(--red);font-weight:700">「比较」与「探寻」</span>——不是最优化！<br>7步骤：认根念比选设评<br>本质：<strong>软系统方法论</strong>，适合目标模糊、社会性复杂问题<br>⚠️ 超高频陷阱：切克兰德的核心<strong>不是最优化</strong>！',
+        parallel:'<strong>并行工程（Concurrent Engineering）</strong><br>3大目标：<strong>提高质量 · 降低成本 · 缩短产品开发周期和上市时间</strong><br>特点：并行、集成化处理产品开发相关的活动<br>⚠️ 注意：不含"增加功能"这个目标！',
+        qian:'<strong>综合集成法（钱学森）</strong><br>提出者：<span style="color:var(--pink);font-weight:700">钱学森</span>（中国科学家）<br>核心理论：开放的复杂巨系统<br>系统分类：简单系统 vs 巨系统<br>基本原则：「整联序动」→ 整体论·相互联系·有序性·动态<br>主要性质：「开复进层巨」→ 开放性·复杂性·进化与涌现性·层次性·巨量性',
+        wsr:'<strong>WSR系统方法（物理-事理-人理）</strong><br>W = Wuli（物理）= 客观规律<br>S = Shili（事理）= 管理组织规则<br>R = Renli（人理）= 人的行为与价值<br>7步骤：「理制调构选协实」<br>特点：中国传统哲学思辨，定性与定量结合'
+    };
+    function showMethodDetail(key){
+        const det=document.getElementById('method-detail');
+        const cards=document.querySelectorAll('.method-card');
+        cards.forEach(c=>c.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        det.style.display='block';
+        det.innerHTML=methodDetails[key];
+    }
+
+    // ─── CALCULATORS ───
+    function calcMIPS(){
+        const cycles=parseFloat(document.getElementById('mips-cycles').value)||0;
+        const time=parseFloat(document.getElementById('mips-time').value)||0;
+        const unit=parseFloat(document.getElementById('mips-unit').value)||1;
+        if(!cycles||!time){document.getElementById('mips-result').textContent='请输入有效数值';return;}
+        const instrUs=cycles*time*unit;
+        const mips=(1/instrUs).toFixed(4);
+        document.getElementById('mips-result').innerHTML=
+            `一条指令执行时间 = ${cycles} × ${time}${unit==1?'μs':unit==0.001?'ns':'ms'} = ${instrUs.toFixed(4)} μs<br>MIPS = 1 / ${instrUs.toFixed(4)} ≈ <strong>${mips} MIPS</strong>`;
+    }
+    function calcAmdahl(){
+        const F=parseFloat(document.getElementById('amdahl-f').value);
+        const S=parseFloat(document.getElementById('amdahl-s').value);
+        if(isNaN(F)||isNaN(S)||F<0||F>1||S<1){document.getElementById('amdahl-result').textContent='请输入有效数值（F在0~1之间，S≥1）';return;}
+        const speedup=1/((1-F)+F/S);
+        const limit=1/(1-F);
+        document.getElementById('amdahl-result').innerHTML=
+            `总加速比 = 1/[(1-${F})+${F}/${S}] = 1/${((1-F)+F/S).toFixed(4)} ≈ <strong>${speedup.toFixed(4)}</strong><br>理论上限（S→∞）= 1/(1-${F}) = <strong>${limit.toFixed(4)}</strong>`;
+    }
+
+    // ─── QUIZ DATA ───
+    const quizData=[
+        // 0: 系统工程方法
+        {cat:0,q:'系统工程方法的特点不包括（ ）。',opts:['整体性','综合性','独立性','协调性'],ans:2,exp:'系统工程5大特点口诀「整综协科实」——整体性·综合性·协调性·科学性·实践性。「独立性」不在其中！'},
+        {cat:0,q:'霍尔三维结构由（ ）组成。',opts:['时间维、空间维、知识维','时间维、逻辑维、知识维','时间维、结构维、知识维','逻辑维、结构维、组织维'],ans:1,exp:'霍尔三维结构由「时间维、逻辑维、知识维」组成。注意：是「逻辑维」不是「空间维」或「组织维」！'},
+        {cat:0,q:'霍尔三维结构时间维共分为（ ）个阶段。',opts:['5','6','7','8'],ans:2,exp:'时间维共7个阶段：规划→拟订方案→研制→生产→安装→运行→更新，口诀「规拟研生安运更」'},
+        {cat:0,q:'霍尔三维结构时间维中，系统按预期用途开展服务的阶段是（ ）。',opts:['生产阶段','安装阶段','运行阶段','更新阶段'],ans:2,exp:'「运行阶段」：系统按照预期的用途开展服务。这是最直接描述系统实际工作状态的阶段。'},
+        {cat:0,q:'在霍尔三维结构中，提出安装计划是在（ ）阶段。',opts:['研制','生产','安装','运行'],ans:1,exp:'「生产阶段」提出安装计划！口诀：研制出方案→生产提安装（安装计划）→安装后做运行（运行计划）。易错：很多人以为提安装计划是在安装阶段！'},
+        {cat:0,q:'切克兰德方法的核心是（ ）。',opts:['最优化','比较与探寻','效率最大化','成本最小化'],ans:1,exp:'切克兰德方法的核心是「比较」与「探寻」，是软系统方法论，适合目标模糊的社会性问题。「最优化」是它的对立面！这是超高频陷阱！'},
+        {cat:0,q:'提出"开放的复杂巨系统"理论的是（ ）。',opts:['霍尔','切克兰德','钱学森','诺兰'],ans:2,exp:'「钱学森」提出开放的复杂巨系统理论，即综合集成法。这是中国科学家的原创贡献！'},
+        {cat:0,q:'WSR系统方法是指（ ）。',opts:['系统-方法-论','物理-事理-人理','规划-实施-评估','战略-战术-操作'],ans:1,exp:'WSR = Wuli(物理)-Shili(事理)-Renli(人理)，中国传统哲学思辨，定性与定量综合的系统方法。'},
+        {cat:0,q:'并行工程的目标不包括（ ）。',opts:['提高质量','降低成本','缩短产品开发周期','增加产品功能'],ans:3,exp:'并行工程3大目标：提高质量·降低成本·缩短产品开发周期和上市时间。「增加产品功能」不是并行工程的目标！'},
+        {cat:0,q:'系统工程的生命周期阶段不包括（ ）。',opts:['探索研究','开发阶段','营销阶段','退役阶段'],ans:2,exp:'系统工程生命周期7阶段口诀「探概开生使保退」——探索研究·概念·开发·生产·使用·保障·退役。没有「营销阶段」！'},
+        // 1: MBSE & 性能指标
+        {cat:1,q:'基于模型的系统工程（MBSE）的三大支柱是（ ）。',opts:['建模语言、建模工具、建模思路','建模语言、建模平台、建模方法','建模工具、建模人员、建模过程','建模思路、建模标准、建模规范'],ans:0,exp:'MBSE三大支柱口诀「语具思」——建模语言·建模工具·建模思路。'},
+        {cat:1,q:'MBSE在需求分析阶段产生的产物不包括（ ）。',opts:['需求图','用例图','包图','状态机图'],ans:3,exp:'需求分析阶段产物口诀「需用包」——需求图·用例图·包图。「状态机图」属于功能分析与分配阶段！'},
+        {cat:1,q:'MBSE在功能分析与分配阶段产生的产物是（ ）。',opts:['需求图、用例图、包图','顺序图、活动图、状态机图','模块定义图、内部块图、参数图','类图、组件图、部署图'],ans:1,exp:'功能分析阶段口诀「顺活状」——顺序图·活动图·状态机图（动态行为图）。'},
+        {cat:1,q:'MBSE在设计综合阶段产生的产物是（ ）。',opts:['需求图、用例图','活动图、顺序图','模块定义图、内部块图、参数图','状态机图、用例图'],ans:2,exp:'设计综合阶段口诀「模内参」——模块定义图·内部块图·参数图（结构相关图）。'},
+        {cat:1,q:'评价计算机的主要性能指标不包括（ ）。',opts:['时钟频率','运算速度','运算精度','最大并发连接数'],ans:3,exp:'最大并发连接数是Web服务器的指标，不是计算机的！计算机指标口诀「频速精数吞」——主频·运算速度·运算精度·数据处理速率·吞吐率。'},
+        {cat:1,q:'评价路由器的性能指标不包括（ ）。',opts:['设备吞吐量','丢包率','时延抖动','MAC地址表大小'],ans:3,exp:'MAC地址表大小是「交换机」的性能指标，不是路由器的！路由器有「路由表能力」，两者千万别搞混！'},
+        {cat:1,q:'MAC地址表大小是评价（ ）的性能指标。',opts:['路由器','交换机','防火墙','服务器'],ans:1,exp:'MAC地址表大小是「交换机」的性能指标。交换机工作在数据链路层，使用MAC地址进行转发。路由器工作在网络层，使用IP地址和路由表。'},
+        {cat:1,q:'衡量数据库管理系统的主要性能指标是（ ）。',opts:['最大并发事务处理能力、负载均衡能力、最大连接数','最大并发连接数、响应延迟、吞吐量','时钟频率、运算速度、内存容量','丢包率、时延、时延抖动'],ans:0,exp:'数据库管理系统性能指标：最大并发事务处理能力·负载均衡能力·最大连接数。注意「事务处理」是数据库专属词汇。'},
+        {cat:1,q:'评价Web服务器的主要性能指标是（ ）。',opts:['MAC地址表大小','最大并发连接数、响应延迟、吞吐量','背板吞吐量','系统上下文切换'],ans:1,exp:'Web服务器指标口诀「并响吞」——最大并发连接数·响应延迟·吞吐量。注意是「并发连接数」，不是「并发事务处理能力」（那是数据库的）！'},
+        {cat:1,q:'评价操作系统的性能指标不包括（ ）。',opts:['系统响应时间','系统资源利用率','可移植性','最大并发事务处理能力'],ans:3,exp:'最大并发事务处理能力是「数据库管理系统」的指标。操作系统指标包括：系统上下文切换·响应时间·吞吐率·资源利用率·可靠性·可移植性。'},
+        {cat:1,q:'某计算机基本指令执行需要4个机器周期，每个机器周期为2μs，则该计算机的定点运算速度为（ ）MIPS。',opts:['0.125','0.25','8','0.5'],ans:0,exp:'一条指令时间 = 4 × 2μs = 8μs。MIPS = 1/8μs = 0.125 MIPS。口诀：μs和MIPS中的10⁶抵消，MIPS = 1/指令时间(μs)'},
+        {cat:1,q:'某计算机基本指令执行需要10个机器周期，每个机器周期为0.1μs，则该计算机的定点运算速度为（ ）MIPS。',opts:['1','10','100','0.1'],ans:0,exp:'一条指令时间 = 10 × 0.1μs = 1μs。MIPS = 1/1μs = 1 MIPS。'},
+        // 2: Amdahl & 评估
+        {cat:2,q:'阿姆达尔定律中，加速比主要取决于的两个因素是（ ）。',opts:['增强比例和增强加速比','CPU速度和内存大小','指令条数和执行时间','系统规模和复杂度'],ans:0,exp:'Amdahl定律公式：总加速比 = 1/[(1-F)+F/S]，由两个因素决定：增强比例F（被优化部分占总时间的比例）和增强加速比S（优化倍数）。'},
+        {cat:2,q:'某系统原执行时间为100秒，其中80秒是某部件的执行时间。若将该部件速度提升4倍，则总加速比约为（ ）。',opts:['2.5','4','5','1.25'],ans:0,exp:'F=80/100=0.8，S=4。总加速比=1/[(1-0.8)+0.8/4]=1/[0.2+0.2]=1/0.4=2.5。',hint:'提示：F=0.8，S=4，代入公式 1/[(1-F)+F/S]'},
+        {cat:2,q:'根据阿姆达尔定律，以下说法正确的是（ ）。',opts:['优化任何部分都能获得同等的性能提升','即使某部分优化无限快，总加速比也有上限','加速比等于增强加速比','总加速比总是大于增强加速比'],ans:1,exp:'Amdahl定律核心启示：即使S→∞，总加速比上限=1/(1-F)，所以有上限！要优化占比大的部分才有意义。'},
+        {cat:2,q:'在基准测试程序中，评测准确程度最高的是（ ）。',opts:['合成基准程序','小型基准程序','核心程序','真实的程序'],ans:3,exp:'准确度排名口诀「真核小合」——真实程序>核心程序>小型基准>合成基准。越接近真实使用场景，准确度越高！'},
+        {cat:2,q:'以下属于整数测试基准程序的是（ ）。',opts:['Dhrystone','Linpack','Whetstone','SPEC'],ans:0,exp:'Dhrystone是整数测试程序。口诀：「D整L浮」——Dhrystone整数，Linpack浮点。'},
+        {cat:2,q:'Linpack是（ ）测试程序。',opts:['整数','浮点','字符串','事务处理'],ans:1,exp:'Linpack是浮点测试程序（Linear Algebra Package）。TPC是事务处理基准程序。'},
+        {cat:2,q:'Web服务器的性能评测方法不包括（ ）。',opts:['基准性能测试','压力测试','可靠性测试','兼容性测试'],ans:3,exp:'Web服务器性能评测3方法口诀「基压可」——基准性能测试·压力测试·可靠性测试。「兼容性测试」是软件测试类型，不是Web性能评测方法。'},
+        {cat:2,q:'系统监视的方法通常不包括（ ）。',opts:['系统内置命令','查阅系统日志','可视化技术','人工巡检'],ans:3,exp:'系统监视3种方式口诀「令日视」——系统内置命令·查阅系统日志·可视化技术。「人工巡检」不在标准的三种方式之内。'},
+    ];
+
+    // ─── RENDER QUIZ ───
+    let answered=0,correct=0;
+    function renderQuiz(items){
+        const container=document.getElementById('quiz-container');
+        container.innerHTML='';
+        items.forEach(item=>{
+            const gi=quizData.indexOf(item);
+            const div=document.createElement('div');
+            div.className='quiz-q';
+            div.dataset.cat=item.cat;
+            div.innerHTML=`
+        <div class="quiz-num">第 ${gi+1} 题 / 共 30 题</div>
+        <div class="quiz-text">${item.q}</div>
+        ${item.hint?`<div class="quiz-hint">${item.hint}</div>`:''}
+        <div class="quiz-options" id="opts-${gi}">
+          ${['A','B','C','D'].map((L,j)=>`
+            <button class="opt-btn" data-q="${gi}" data-opt="${j}" onclick="handleOpt(${gi},${j})">
+              <span class="opt-letter">${L}.</span><span>${item.opts[j]}</span>
+            </button>`).join('')}
+        </div>
+        <button class="reveal-btn" id="reveal-${gi}" onclick="revealAns(${gi})" style="display:none">💡 查看解析</button>
+        <div class="quiz-ans" id="ans-${gi}">
+          <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+          <div class="ans-body">${item.exp}</div>
+        </div>`;
+            container.appendChild(div);
+        });
+    }
+    function handleOpt(qi,opt){
+        const item=quizData[qi];
+        const opts=document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed'))return;
+        opts.forEach((btn,j)=>{
+            btn.classList.add('revealed');
+            if(j===item.ans)btn.classList.add('correct');
+            else if(j===opt)btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt===item.ans)correct++;
+        document.getElementById('answered').textContent=answered;
+        document.getElementById('correct-count').textContent=correct;
+        document.getElementById('accuracy').textContent=Math.round(correct/answered*100)+'%';
+        document.getElementById(`reveal-${qi}`).style.display='inline-flex';
+    }
+    function revealAns(qi){document.getElementById(`ans-${qi}`).classList.toggle('show');}
+    function filterQuiz(cat,btn){
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const filtered=cat==='all'?quizData:quizData.filter(q=>q.cat===cat);
+        renderQuiz(filtered);
+    }
+    renderQuiz(quizData);
+
+    // ─── FLASH CARDS ───
+    const flashData=[
+        {n:'01',topic:'系统工程五大特点',mnemonic:'整综协科实',detail:'整体性·综合性·协调性·科学性·实践性，不含独立性'},
+        {n:'02',topic:'霍尔三维结构',mnemonic:'时间+逻辑+知识',detail:'不是空间维！不是组织维！是"逻辑维"'},
+        {n:'03',topic:'时间维7阶段',mnemonic:'规拟研生安运更',detail:'研制出方案→生产提安装计划→安装完做运行计划'},
+        {n:'04',topic:'时间维关键易错点',mnemonic:'生产阶段提安装计划',detail:'提出安装计划=生产阶段，不是安装阶段！'},
+        {n:'05',topic:'逻辑维7步骤',mnemonic:'明确综分优决实',detail:'明确问题→确定目标→系统综合→系统分析→优化→决策→实施'},
+        {n:'06',topic:'切克兰德方法',mnemonic:'比较与探寻（不是最优化！）',detail:'软系统方法论·7步骤：认根念比选设评'},
+        {n:'07',topic:'综合集成法',mnemonic:'钱学森·开放复杂巨系统',detail:'简单系统vs巨系统·基本原则：整联序动'},
+        {n:'08',topic:'WSR系统方法',mnemonic:'物理-事理-人理',detail:'Wuli-Shili-Renli·中国传统哲学·7步骤：理制调构选协实'},
+        {n:'09',topic:'并行工程三目标',mnemonic:'质量·成本·周期',detail:'提高质量·降低成本·缩短产品开发周期，不含增加功能'},
+        {n:'10',topic:'生命周期7阶段',mnemonic:'探概开生使保退',detail:'没有"营销阶段"！记住这是陷阱'},
+        {n:'11',topic:'MBSE三大支柱',mnemonic:'语具思',detail:'建模语言·建模工具·建模思路'},
+        {n:'12',topic:'MBSE产物三阶段',mnemonic:'需用包→顺活状→模内参',detail:'状态机图在功能分析阶段！'},
+        {n:'13',topic:'交换机 vs 路由器',mnemonic:'交换机→MAC，路由器→路由表',detail:'这是超高频混淆考点！'},
+        {n:'14',topic:'数据库指标',mnemonic:'最大并发事务处理能力',detail:'还有负载均衡能力·最大连接数'},
+        {n:'15',topic:'Web服务器指标',mnemonic:'并响吞',detail:'最大并发连接数·响应延迟·吞吐量（≠并发事务！）'},
+        {n:'16',topic:'MIPS快速算法',mnemonic:'MIPS = 1/指令时间(μs)',detail:'μs与10⁶抵消！一条指令8μs→MIPS=0.125'},
+        {n:'17',topic:'Amdahl定律公式',mnemonic:'1/[(1-F)+F/S]',detail:'F=增强比例，S=增强加速比，加速比有上限1/(1-F)'},
+        {n:'18',topic:'吉普森法权重',mnemonic:'加减50，乘15，除5，程控15，其他15',detail:'合计100%，否则计算错！'},
+        {n:'19',topic:'基准测试准确度',mnemonic:'真核小合',detail:'真实>核心>小型>合成，越真实越准确'},
+        {n:'20',topic:'Dhrystone vs Linpack',mnemonic:'D整数，L浮点',detail:'别搞反！TPC=事务处理，SPEC=综合'},
+        {n:'21',topic:'Web性能评测',mnemonic:'基压可',detail:'基准性能测试·压力测试·可靠性测试'},
+        {n:'22',topic:'系统监视3方式',mnemonic:'令日视',detail:'内置命令·查阅日志·可视化技术'},
+    ];
+    function renderFlash(){
+        const grid=document.getElementById('flash-grid');
+        flashData.forEach(fc=>{
+            const div=document.createElement('div');
+            div.className='flash-card';
+            div.innerHTML=`<div class="fc-num"># ${fc.n}</div><div class="fc-topic">${fc.topic}</div><div class="fc-mnemonic">「${fc.mnemonic}」</div><div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+
+    // ─── INIT BENCH BARS ───
+    setTimeout(()=>{
+        document.querySelectorAll('.bench-bar-fill').forEach(b=>{
+            const w=b.style.width;b.style.width='0';
+            setTimeout(()=>b.style.width=w,200);
+        });
+    },300);
+</script>
+</body>
+</html>
