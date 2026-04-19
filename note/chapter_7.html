@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第七章 · 软件工程基础知识 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#fdfbf7;--bg2:#f4efe6;--card:#fff;--card2:#f9f7f2;
+            --border:#e8e2d5;--border2:#d4cbb8;--text:#2c2825;--text2:#5e574f;--text3:#8f877c;
+            --accent:#0284c7;--accent2:#0369a1;--gold:#d97706;--gold2:#b45309;
+            --green:#059669;--red:#dc2626;--purple:#7c3aed;--pink:#db2777;--teal:#0d9488;
+            --nav-h:56px;--radius:10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        #topnav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(253,251,247,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);z-index:1000;display:flex;align-items:center;padding:0 16px;gap:2px;overflow-x:auto;white-space:nowrap}
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px}
+        .nav-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        main{padding-top:calc(var(--nav-h)+24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        .section-hero{text-align:center;padding:40px 20px 32px;background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;position:relative;overflow:hidden}
+        .section-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);pointer-events:none}
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:560px;margin:0 auto}
+        .section-tag{display:inline-block;padding:3px 10px;background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:12px}
+
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2)}
+        .analogy strong{color:var(--gold)}
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple)}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+        .badge-pink{color:var(--pink);font-weight:600}
+
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-e .vs-title{background:rgba(217,119,6,.1);color:var(--gold)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* COUPLING/COHESION SLIDER */
+        .scale-bar{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .scale-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;transition:all .18s}
+        .scale-item:hover{border-color:var(--border2)}
+        .scale-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+        .scale-label{font-weight:600;font-size:.84rem;min-width:90px}
+        .scale-desc{font-size:.79rem;color:var(--text3);flex:1}
+        .scale-badge{font-size:.7rem;padding:2px 7px;border-radius:8px;font-weight:700;flex-shrink:0}
+
+        /* 4+1 VIEW INTERACTIVE */
+        .view41-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:12px 0}
+        .view41-card{border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+        .view41-card:hover,.view41-card.active{border-color:var(--accent);background:rgba(2,132,199,.05)}
+        .view41-name{font-weight:700;font-size:.85rem;margin-bottom:4px}
+        .view41-who{font-size:.75rem;color:var(--text3)}
+        .view41-detail{display:none;margin-top:12px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.84rem;line-height:1.7;color:var(--text2)}
+
+        /* MODEL CARDS */
+        .model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:12px 0}
+        .model-card{border:1px solid var(--border);border-radius:8px;padding:11px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+        .model-card:hover,.model-card.active{border-color:var(--accent);background:rgba(2,132,199,.05)}
+        .model-name{font-weight:700;font-size:.85rem;color:var(--accent);margin-bottom:3px}
+        .model-key{font-size:.75rem;color:var(--text3)}
+        .model-detail{display:none;margin-top:10px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.84rem;line-height:1.7;color:var(--text2)}
+
+        /* CMMI STEPS */
+        .cmmi-stack{display:flex;flex-direction:column;gap:3px;margin:12px 0}
+        .cmmi-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);transition:border-color .15s}
+        .cmmi-row:hover{border-color:var(--border2)}
+        .cmmi-lv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;width:24px;text-align:center}
+        .cmmi-name{font-weight:700;font-size:.87rem;min-width:110px}
+        .cmmi-desc{font-size:.8rem;color:var(--text2);flex:1}
+
+        /* LAYER STACK */
+        .layer-stack{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .layer-row{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);transition:border-color .15s}
+        .layer-row:hover{border-color:var(--border2)}
+        .layer-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text3);font-weight:700;width:26px;flex-shrink:0;text-align:center;margin-top:2px}
+        .layer-name{font-weight:700;font-size:.87rem;min-width:100px;flex-shrink:0}
+        .layer-desc{font-size:.8rem;color:var(--text2);flex:1}
+
+        /* QUIZ */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.83rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4}
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        .quiz-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+        .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .filter-btn:hover{border-color:var(--border2);color:var(--text)}
+        .filter-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* FLASH */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* CHEAT SHEET */
+        .cheatsheet{background:linear-gradient(135deg,var(--bg2),var(--card));border:1px solid var(--border);border-radius:10px;padding:18px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2;color:var(--text2);margin:12px 0;white-space:pre-wrap;overflow-x:auto}
+        .cheatsheet .hl{color:var(--accent);font-weight:700}
+        .cheatsheet .key{color:var(--gold2);font-weight:700}
+
+        @media(max-width:640px){main{padding-left:12px;padding-right:12px}.section-hero h1{font-size:1.3rem}.kp-grid{grid-template-columns:1fr}.flash-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        架构师第七章
+    </div>
+    <button class="nav-btn active" onclick="showSection('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="showSection('s1',this)">① 过程模型</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">② RUP&CMMI</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">③ 需求工程</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">④ 结构化方法</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">⑤ 面向对象</button>
+    <button class="nav-btn" onclick="showSection('s6',this)">⑥ 测试&净室</button>
+    <button class="nav-btn" onclick="showSection('s7',this)">⑦ CBSE&管理</button>
+    <button class="nav-btn" onclick="showSection('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="showSection('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══ MAP ══ -->
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 07</div>
+            <h1>软件工程基础知识</h1>
+            <p>架构师考试双料王炸章节 · 上下午都考 · 选择+案例+论文 约 8-15 分 ⭐⭐⭐⭐</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🗺️</span>全章知识架构</div>
+            <div style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:500px">
+                    <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d4cbb8"/></marker></defs>
+                    <rect x="340" y="220" width="190" height="48" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="435" y="240" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第七章</text>
+                    <text x="435" y="258" text-anchor="middle" font-size="10.5" fill="#0284c7">软件工程基础知识</text>
+                    <!-- Branches -->
+                    <line x1="340" y1="235" x2="200" y2="80" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="105" y="58" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="170" y="74" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 软件过程模型</text>
+                    <text x="170" y="89" text-anchor="middle" font-size="9.5" fill="#5e574f">瀑布/原型/螺旋/敏捷/RUP</text>
+                    <line x1="340" y1="240" x2="148" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="28" y="160" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="97" y="176" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. RUP&amp;CMMI</text>
+                    <text x="97" y="191" text-anchor="middle" font-size="9.5" fill="#5e574f">4+1视图·5成熟度</text>
+                    <line x1="340" y1="255" x2="148" y2="305" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="28" y="287" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="97" y="303" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 需求工程</text>
+                    <text x="97" y="318" text-anchor="middle" font-size="9.5" fill="#5e574f">获分规确管·CCB·跟踪</text>
+                    <line x1="340" y1="262" x2="200" y2="415" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="105" y="396" width="130" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="170" y="412" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">4. 结构化方法</text>
+                    <text x="170" y="427" text-anchor="middle" font-size="9.5" fill="#5e574f">耦合/内聚/DFD</text>
+                    <line x1="530" y1="262" x2="660" y2="415" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="605" y="396" width="130" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="670" y="412" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 面向对象</text>
+                    <text x="670" y="427" text-anchor="middle" font-size="9.5" fill="#5e574f">封继多·实控边</text>
+                    <line x1="530" y1="255" x2="720" y2="305" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="700" y="287" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="769" y="303" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">6. 软件测试</text>
+                    <text x="769" y="318" text-anchor="middle" font-size="9.5" fill="#5e574f">单元/集成/系统/验收</text>
+                    <line x1="530" y1="240" x2="720" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="700" y="160" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="769" y="176" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">7. CBSE&amp;项目管理</text>
+                    <text x="769" y="191" text-anchor="middle" font-size="9.5" fill="#5e574f">构件组装·SCM·风险</text>
+                    <line x1="530" y1="235" x2="660" y2="80" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="605" y="58" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="670" y="74" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">净室软件工程</text>
+                    <text x="670" y="89" text-anchor="middle" font-size="9.5" fill="#5e574f">函数理论+抽样理论</text>
+                    <rect x="385" y="188" width="95" height="18" rx="9" fill="rgba(220,38,38,.12)" stroke="rgba(220,38,38,.28)"/>
+                    <text x="432" y="201" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">上下午双料 8-15分</text>
+                </svg>
+            </div>
+        </div>
+        <div class="kp-grid">
+            <div class="kp-item"><div class="kp-title">🔥 螺旋模型</div><div class="kp-body">在<strong>原型模型</strong>基础上扩展<br>核心是<strong>风险分析</strong>！不是瀑布</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 耦合与内聚</div><div class="kp-body">最低耦合：<strong>非直接耦合</strong><br>最高内聚：<strong>功能内聚</strong></div></div>
+            <div class="kp-item"><div class="kp-title">🔥 RUP 4+1视图</div><div class="kp-body">逻辑→用户 · 进程→集成人员<br>实现→程序员 · 部署→工程师</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 CMMI 5级</div><div class="kp-body">初管定量优<br>量化级=<strong>过程性能可预测</strong></div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 单元测试</div><div class="kp-body">程序员自己完成<br>白盒+静态测试为主</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ CCB</div><div class="kp-body"><strong>决策机构</strong>，不是作业机构<br>不提出变更方案，只决定是否变更</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 敏捷方法区分</div><div class="kp-body">XP→测试先行<br>FDD→首席+类程序员</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 重构 vs 逆向</div><div class="kp-body">重构=同一抽象层级<br>逆向=跨抽象层级</div></div>
+        </div>
+    </section>
+
+    <!-- ══ S1: 过程模型 ══ -->
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>软件过程模型</h1>
+            <p>瀑布 · 原型 · 螺旋 · 敏捷 · RUP · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📊</span>1.1 五大过程模型对比 <span class="tag tag-hot">必考</span></div>
+            <div class="model-grid" id="model-cards">
+                <div class="model-card" onclick="showModelDetail('waterfall')"><div class="model-name">瀑布模型</div><div class="model-key">结构化·串行</div></div>
+                <div class="model-card" onclick="showModelDetail('proto')"><div class="model-name">原型模型</div><div class="model-key">快速原型</div></div>
+                <div class="model-card" onclick="showModelDetail('spiral')"><div class="model-name" style="color:var(--red)">螺旋模型 ⭐</div><div class="model-key" style="color:var(--red)">风险分析！</div></div>
+                <div class="model-card" onclick="showModelDetail('agile')"><div class="model-name">敏捷模型</div><div class="model-key">迭代·以人为本</div></div>
+                <div class="model-card" onclick="showModelDetail('rup')"><div class="model-name">RUP模型</div><div class="model-key">用例驱动</div></div>
+            </div>
+            <div id="model-detail" class="model-detail"></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>模型</th><th>核心特征</th><th>优点</th><th>缺点</th><th>适用</th></tr>
+                    <tr><td class="badge-acc">瀑布模型</td><td>阶段串行、里程碑</td><td>结构清晰</td><td>不能并行、变更代价高</td><td class="badge-acc">结构化开发</td></tr>
+                    <tr><td class="badge-gold">原型模型</td><td>快速原型→目标软件</td><td>解决需求不确定</td><td>—</td><td>需求不明确</td></tr>
+                    <tr><td class="badge-red">螺旋模型</td><td class="badge-red">原型+瀑布+风险分析</td><td>支持大型项目</td><td>风险专家要求高</td><td>大型高风险</td></tr>
+                    <tr><td class="badge-purple">敏捷模型</td><td>迭代、以人为本</td><td>灵活响应变化</td><td>文档少</td><td>变化频繁</td></tr>
+                    <tr><td class="badge-pink">RUP模型</td><td>用例驱动+架构为中心+迭代增量</td><td>重量级规范</td><td>过于复杂</td><td class="badge-pink">构件化开发</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 螺旋模型是在<strong>原型模型</strong>基础上扩展，不是瀑布！核心是<strong>风险分析</strong>！</div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「瀑原螺敏RUP」</strong> · 螺旋模型4部分：<strong>「目险开评」</strong> → 目标设定+风险分析+开发+评审</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>⚡</span>1.2 敏捷方法详细对比 <span class="tag tag-hot">★★高频易混</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>方法</th><th>关键特征</th><th>记忆要点</th></tr>
+                    <tr><td class="badge-red">极限编程（XP）</td><td class="badge-red">高效、低风险、<strong>测试先行</strong></td><td>先写测试代码再编程序</td></tr>
+                    <tr><td class="badge-acc">Scrum（并列争球）</td><td>侧重项目管理，<strong>Backlog + Sprint</strong></td><td>产品Backlog按商业价值排序</td></tr>
+                    <tr><td class="badge-gold">FDD（特征驱动）</td><td>开发人员分类：<strong>首席程序员 + "类"程序员</strong></td><td>迭代周期一般2周</td></tr>
+                    <tr><td class="badge-purple">水晶系列</td><td>不同项目不同策略，以人为中心</td><td>弱纪律约束</td></tr>
+                    <tr><td class="badge-green">开放式源码</td><td class="badge-green">程序员地域分布广</td><td>高度并行Debug</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>测试先行</strong> = 极限编程XP · <strong>首席+类程序员</strong> = FDD · <strong>地域分布广</strong> = 开放式源码</div>
+        </div>
+    </section>
+
+    <!-- ══ S2: RUP & CMMI ══ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>RUP模型 & CMMI</h1>
+            <p>4+1视图 · 4阶段 · 9工作流 · CMMI 5成熟度 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🎬</span>2.1 RUP核心要点 <span class="tag tag-hot">★★必考</span></div>
+            <div class="analogy"><strong>类比：拍一部长篇电视剧</strong><br>分多个循环（季）→ 每季4阶段 → 用例驱动剧情 → 架构为骨架 → 迭代增量推进</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">4个阶段</div>
+                    <div class="vs-item"><span class="badge-acc">①初始</span><span class="label">建立商业案例</span></div>
+                    <div class="vs-item"><span class="badge-acc">②细化</span><span class="label">架构、计划、需求</span></div>
+                    <div class="vs-item"><span class="badge-acc">③构造</span><span class="label">开发产品</span></div>
+                    <div class="vs-item"><span class="badge-acc">④移交</span><span class="label">交付用户</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">3大特点</div>
+                    <div class="vs-item"><span class="badge-green">用例驱动</span><span class="label">用</span></div>
+                    <div class="vs-item"><span class="badge-green">架构为中心</span><span class="label">架</span></div>
+                    <div class="vs-item"><span class="badge-green">迭代和增量</span><span class="label">迭</span></div>
+                </div>
+                <div class="vs-card vs-d">
+                    <div class="vs-title">9核心工作流</div>
+                    <div class="vs-item"><span style="font-size:.78rem">业需分实测</span><span class="label">5个核心</span></div>
+                    <div class="vs-item"><span style="font-size:.78rem">部配项环</span><span class="label">4个支持</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div>
+                <strong>4阶段：「初细构移」</strong><br>
+                <strong>9工作流：「业需分实测部配项环」</strong><br>
+                <strong>3特点：「用架迭」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔭</span>2.2 RUP "4+1"视图模型 <span class="tag tag-hot">★★★超高频</span></div>
+            <div class="view41-grid" id="view41-cards">
+                <div class="view41-card" onclick="showView41('logic')"><div class="view41-name" style="color:var(--accent)">逻辑视图</div><div class="view41-who">→ 最终用户</div></div>
+                <div class="view41-card" onclick="showView41('impl')"><div class="view41-name" style="color:var(--green)">实现视图</div><div class="view41-who">→ 程序员</div></div>
+                <div class="view41-card" onclick="showView41('proc')"><div class="view41-name" style="color:var(--gold)">进程视图</div><div class="view41-who">→ 系统集成人员</div></div>
+                <div class="view41-card" onclick="showView41('deploy')"><div class="view41-name" style="color:var(--purple)">部署视图</div><div class="view41-who">→ 系统工程师</div></div>
+                <div class="view41-card" onclick="showView41('usecase')" style="border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.03)"><div class="view41-name" style="color:var(--red)">用例视图（+1）</div><div class="view41-who">→ 所有人</div></div>
+            </div>
+            <div id="view41-detail" class="view41-detail"></div>
+            <div class="tbl-wrap" style="margin-top:12px">
+                <table>
+                    <tr><th>视图</th><th>对应人员</th><th>关注点</th><th>常用图</th></tr>
+                    <tr><td class="badge-acc">逻辑视图</td><td class="badge-acc">最终用户</td><td>功能性需求</td><td>类图、对象图、状态图、协作图</td></tr>
+                    <tr><td class="badge-green">实现视图</td><td class="badge-green">程序员</td><td>模块组织、静态结构</td><td>包图、组件图</td></tr>
+                    <tr><td class="badge-gold">进程视图</td><td class="badge-red">系统集成人员⭐</td><td>并发性、分布性、容错性</td><td>活动图</td></tr>
+                    <tr><td class="badge-purple">部署视图</td><td class="badge-purple">系统工程师</td><td>软件→硬件映射</td><td>部署图</td></tr>
+                    <tr><td class="badge-red">用例视图(+1)</td><td>所有人</td><td>场景，指导其他视图</td><td>用例图</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>进程视图对应"系统集成人员"</strong>，不是开发人员！这是高频陷阱！</div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「逻用，实程，进集，部工」</strong> → 逻辑→用户 · 实现→程序员 · 进程→集成 · 部署→工程师</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏆</span>2.3 CMMI 5个成熟度等级 <span class="tag tag-hot">高频考点</span></div>
+            <div class="analogy"><strong>类比：武功修炼等级</strong> — 初始级=野路子 · 已定义级=有套路 · 量化管理级=能精准控制 · 优化级=登峰造极</div>
+            <div class="cmmi-stack">
+                <div class="cmmi-row" style="border-color:#d4cbb8"><div class="cmmi-lv" style="color:var(--text3)">1</div><div class="cmmi-name">初始级</div><div class="cmmi-desc">混乱、无序，依赖个人英雄主义</div></div>
+                <div class="cmmi-row" style="border-color:#0284c7"><div class="cmmi-lv" style="color:var(--accent)">2</div><div class="cmmi-name" style="color:var(--accent)">已管理级</div><div class="cmmi-desc">有基本过程管理，建立基础管控</div></div>
+                <div class="cmmi-row" style="border-color:#d97706"><div class="cmmi-lv" style="color:var(--gold)">3</div><div class="cmmi-name" style="color:var(--gold)">已定义级</div><div class="cmmi-desc">标准化、文档化，组织级定义</div></div>
+                <div class="cmmi-row" style="border-color:#dc2626;background:rgba(220,38,38,.03)"><div class="cmmi-lv" style="color:var(--red)">4</div><div class="cmmi-name" style="color:var(--red)">量化管理级 ⭐</div><div class="cmmi-desc">对过程性能<strong>可预测</strong> — 这是与3级的核心区别！</div></div>
+                <div class="cmmi-row" style="border-color:#059669"><div class="cmmi-lv" style="color:var(--green)">5</div><div class="cmmi-name" style="color:var(--green)">优化级</div><div class="cmmi-desc">持续过程改进，登峰造极</div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「初管定量优」</strong> → 谐音「出关定量油」→ 出关后必须定量加油！</div>
+            <div class="alert alert-red">⚠️ 量化管理级（4级）与已定义级（3级）的区别：<strong>对过程性能的可预测性！</strong></div>
+        </div>
+    </section>
+
+    <!-- ══ S3: 需求工程 ══ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>需求工程</h1>
+            <p>需求三层次 · 5阶段 · CCB · 双向跟踪 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📋</span>3.1 软件需求3个层次</div>
+            <div class="analogy"><strong>类比：家装需求</strong> — 老板决定装修（业务需求）→ 家人要书房儿童房（用户需求）→ 几个插座什么颜色（功能需求）</div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#7c3aed"><div class="layer-num" style="color:#7c3aed">业</div><div class="layer-name" style="color:#7c3aed">业务需求</div><div class="layer-desc">组织机构或客户<strong>高层次</strong>的目标要求（Business Requirement）</div></div>
+                <div class="layer-row" style="border-color:#d97706"><div class="layer-num" style="color:#d97706">用</div><div class="layer-name" style="color:#d97706">用户需求</div><div class="layer-desc">用户完成任务的期望（User Requirement）</div></div>
+                <div class="layer-row" style="border-color:#059669"><div class="layer-num" style="color:#059669">功</div><div class="layer-name" style="color:#059669">功能需求</div><div class="layer-desc">开发人员必须实现的<strong>软件功能</strong>（Functional Requirement）</div></div>
+            </div>
+            <div class="alert alert-info">💡 业务需求 + 用户需求 = 用户原始需求文档</div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「业用功」</strong> → 谐音「夜用工」→ 从高层业务逐步细化到功能</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔄</span>3.2 需求工程5个阶段 & SRS</div>
+            <div class="flow">
+                <div class="flow-step">①需求获取</div><div class="flow-arrow">→</div>
+                <div class="flow-step">②需求分析</div><div class="flow-arrow">→</div>
+                <div class="flow-step">③形成需求规格(SRS)</div><div class="flow-arrow">→</div>
+                <div class="flow-step">④需求确认与验证</div><div class="flow-arrow">→</div>
+                <div class="flow-step">⑤需求管理</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「获分规确管」</strong> → 谐音「货分归却管」</div>
+            <div class="sub-title">SRS（软件需求规格说明书）</div>
+            <div class="kp-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="kp-item"><div class="kp-title">SRS包含</div><div class="kp-body">功能需求 + 非功能需求 + 约束</div></div>
+                <div class="kp-item"><div class="kp-title">约束分类</div><div class="kp-body">设计约束 + 过程约束</div></div>
+                <div class="kp-item"><div class="kp-title">SRS地位⭐</div><div class="kp-body">批准的SRS是需求开发和需求管理之间的<strong>桥梁</strong></div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>⚙️</span>3.3 需求管理 · CCB · 需求跟踪 <span class="tag tag-hot">高频考点</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">需求管理3大活动</div>
+                    <div class="vs-item"><span class="badge-red">变更控制</span><span class="label">变</span></div>
+                    <div class="vs-item"><span class="badge-acc">版本控制</span><span class="label">版</span></div>
+                    <div class="vs-item"><span class="badge-green">需求跟踪</span><span class="label">跟</span></div>
+                    <div class="vs-item"><span style="color:var(--red);font-size:.75rem">⚠️ 不含文档管理！</span><span></span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">CCB（变更控制委员会）</div>
+                    <div class="vs-item"><span>性质</span><span class="badge-red">决策机构（不是作业机构！）</span></div>
+                    <div class="vs-item"><span>工作方式</span><span>评审→决定是否变更</span></div>
+                    <div class="vs-item"><span>注意</span><span class="badge-red">不提出变更方案</span></div>
+                    <div class="vs-item"><span>组成</span><span>用户和实施方决策人员</span></div>
+                </div>
+            </div>
+            <div class="sub-title">需求跟踪</div>
+            <div class="flow">
+                <div class="flow-step">正向跟踪（需求→设计→编程→测试）</div>
+                <div class="flow-arrow">+</div>
+                <div class="flow-step">逆向跟踪（测试→编程→设计→需求）</div>
+                <div class="flow-arrow">=</div>
+                <div class="flow-step" style="border-color:var(--red);color:var(--red);font-weight:700">双向跟踪 ⭐</div>
+            </div>
+            <div class="alert alert-info">💡 需求跟踪必备工具：<strong>需求跟踪矩阵</strong></div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「变版跟」</strong> → 变更控制 + 版本控制 + 需求跟踪（不含文档管理！）</div>
+        </div>
+    </section>
+
+    <!-- ══ S4: 结构化方法 ══ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>结构化方法（SASD）</h1>
+            <p>DFD · 耦合 · 内聚 · 顺分循 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📊</span>4.1 数据流图（DFD）</div>
+            <div class="analogy"><strong>类比：老派的组装工厂</strong> — 面向功能/面向数据流，自顶向下逐步分解，模块化生产</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(4,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">数据流</div><div class="vs-item"><span>符号</span><span>→ 箭头</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">处理/加工</div><div class="vs-item"><span>符号</span><span>○ 圆形</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">数据存储</div><div class="vs-item"><span>符号</span><span>= 平行线</span></div></div>
+                <div class="vs-card vs-e"><div class="vs-title">外部项</div><div class="vs-item"><span>符号</span><span>□ 方形</span></div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「流处存外」</strong> → 数据流 + 处理/加工 + 数据存储 + 外部项（不含"类"！）</div>
+            <div class="sub-title">3种基本控制结构</div>
+            <div class="flow">
+                <div class="flow-step" style="border-color:var(--accent);color:var(--accent)">顺序结构</div>
+                <div class="flow-arrow">+</div>
+                <div class="flow-step" style="border-color:var(--gold);color:var(--gold)">分支结构</div>
+                <div class="flow-arrow">+</div>
+                <div class="flow-step" style="border-color:var(--green);color:var(--green)">循环结构</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「顺分循」</strong> — 构造单入口单出口程序的基础！（不是嵌套或并发！）</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔗</span>4.2 耦合（模块间联系）— 越低越好 <span class="tag tag-hot">★★★必考</span></div>
+            <div class="scale-bar" id="coupling-bar">
+                <div class="scale-item"><div class="scale-dot" style="background:#059669"></div><div class="scale-label" style="color:#059669">非直接耦合</div><div class="scale-desc">模块间无直接关系</div><div class="scale-badge" style="background:rgba(5,150,105,.1);color:#059669">最低 ⭐</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#0284c7"></div><div class="scale-label" style="color:#0284c7">数据耦合</div><div class="scale-desc">参数表传递<strong>简单数据</strong></div><div class="scale-badge" style="background:rgba(2,132,199,.1);color:#0284c7">低</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#0d9488"></div><div class="scale-label" style="color:#0d9488">标记耦合</div><div class="scale-desc">参数表传递<strong>记录/数据结构</strong></div><div class="scale-badge" style="background:rgba(13,148,136,.1);color:#0d9488">↓</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#d97706"></div><div class="scale-label" style="color:#d97706">控制耦合</div><div class="scale-desc">传递<strong>控制信息</strong></div><div class="scale-badge" style="background:rgba(217,119,6,.1);color:#d97706">中</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#7c3aed"></div><div class="scale-label" style="color:#7c3aed">通信耦合</div><div class="scale-desc"><strong>共享输入或输出</strong></div><div class="scale-badge" style="background:rgba(124,58,237,.1);color:#7c3aed">↑</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#db2777"></div><div class="scale-label" style="color:#db2777">公共耦合</div><div class="scale-desc">访问<strong>同一公共数据环境</strong>（全局变量）</div><div class="scale-badge" style="background:rgba(219,39,119,.1);color:#db2777">高</div></div>
+                <div class="scale-item" style="border-color:rgba(220,38,38,.3)"><div class="scale-dot" style="background:#dc2626"></div><div class="scale-label" style="color:#dc2626">内容耦合</div><div class="scale-desc">直接访问内部数据（代码重叠、多入口）</div><div class="scale-badge" style="background:rgba(220,38,38,.12);color:#dc2626">最高 ⭐</div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「非数标控通公内」</strong> → 由低到高 → 谐音「飞数标空通攻内」</div>
+            <div class="alert alert-red">⚠️ 耦合最低=<strong>非直接耦合</strong> · 耦合最高=<strong>内容耦合</strong>（直接访问内部数据）</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🧩</span>4.3 内聚（模块内部关系）— 越高越好 <span class="tag tag-hot">★★★必考</span></div>
+            <div class="scale-bar">
+                <div class="scale-item" style="border-color:rgba(5,150,105,.3)"><div class="scale-dot" style="background:#059669"></div><div class="scale-label" style="color:#059669">功能内聚</div><div class="scale-desc">协同完成<strong>单一功能</strong></div><div class="scale-badge" style="background:rgba(5,150,105,.1);color:#059669">最高 ⭐</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#0284c7"></div><div class="scale-label" style="color:#0284c7">顺序内聚</div><div class="scale-desc">前一输出=后一输入（顺序执行）</div><div class="scale-badge" style="background:rgba(2,132,199,.1);color:#0284c7">高</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#0d9488"></div><div class="scale-label" style="color:#0d9488">通信内聚</div><div class="scale-desc">集中在同一<strong>数据结构</strong>上操作</div><div class="scale-badge" style="background:rgba(13,148,136,.1);color:#0d9488">↓</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#d97706"></div><div class="scale-label" style="color:#d97706">过程内聚</div><div class="scale-desc">按<strong>特定次序</strong>执行</div><div class="scale-badge" style="background:rgba(217,119,6,.1);color:#d97706">中</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#7c3aed"></div><div class="scale-label" style="color:#7c3aed">时间内聚</div><div class="scale-desc">同一<strong>时间间隔</strong>内执行（如初始化）</div><div class="scale-badge" style="background:rgba(124,58,237,.1);color:#7c3aed">↑</div></div>
+                <div class="scale-item"><div class="scale-dot" style="background:#db2777"></div><div class="scale-label" style="color:#db2777">逻辑内聚</div><div class="scale-desc"><strong>逻辑</strong>上相关任务（调用关系决定）</div><div class="scale-badge" style="background:rgba(219,39,119,.1);color:#db2777">低</div></div>
+                <div class="scale-item" style="border-color:rgba(220,38,38,.3)"><div class="scale-dot" style="background:#dc2626"></div><div class="scale-label" style="color:#dc2626">偶然内聚</div><div class="scale-desc">无关系或松散关系</div><div class="scale-badge" style="background:rgba(220,38,38,.12);color:#dc2626">最低 ⭐</div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「功顺通过时逻偶」</strong> → 由高到低 → 谐音「公顺通过时路偶」</div>
+            <div class="alert alert-green">✅ 设计原则：<strong>高内聚、低耦合</strong> — 模块分解的黄金法则！</div>
+        </div>
+    </section>
+
+    <!-- ══ S5: 面向对象 ══ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>面向对象方法（OO）</h1>
+            <p>OOA分析 · OOD设计三类 · OOP三特点 · 逆向工程 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🧱</span>5.1 OOA分析 & OOD设计三类</div>
+            <div class="analogy"><strong>类比：乐高积木</strong> — 每块积木=对象 · 相同形状=类 · 组合替换=多态</div>
+            <div class="sub-title">OOA 5个层次</div>
+            <div class="flow">
+                <div class="flow-step">主题层</div><div class="flow-arrow">+</div>
+                <div class="flow-step">对象类层</div><div class="flow-arrow">+</div>
+                <div class="flow-step">结构层</div><div class="flow-arrow">+</div>
+                <div class="flow-step">属性层</div><div class="flow-arrow">+</div>
+                <div class="flow-step">服务层</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「主对结属服」</strong></div>
+            <div class="sub-title">OOD 3种类型的类 <span class="tag tag-hot">★高频</span></div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">实体类</div>
+                    <div class="vs-item"><span>识别方式</span><span class="badge-acc">通常是名词</span></div>
+                    <div class="vs-item"><span>特征</span><span>永久性、需要存储</span></div>
+                    <div class="vs-item"><span>例子</span><span>教师、学生、订单</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">控制类</div>
+                    <div class="vs-item"><span>识别方式</span><span class="badge-green">控制逻辑</span></div>
+                    <div class="vs-item"><span>特征</span><span>协调控制其他对象</span></div>
+                    <div class="vs-item"><span>例子</span><span>登录验证、事务管理</span></div>
+                </div>
+                <div class="vs-card vs-d">
+                    <div class="vs-title">边界类</div>
+                    <div class="vs-item"><span>识别方式</span><span class="badge-purple">用例内外流动</span></div>
+                    <div class="vs-item"><span>特征</span><span>封装接口和通信协议</span></div>
+                    <div class="vs-item"><span>例子</span><span>窗口、接口、通信协议</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「实名存，控协调，边接口」</strong></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔑</span>5.2 OOP 3大基本特点</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">封装</div><div class="vs-item"><span>含义</span><span>数据与操作组装到一起</span></div><div class="vs-item"><span>目的</span><span>隐藏内部实现</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">继承</div><div class="vs-item"><span>含义</span><span>子对象继承父对象特点</span></div><div class="vs-item"><span>4种</span><span>取包受特</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">多态</div><div class="vs-item"><span>含义</span><span>同一操作不同对象不同结果</span></div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「封继多」</strong> · 继承4种：<strong>「取包受特」</strong> → 取代继承 + 包含继承 + 受限继承 + 特化继承</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔍</span>5.3 逆向工程 <span class="tag tag-key">★高频</span></div>
+            <div class="analogy"><strong>类比：拆解一道菜研究配方</strong> — 不只知道食材（源代码），还要理解烹饪逻辑（更高抽象表现形式）</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>级别</th><th>内容</th><th>抽象级别</th><th>工具支持</th><th>人工参与</th></tr>
+                    <tr><td class="badge-green">实现级（最低）</td><td>语法树、符号表</td><td class="badge-green">低</td><td class="badge-green">高</td><td>低</td></tr>
+                    <tr><td class="badge-acc">结构级</td><td>程序分量间关系（调用图）</td><td>↓</td><td>↓</td><td>↓</td></tr>
+                    <tr><td class="badge-gold">功能级</td><td>功能和程序段之间关系</td><td>↑</td><td>↑</td><td>↑</td></tr>
+                    <tr><td class="badge-red">领域级（最高）</td><td>实体与应用域之间关系</td><td class="badge-red">高</td><td class="badge-red">低</td><td>高</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「实结功领」</strong> → 由低到高，工具支持递减，人工参与递增</div>
+            <div class="alert alert-red">⚠️ <strong>重构</strong> = 同一抽象层级中转换 · <strong>逆向工程</strong> = 跨抽象层级（越来越抽象）</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔄</span>5.4 软件重用 & ORM框架</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">水平式重用</div>
+                    <div class="vs-item"><span>对象</span><span>不同应用领域中的软件元素</span></div>
+                    <div class="vs-item"><span>例子</span><span class="badge-acc">标准函数库</span></div>
+                    <div class="vs-item"><span>口诀</span><span>水平=跨领域通用</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">垂直式重用</div>
+                    <div class="vs-item"><span>对象</span><span>共性应用领域间的软部件</span></div>
+                    <div class="vs-item"><span>例子</span><span class="badge-green">区块链</span></div>
+                    <div class="vs-item"><span>口诀</span><span>垂直=领域内专用</span></div>
+                </div>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>ORM框架</th><th>类型</th><th>特点</th></tr>
+                    <tr><td class="badge-red">Hibernate</td><td class="badge-red">全自动ORM</td><td>跨数据库平台，提供HQL</td></tr>
+                    <tr><td class="badge-gold">iBatis/Mybatis</td><td>手动ORM</td><td>需要程序员手写SQL，深度优化</td></tr>
+                    <tr><td class="badge-acc">JDO</td><td>Java标准</td><td>支持关系库、XML、对象数据库</td></tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ S6: 测试 & 净室 ══ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>软件测试 & 净室软件工程</h1>
+            <p>4个测试阶段 · 黑/白/灰盒 · 净室CSE · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🧪</span>6.1 软件测试阶段对比 <span class="tag tag-hot">必考</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>阶段</th><th>对象</th><th>执行者</th><th>测试方法</th><th>目的</th></tr>
+                    <tr>
+                        <td class="badge-red">单元测试</td>
+                        <td>模块</td>
+                        <td class="badge-red">程序员自己 ⭐</td>
+                        <td class="badge-red">白盒+静态为主</td>
+                        <td>验证模块</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">集成测试</td>
+                        <td>组装后的模块</td>
+                        <td>测试人员</td>
+                        <td class="badge-gold">白盒+黑盒结合</td>
+                        <td>验证组装正确性</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-acc">系统测试</td>
+                        <td>完整系统</td>
+                        <td>测试人员</td>
+                        <td class="badge-acc">黑盒为主</td>
+                        <td class="badge-acc">检查是否符合SRS</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-green">验收测试</td>
+                        <td>完整系统</td>
+                        <td class="badge-green">用户</td>
+                        <td>黑盒</td>
+                        <td>确认满足用户需求</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ <strong>单元测试</strong>由<strong>程序员自己</strong>完成，采用<strong>白盒+静态测试</strong>！</div>
+            <div class="alert alert-warn">⚠️ <strong>系统测试</strong>是检查是否符合<strong>SRS</strong>要求，不是用户需求！</div>
+            <div class="sub-title">系统测试主要内容</div>
+            <div class="flow">
+                <div class="flow-step">功能测试</div><div class="flow-arrow">+</div>
+                <div class="flow-step">性能测试</div><div class="flow-arrow">+</div>
+                <div class="flow-step">健壮性测试</div><div class="flow-arrow">+</div>
+                <div class="flow-step">安全性测试</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「功性健安」</strong></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏥</span>6.2 净室软件工程（CSE） <span class="tag tag-key">★考点</span></div>
+            <div class="analogy"><strong>类比：无菌手术室</strong> — 每步严格验证，预防 > 治疗，用数学方法证明软件正确</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>要素</th><th>内容</th></tr>
+                    <tr><td class="badge-red">理论基础</td><td class="badge-red">函数理论 + 抽样理论 ⭐</td></tr>
+                    <tr><td class="badge-acc">建模工具</td><td>盒子结构规约</td></tr>
+                    <tr><td class="badge-green">核心机制</td><td>正确性验证（而不是测试）</td></tr>
+                    <tr><td class="badge-gold">优点</td><td>可生成质量非常高的软件</td></tr>
+                    <tr><td class="badge-purple">缺点</td><td>太理论化、忽视测试、带有传统弊端</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「净室重验证，函数抽样盒」</strong></div>
+        </div>
+    </section>
+
+    <!-- ══ S7: CBSE & 管理 ══ -->
+    <section id="s7" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 07</div>
+            <h1>CBSE · 软件配置 · 风险管理</h1>
+            <p>构件特征 · 组装方式 · SCM · WBS · Bochm/Charette · 考点密度 ★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🧩</span>7.1 基于构件的软件工程（CBSE）</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">构件5大特征</div>
+                    <div class="vs-item"><span class="badge-acc">组装型</span><span class="label">组</span></div>
+                    <div class="vs-item"><span class="badge-acc">可部署性</span><span class="label">部</span></div>
+                    <div class="vs-item"><span class="badge-acc">文档化</span><span class="label">文</span></div>
+                    <div class="vs-item"><span class="badge-acc">独立性</span><span class="label">独</span></div>
+                    <div class="vs-item"><span class="badge-acc">标准化</span><span class="label">标</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">主流构件模型</div>
+                    <div class="vs-item"><span class="badge-green">Web Services</span><span>通用</span></div>
+                    <div class="vs-item"><span class="badge-gold">Sun的EJB</span><span>Java平台</span></div>
+                    <div class="vs-item"><span class="badge-acc">微软.NET</span><span>Windows平台</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div>
+                <strong>5大特征：「组部文独标」</strong><br>
+                <strong>CBSE 6步骤：「需识改架定组」</strong> → 需求概览→识别候选构件→改需求→架构设计→构件定制→组装构件<br>
+                <strong>构件组装3方式：「顺层叠」</strong> → 顺序组装 + 层次组装 + 叠加组装
+            </div>
+            <div class="alert alert-red">⚠️ CBSE<strong>早期需要完整需求</strong>（与传统开发最大不同）<br>⚠️ 接口不兼容3种问题：<strong>「参操完」</strong>→ 参数/操作不兼容 + 操作不完备 → 解决：编写<strong>适配器构件</strong></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📁</span>7.2 软件配置管理（SCM）& WBS</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">SCM核心内容</div>
+                    <div class="vs-item"><span class="badge-red">版本控制</span><span>追踪记录变更、并行开发</span></div>
+                    <div class="vs-item"><span class="badge-acc">变更控制</span><span>管理变更，确保有序</span></div>
+                    <div class="vs-item"><span style="font-size:.75rem;color:var(--gold)">核心 = 「版变」</span><span></span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">WBS（工作分解结构）</div>
+                    <div class="vs-item"><span>定义</span><span>以可交付成果为导向</span></div>
+                    <div class="vs-item"><span>地位</span><span class="badge-green">计划过程的中心 ⭐</span></div>
+                    <div class="vs-item"><span>层次</span><span>项目→任务→工作→活动</span></div>
+                </div>
+            </div>
+            <div class="sub-title">软件进度管理6过程</div>
+            <div class="flow">
+                <div class="flow-step">活动定义</div><div class="flow-arrow">→</div>
+                <div class="flow-step">活动排序</div><div class="flow-arrow">→</div>
+                <div class="flow-step">资源估计</div><div class="flow-arrow">→</div>
+                <div class="flow-step">历时估计</div><div class="flow-arrow">→</div>
+                <div class="flow-step">制定进度计划</div><div class="flow-arrow">→</div>
+                <div class="flow-step">进度控制</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「定排资历划控」</strong></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>⚠️</span>7.3 软件风险管理</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">Bochm方法（2阶段）</div>
+                    <div class="vs-item"><span class="badge-acc">风险估计</span><span>辨识·分析·排序</span></div>
+                    <div class="vs-item"><span class="badge-red">风险控制</span><span>计划·处理·监督</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">Charette方法</div>
+                    <div class="vs-item"><span class="badge-green">分析</span><span>辨识·估计·评价</span></div>
+                    <div class="vs-item"><span class="badge-gold">管理</span><span>计划·控制·监督</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「Bochm估控，Charette分管」</strong></div>
+            <div class="sub-title">SQA（软件质量保证）</div>
+            <div class="kp-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="kp-item"><div class="kp-title">SQA目的</div><div class="kp-body">使软件过程对<strong>管理人员可见</strong></div></div>
+                <div class="kp-item"><div class="kp-title">SQA主要任务</div><div class="kp-body">审计与评审 · SQA报告 · 处理不符合问题</div></div>
+                <div class="kp-item"><div class="kp-title">国内主要质量认证</div><div class="kp-body">ISO 9001 + CMM ⭐</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ QUIZ ══ -->
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>30道练习题</h1>
+            <p>点击选项即时判断 · 点击「查看解析」获取详细讲解</p>
+        </div>
+        <div style="font-size:.85rem;color:var(--text2);margin-bottom:12px">已答：<span id="answered">0</span> 题 &nbsp;·&nbsp; 正确：<span id="correct-count">0</span> 题 &nbsp;·&nbsp; 正确率：<span id="accuracy">—</span></div>
+        <div class="quiz-filter">
+            <button class="filter-btn active" onclick="filterQuiz('all',this)">全部 (30)</button>
+            <button class="filter-btn" onclick="filterQuiz(0,this)">过程模型 (1-8)</button>
+            <button class="filter-btn" onclick="filterQuiz(1,this)">需求工程 (9-13)</button>
+            <button class="filter-btn" onclick="filterQuiz(2,this)">结构化&OO (14-23)</button>
+            <button class="filter-btn" onclick="filterQuiz(3,this)">测试&管理 (24-30)</button>
+        </div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══ FLASH ══ -->
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">FLASH CARDS</div>
+            <h1>⚡ 速记卡 — 考前必背</h1>
+            <p>悬停查看详情 · 覆盖本章全部核心考点</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+<script>
+    function showSection(id,btn){
+        document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // MODEL DETAILS
+    const modelDetails={
+        waterfall:'<strong>瀑布模型</strong><br>特点：阶段串行、每个阶段有里程碑、因果相连<br>优点：结构清晰，过程有序<br>缺点：需求难一次确定、变更代价高、不能并行开发<br>适用：结构化软件开发，需求明确的项目',
+        proto:'<strong>原型模型</strong><br>特点：快速构建原型→用户确认→开发目标软件<br>优点：解决需求不确定问题，客户参与度高<br>缺点：可能导致用户需求无限扩展<br>适用：需求不明确的项目',
+        spiral:'<strong>螺旋模型 ⭐</strong><br>核心：在<span style="color:var(--red);font-weight:700">原型模型</span>的基础上扩展（不是瀑布！）<br>核心特征：<span style="color:var(--red);font-weight:700">强调风险分析</span>，每转一圈都要进行风险分析<br>4部分：目标设定→风险分析→开发和有效性验证→评审（「目险开评」）<br>优点：支持大型软件项目，减少风险损失<br>缺点：要求开发人员具备丰富的风险分析经验',
+        agile:'<strong>敏捷模型</strong><br>核心价值：个人与交互 > 过程与工具 · 可工作软件 > 综合文档<br>特点：迭代开发、以人为本、响应变化<br>主要方法：XP(测试先行) · Scrum(Backlog+Sprint) · FDD(首席+类程序员) · 水晶系列 · 开放式源码(地域分布广)',
+        rup:'<strong>RUP模型（重量级过程模型）</strong><br>三大特点：用例驱动 + 架构为中心 + 迭代和增量<br>4个阶段：初始→细化→构造→移交（「初细构移」）<br>9个核心工作流：「业需分实测部配项环」<br>适用：构件化开发<br>⚠️ 是重量级过程模型，与敏捷相对'
+    };
+    function showModelDetail(key){
+        const det=document.getElementById('model-detail');
+        document.querySelectorAll('.model-card').forEach(c=>c.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        det.style.display='block';
+        det.innerHTML=modelDetails[key];
+    }
+
+    // 4+1 VIEW DETAILS
+    const view41Details={
+        logic:'<strong>逻辑视图（Logical View）</strong><br>对应人员：<span style="color:var(--accent);font-weight:700">最终用户</span><br>关注点：功能性需求，系统应该提供哪些功能<br>常用图：类图、对象图、状态图、协作图<br>类比：商场介绍册（顾客看什么功能）',
+        impl:'<strong>实现视图 / 开发视图（Implementation/Development View）</strong><br>对应人员：<span style="color:var(--green);font-weight:700">程序员</span><br>关注点：模块组织、静态组织结构<br>常用图：包图、组件图<br>类比：员工手册（程序员怎么组织代码）',
+        proc:'<strong>进程视图 / 过程视图（Process View）</strong><br>对应人员：<span style="color:var(--red);font-weight:700">系统集成人员 ⭐（不是开发人员！）</span><br>关注点：并发性、分布性、容错性、性能<br>常用图：活动图<br>类比：生产调度表（集成时考虑并发和性能）',
+        deploy:'<strong>部署视图 / 物理视图（Deployment/Physical View）</strong><br>对应人员：<span style="color:var(--purple);font-weight:700">系统工程师</span><br>关注点：软件→硬件映射、网络拓扑、通信<br>常用图：部署图<br>类比：建筑平面图（物理上怎么部署）',
+        usecase:'<strong>用例视图（Use-Case View）— +1</strong><br>对应人员：<span style="color:var(--red);font-weight:700">所有人员</span><br>关注点：场景，指导和驱动其他4个视图<br>常用图：用例图<br>类比：总导览图（架构设计的中心）<br>⚠️ 这就是"4+1"中的"+1"！'
+    };
+    function showView41(key){
+        const det=document.getElementById('view41-detail');
+        document.querySelectorAll('.view41-card').forEach(c=>c.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        det.style.display='block';
+        det.innerHTML=view41Details[key];
+    }
+
+    // QUIZ DATA
+    const quizData=[
+        {cat:0,q:'螺旋模型是在（ ）的基础上扩展而成。',opts:['瀑布模型','原型模型','V模型','敏捷模型'],ans:1,exp:'螺旋模型是在「原型模型」基础上结合瀑布模型扩展而成，核心特征是强调风险分析。超高频陷阱：很多人认为是在瀑布模型基础上！'},
+        {cat:0,q:'螺旋模型强调其他模型忽视的（ ）。',opts:['需求分析','快速交付','风险分析','文档化'],ans:2,exp:'螺旋模型的核心是「风险分析」，每次迭代都必须进行风险分析，这是它与其他模型最大的区别。'},
+        {cat:0,q:'以下敏捷方法中，强调"测试先行"的是（ ）。',opts:['水晶系列方法','Scrum方法','极限编程（XP）','特征驱动开发（FDD）'],ans:2,exp:'极限编程(XP)的显著特征是「测试先行」——先写测试代码，再编写实现程序。这是XP的核心实践之一。'},
+        {cat:0,q:'在敏捷方法中，编程开发人员分为首席程序员和"类"程序员的是（ ）。',opts:['极限编程（XP）','水晶系列方法','Scrum方法','特征驱动开发（FDD）'],ans:3,exp:'FDD（特征驱动开发）将开发人员分为首席程序员和"类"程序员，迭代周期一般为2周。'},
+        {cat:0,q:'适用于程序员在地域上分布很广的开发团队的方法是（ ）。',opts:['XP','Scrum','开放式源码','水晶系列'],ans:2,exp:'开放式源码方法适用于程序员在地域上分布很广的团队，特点是高度并行Debug。'},
+        {cat:0,q:'RUP的4个阶段按顺序是（ ）。',opts:['初始→构造→细化→移交','初始→细化→构造→移交','细化→初始→构造→移交','初始→细化→移交→构造'],ans:1,exp:'RUP的4个阶段口诀「初细构移」——初始→细化→构造→移交，顺序不可颠倒！'},
+        {cat:0,q:'RUP"4+1"视图中，对应最终用户的是（ ）。',opts:['逻辑视图','实现视图','进程视图','部署视图'],ans:0,exp:'逻辑视图对应最终用户，关注功能性需求，使用类图、对象图等表达。'},
+        {cat:0,q:'CMMI的5个成熟度等级中，量化管理级与已定义级的区别是（ ）。',opts:['是否文档化','对过程性能的可预测','是否使用工具','是否有标准流程'],ans:1,exp:'量化管理级（4级）与已定义级（3级）的核心区别是：量化管理级能够「对过程性能进行预测」，使用统计和量化技术管理过程。'},
+        // 需求工程
+        {cat:1,q:'软件需求的3个层次不包括（ ）。',opts:['业务需求','用户需求','功能需求','设计需求'],ans:3,exp:'软件需求3层次口诀「业用功」——业务需求·用户需求·功能需求。「设计需求」不在其中！'},
+        {cat:1,q:'需求工程的5个阶段不包括（ ）。',opts:['需求获取','需求分析','需求编码','需求管理'],ans:2,exp:'需求工程5阶段口诀「获分规确管」——需求获取·分析·形成规格·确认验证·管理。没有「需求编码」！'},
+        {cat:1,q:'以下活动中，不属于需求管理主要活动的是（ ）。',opts:['变更控制','版本控制','需求跟踪','文档管理'],ans:3,exp:'需求管理3大活动口诀「变版跟」——变更控制·版本控制·需求跟踪。「文档管理」不是需求管理的活动！这是超高频陷阱！'},
+        {cat:1,q:'关于变更控制委员会（CCB），以下说法错误的是（ ）。',opts:['CCB是决策机构','CCB是作业机构','CCB通过评审决定是否变更','CCB不提出变更方案'],ans:1,exp:'CCB是「决策机构」，不是作业机构！CCB通过评审决定是否接受变更，但不提出变更方案。这是高频考点！'},
+        {cat:1,q:'需求跟踪中的"双向跟踪"是指（ ）。',opts:['正向跟踪和逆向跟踪','横向跟踪和纵向跟踪','功能跟踪和非功能跟踪','用户跟踪和开发跟踪'],ans:0,exp:'双向跟踪 = 正向跟踪（需求→设计→编程→测试）+ 逆向跟踪（测试→编程→设计→需求），必备工具是需求跟踪矩阵。'},
+        // 结构化&OO
+        {cat:2,q:'结构化程序设计通过（ ）三种基本控制结构构造程序。',opts:['顺序、选择和嵌套','顺序、分支和循环','分支、并发和循环','跳转、选择和并发'],ans:1,exp:'结构化程序设计的3种基本控制结构口诀「顺分循」——顺序·分支·循环。不是嵌套或并发！'},
+        {cat:2,q:'数据流图（DFD）的4个基本元素不包括（ ）。',opts:['数据流','处理/加工','数据存储','类'],ans:3,exp:'DFD的4个基本元素口诀「流处存外」——数据流·处理/加工·数据存储·外部项。「类」是面向对象中的概念，不是DFD的元素！'},
+        {cat:2,q:'模块耦合程度最低的是（ ）。',opts:['数据耦合','控制耦合','非直接耦合','内容耦合'],ans:2,exp:'耦合从低到高：「非数标控通公内」。非直接耦合（模块间无直接关系）是最低的，内容耦合是最高的。'},
+        {cat:2,q:'模块内聚程度最高的是（ ）。',opts:['偶然内聚','逻辑内聚','时间内聚','功能内聚'],ans:3,exp:'内聚从高到低：「功顺通过时逻偶」。功能内聚（协同完成单一功能）是最高的，偶然内聚是最低的。'},
+        {cat:2,q:'一组模块通过参数表传递记录等复杂信息的耦合方式是（ ）。',opts:['数据耦合','标记耦合','控制耦合','通信耦合'],ans:1,exp:'标记耦合：通过参数表传递「记录」等复杂数据结构。数据耦合传递简单数据，两者区别在于传递的是简单数据还是数据结构。'},
+        {cat:2,q:'在面向对象设计中，用于封装在用例内、外流动信息的类是（ ）。',opts:['实体类','控制类','边界类','工具类'],ans:2,exp:'边界类用于封装在用例内、外流动的信息或数据流，例子：窗口、接口、通信协议。口诀「边接口」。'},
+        {cat:2,q:'面向对象编程（OOP）的3大基本特点是（ ）。',opts:['封装、继承、多态','抽象、封装、继承','封装、聚合、组合','继承、多态、关联'],ans:0,exp:'OOP 3大基本特点口诀「封继多」——封装·继承·多态。'},
+        {cat:2,q:'以下ORM框架中，提供全自动ORM实现的是（ ）。',opts:['iBatis','Mybatis','Hibernate','JDBC'],ans:2,exp:'Hibernate是全自动ORM框架，跨数据库平台，提供HQL。iBatis/Mybatis是手动ORM，需要程序员手写SQL。'},
+        {cat:2,q:'逆向工程信息恢复的级别从低到高依次是（ ）。',opts:['实现级→功能级→结构级→领域级','实现级→结构级→功能级→领域级','领域级→功能级→结构级→实现级','结构级→实现级→功能级→领域级'],ans:1,exp:'逆向工程信息恢复级别从低到高口诀「实结功领」——实现级→结构级→功能级→领域级。抽象级别越高，工具支持越少，人工参与越多。'},
+        {cat:2,q:'在同一抽象层级中转换系统描述的活动称为（ ）。',opts:['逆向工程','设计恢复','重构','重用'],ans:2,exp:'重构是在「同一抽象层级」中转换系统描述；逆向工程是跨抽象层级（从低到高）；这是重要区分！'},
+        // 测试&管理
+        {cat:3,q:'单元测试通常由（ ）完成。',opts:['测试人员','程序员自己','客户','项目经理'],ans:1,exp:'单元测试由「程序员自己」完成，主要对模块进行验证，采用白盒+静态测试方法。'},
+        {cat:3,q:'单元测试主要采用（ ）方法。',opts:['白盒静态测试','黑盒测试','灰盒测试','验收测试'],ans:0,exp:'单元测试采用「白盒+静态测试」——包括静态分析、代码审查、白盒测试用例设计。'},
+        {cat:3,q:'系统测试的主要内容不包括（ ）。',opts:['功能测试','性能测试','健壮性测试','单元测试'],ans:3,exp:'系统测试内容口诀「功性健安」——功能测试·性能测试·健壮性测试·安全性测试。「单元测试」属于更早的阶段！'},
+        {cat:3,q:'净室软件工程（CSE）的理论基础是（ ）。',opts:['函数理论和抽样理论','概率论和数理统计','数据流理论和控制流理论','面向对象理论'],ans:0,exp:'CSE的理论基础是「函数理论和抽样理论」，建模工具是盒子结构规约，核心是正确性验证而不是测试。'},
+        {cat:3,q:'CBSE过程与传统软件开发过程最大的不同点是（ ）。',opts:['后期需要完整的需求','早期需要完整的需求，以便识别可复用的构件','不需要架构设计','不需要测试'],ans:1,exp:'CBSE的显著特点是「早期需要完整的需求」，这与传统开发最大的不同——因为需要根据需求识别可复用的候选构件。'},
+        {cat:3,q:'构件组装面临接口不兼容的问题不包括（ ）。',opts:['参数不兼容','操作不兼容','操作不完备','类型不兼容'],ans:3,exp:'接口不兼容3种问题口诀「参操完」——参数不兼容·操作不兼容·操作不完备。「类型不兼容」不在标准的3种之内！解决方案是编写适配器构件。'},
+        {cat:3,q:'软件配置管理（SCM）的核心内容是（ ）。',opts:['版本控制和变更控制','需求控制和设计控制','质量控制和成本控制','进度控制和范围控制'],ans:0,exp:'SCM核心内容口诀「版变」——版本控制和变更控制。版本控制追踪记录变更，变更控制管理变更的有序进行。'},
+    ];
+
+    let answered=0,correct=0;
+    function renderQuiz(items){
+        const c=document.getElementById('quiz-container');
+        c.innerHTML='';
+        items.forEach(item=>{
+            const gi=quizData.indexOf(item);
+            const d=document.createElement('div');
+            d.className='quiz-q';
+            d.innerHTML=`<div class="quiz-num">第 ${gi+1} 题 / 共 30 题</div>
+    <div class="quiz-text">${item.q}</div>
+    <div class="quiz-options" id="opts-${gi}">
+      ${['A','B','C','D'].map((L,j)=>`<button class="opt-btn" data-q="${gi}" data-opt="${j}" onclick="handleOpt(${gi},${j})"><span class="opt-letter">${L}.</span><span>${item.opts[j]}</span></button>`).join('')}
+    </div>
+    <button class="reveal-btn" id="reveal-${gi}" onclick="revealAns(${gi})" style="display:none">💡 查看解析</button>
+    <div class="quiz-ans" id="ans-${gi}"><div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div><div class="ans-body">${item.exp}</div></div>`;
+            c.appendChild(d);
+        });
+    }
+    function handleOpt(qi,opt){
+        const item=quizData[qi];
+        const opts=document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed'))return;
+        opts.forEach((btn,j)=>{btn.classList.add('revealed');if(j===item.ans)btn.classList.add('correct');else if(j===opt)btn.classList.add('wrong');});
+        answered++;if(opt===item.ans)correct++;
+        document.getElementById('answered').textContent=answered;
+        document.getElementById('correct-count').textContent=correct;
+        document.getElementById('accuracy').textContent=Math.round(correct/answered*100)+'%';
+        document.getElementById(`reveal-${qi}`).style.display='inline-flex';
+    }
+    function revealAns(qi){document.getElementById(`ans-${qi}`).classList.toggle('show');}
+    function filterQuiz(cat,btn){
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        renderQuiz(cat==='all'?quizData:quizData.filter(q=>q.cat===cat));
+    }
+    renderQuiz(quizData);
+
+    // FLASH CARDS
+    const flashData=[
+        {n:'01',topic:'软件危机6大表现',mnemonic:'进成能质维档',detail:'进度难预测·成本难控制·功能难满足·质量难保证·维护困难·文档缺失'},
+        {n:'02',topic:'螺旋模型',mnemonic:'在原型模型基础上+风险分析',detail:'不是瀑布！4部分：目险开评→目标设定+风险分析+开发+评审'},
+        {n:'03',topic:'敏捷方法区分',mnemonic:'XP测试先行，FDD首席+类程序员',detail:'Scrum=Backlog+Sprint · 开放式源码=地域分布广'},
+        {n:'04',topic:'RUP 4阶段',mnemonic:'初细构移',detail:'初始→细化→构造→移交，顺序不可颠倒'},
+        {n:'05',topic:'RUP 4+1视图',mnemonic:'逻用·实程·进集·部工',detail:'逻辑→用户 · 实现→程序员 · 进程→集成人员 · 部署→工程师'},
+        {n:'06',topic:'进程视图对应人员',mnemonic:'进程视图=系统集成人员',detail:'超高频陷阱！不是开发人员！'},
+        {n:'07',topic:'CMMI 5级',mnemonic:'初管定量优',detail:'第4级量化管理级=过程性能可预测（与第3级已定义级的核心区别）'},
+        {n:'08',topic:'需求3层次',mnemonic:'业用功',detail:'业务需求→用户需求→功能需求（从高层到具体）'},
+        {n:'09',topic:'需求工程5阶段',mnemonic:'获分规确管',detail:'需求获取→分析→规格说明(SRS)→确认验证→管理'},
+        {n:'10',topic:'需求管理3活动',mnemonic:'变版跟',detail:'变更控制+版本控制+需求跟踪，不含文档管理！'},
+        {n:'11',topic:'CCB',mnemonic:'决策机构，不提方案',detail:'变更控制委员会=决策机构，不是作业机构，不提出变更方案'},
+        {n:'12',topic:'双向跟踪',mnemonic:'正向+逆向=双向跟踪',detail:'工具：需求跟踪矩阵'},
+        {n:'13',topic:'DFD 4元素',mnemonic:'流处存外',detail:'数据流+处理/加工+数据存储+外部项，不含类！'},
+        {n:'14',topic:'3种控制结构',mnemonic:'顺分循',detail:'顺序+分支+循环，不是嵌套或并发！'},
+        {n:'15',topic:'耦合 最低→最高',mnemonic:'非数标控通公内',detail:'非直接耦合最低⭐，内容耦合最高⭐'},
+        {n:'16',topic:'内聚 最高→最低',mnemonic:'功顺通过时逻偶',detail:'功能内聚最高⭐，偶然内聚最低⭐'},
+        {n:'17',topic:'设计黄金法则',mnemonic:'高内聚、低耦合',detail:'模块分解的核心原则'},
+        {n:'18',topic:'标记耦合',mnemonic:'传递记录/数据结构',detail:'数据耦合传简单数据，标记耦合传数据结构，注意区分'},
+        {n:'19',topic:'OOD 3种类',mnemonic:'实名存·控协调·边接口',detail:'实体类=名词+存储 · 控制类=协调 · 边界类=接口/窗口'},
+        {n:'20',topic:'OOP 3特点',mnemonic:'封继多',detail:'封装+继承+多态 · 继承4种：取包受特'},
+        {n:'21',topic:'逆向工程4级',mnemonic:'实结功领（由低到高）',detail:'越高越抽象，工具支持越少，人工参与越多'},
+        {n:'22',topic:'重构 vs 逆向',mnemonic:'重构=同一抽象层级',detail:'逆向工程=跨抽象层级，方向是从低到高'},
+        {n:'23',topic:'软件测试4阶段',mnemonic:'单元(程序员/白盒静态)→集成→系统(黑盒/SRS)→验收(用户)',detail:'单元测试由程序员自己完成！系统测试对照SRS！'},
+        {n:'24',topic:'系统测试内容',mnemonic:'功性健安',detail:'功能·性能·健壮性·安全性测试'},
+        {n:'25',topic:'净室CSE',mnemonic:'函数理论+抽样理论+盒子结构',detail:'核心是正确性验证，不是测试'},
+        {n:'26',topic:'CBSE特征',mnemonic:'组部文独标',detail:'早期需要完整需求（最大不同点）'},
+        {n:'27',topic:'构件组装3方式',mnemonic:'顺层叠',detail:'顺序+层次+叠加组装 · 接口不兼容：参操完 → 适配器解决'},
+        {n:'28',topic:'SCM核心',mnemonic:'版变',detail:'版本控制+变更控制'},
+        {n:'29',topic:'WBS',mnemonic:'以可交付成果为导向，计划过程的中心',detail:'项目→任务→工作→活动'},
+        {n:'30',topic:'风险管理方法',mnemonic:'Bochm估控，Charette分管',detail:'Bochm=风险估计+风险控制 · Charette=分析+管理'},
+    ];
+    (function renderFlash(){
+        const g=document.getElementById('flash-grid');
+        flashData.forEach(fc=>{
+            const d=document.createElement('div');d.className='flash-card';
+            d.innerHTML=`<div class="fc-num"># ${fc.n}</div><div class="fc-topic">${fc.topic}</div><div class="fc-mnemonic">「${fc.mnemonic}」</div><div class="fc-detail">${fc.detail}</div>`;
+            g.appendChild(d);
+        });
+    })();
+</script>
+</body>
+</html>
