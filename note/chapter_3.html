@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章 · 计算机网络基础知识 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:#fdfbf7; --bg2:#f4efe6; --card:#fff; --card2:#f9f7f2;
+            --border:#e8e2d5; --border2:#d4cbb8;
+            --text:#2c2825; --text2:#5e574f; --text3:#8f877c;
+            --accent:#0284c7; --accent2:#0369a1;
+            --gold:#d97706; --gold2:#b45309;
+            --green:#059669; --red:#dc2626;
+            --purple:#7c3aed; --pink:#db2777; --teal:#0d9488;
+            --nav-h:56px; --radius:10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ── NAV ── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+            background:rgba(253,251,247,.93);backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);z-index:1000;
+            display:flex;align-items:center;padding:0 16px;gap:2px;overflow-x:auto;white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px}
+        .nav-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── MAIN ── */
+        main{padding-top:calc(var(--nav-h)+24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── HERO ── */
+        .section-hero{text-align:center;padding:40px 20px 32px;background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;position:relative;overflow:hidden}
+        .section-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);pointer-events:none}
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:520px;margin:0 auto}
+        .section-tag{display:inline-block;padding:3px 10px;background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:12px}
+
+        /* ── CARD ── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+        /* ── ANALOGY ── */
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2)}
+        .analogy strong{color:var(--gold)}
+
+        /* ── MNEMONIC ── */
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple)}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ── FORMULA ── */
+        .formula-box{background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;margin:12px 0;line-height:1.8}
+
+        /* ── TABLE ── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+
+        /* ── KP GRID ── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ── ALERT ── */
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+
+        /* ── SUB TITLE ── */
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ── TAG ── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+
+        /* ── VS GRID ── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-e .vs-title{background:rgba(13,148,136,.1);color:var(--teal)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        /* ── LAYER STACK ── */
+        .layer-stack{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .layer-row{display:grid;grid-template-columns:28px 1fr 1fr auto;gap:10px;align-items:center;padding:9px 13px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);transition:border-color .15s;font-size:.82rem}
+        .layer-row:hover{border-color:var(--border2)}
+        .layer-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;text-align:center}
+        .layer-name{font-weight:700}
+        .layer-pdu{color:var(--text3);font-size:.77rem}
+        .layer-proto{color:var(--text2);font-size:.77rem;text-align:right}
+
+        /* ── OSI GRID (colored rows) ── */
+        .osi-grid{display:flex;flex-direction:column;gap:3px;margin:12px 0}
+        .osi-row{display:grid;grid-template-columns:28px 1fr 80px 1fr;gap:8px;align-items:center;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);font-size:.8rem;transition:border-color .15s}
+        .osi-row:hover{border-color:var(--border2)}
+
+        /* ── FLOW ── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3)}
+
+        /* ── QUIZ ── */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.83rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4}
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        #quiz-score{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ── FLASH CARDS ── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ── PORT TABLE special ── */
+        .port-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin:12px 0}
+        .port-item{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:.82rem}
+        .port-num{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:2px}
+        .port-proto{font-weight:600;color:var(--text);font-size:.83rem}
+        .port-trans{font-size:.75rem;color:var(--text3)}
+        .port-desc{font-size:.78rem;color:var(--text2);margin-top:2px}
+
+        /* ── IP CLASS ── */
+        .ip-bar{display:flex;flex-direction:column;gap:4px;margin:12px 0}
+        .ip-row{display:grid;grid-template-columns:36px 1fr 110px 90px;gap:8px;align-items:center;padding:7px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);font-size:.81rem;transition:border-color .15s}
+        .ip-row:hover{border-color:var(--border2)}
+        .ip-class{font-weight:900;font-family:'JetBrains Mono',monospace;font-size:1rem;text-align:center}
+        .ip-range{color:var(--text2);font-size:.77rem;font-family:'JetBrains Mono',monospace}
+        .ip-mask{color:var(--text3);font-size:.77rem;font-family:'JetBrains Mono',monospace}
+        .ip-use{text-align:right}
+
+        /* ── HANDSHAKE SVG ── */
+        #hs-wrap{overflow-x:auto;padding:8px 0}
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:640px){
+            main{padding-left:12px;padding-right:12px}
+            .section-hero h1{font-size:1.3rem}
+            .kp-grid{grid-template-columns:1fr}
+            .flash-grid{grid-template-columns:1fr}
+            .layer-row{grid-template-columns:24px 1fr;grid-template-rows:auto auto}
+            .layer-pdu,.layer-proto{grid-column:1/3;font-size:.75rem}
+            .ip-row{grid-template-columns:28px 1fr}
+            .ip-range,.ip-mask,.ip-use{grid-column:1/3;font-size:.75rem}
+            .osi-row{grid-template-columns:24px 1fr}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ TOP NAV ══ -->
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        架构师第三章
+    </div>
+    <button class="nav-btn active" onclick="go('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="go('s1',this)">① 网络概念</button>
+    <button class="nav-btn" onclick="go('s2',this)">② 通信技术</button>
+    <button class="nav-btn" onclick="go('s3',this)">③ 网络技术</button>
+    <button class="nav-btn" onclick="go('s4',this)">④ 组网技术</button>
+    <button class="nav-btn" onclick="go('s5',this)">⑤ 网络工程</button>
+    <button class="nav-btn" onclick="go('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="go('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══════════ 知识地图 ══════════ -->
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 03</div>
+            <h1>计算机网络基础知识</h1>
+            <p>每年必考 3-5 分 · 核心考点稳定 · 计算题+记忆题并重</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏗️</span>全章知识架构</div>
+            <div style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 900 490" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:490px">
+                    <defs>
+                        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#d4cbb8"/>
+                        </marker>
+                    </defs>
+                    <!-- Root -->
+                    <rect x="355" y="215" width="180" height="46" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="445" y="234" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第三章</text>
+                    <text x="445" y="252" text-anchor="middle" font-size="10.5" fill="#0284c7">计算机网络基础知识</text>
+                    <!-- Branches left -->
+                    <line x1="355" y1="232" x2="200" y2="80" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="108" y="61" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="173" y="77" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 基本概念</text>
+                    <text x="173" y="92" text-anchor="middle" font-size="9.5" fill="#5e574f">六大性能指标</text>
+
+                    <line x1="355" y1="228" x2="165" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="40" y="160" width="138" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="109" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. 通信技术</text>
+                    <text x="109" y="190" text-anchor="middle" font-size="9.5" fill="#5e574f">复用·多址·5G</text>
+
+                    <line x1="355" y1="248" x2="165" y2="308" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="40" y="289" width="138" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="109" y="305" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 网络技术</text>
+                    <text x="109" y="320" text-anchor="middle" font-size="9.5" fill="#5e574f">LAN·以太网·移动通信</text>
+
+                    <line x1="355" y1="258" x2="200" y2="400" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="108" y="381" width="130" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="173" y="397" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 网络工程</text>
+                    <text x="173" y="412" text-anchor="middle" font-size="9.5" fill="#5e574f">三层架构·核汇接</text>
+                    <!-- Branches right -->
+                    <line x1="535" y1="232" x2="695" y2="80" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="660" y="61" width="130" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="725" y="77" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">OSI七层模型</text>
+                    <text x="725" y="92" text-anchor="middle" font-size="9.5" fill="#5e574f">物数网传会表应</text>
+
+                    <line x1="535" y1="238" x2="726" y2="178" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="688" y="160" width="130" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="753" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">4. 组网技术</text>
+                    <text x="753" y="190" text-anchor="middle" font-size="9.5" fill="#5e574f">TCP/IP·子网·路由</text>
+
+                    <line x1="535" y1="248" x2="726" y2="308" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="688" y="289" width="130" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="753" y="305" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">TCP vs UDP</text>
+                    <text x="753" y="320" text-anchor="middle" font-size="9.5" fill="#5e574f">三次握手·四次挥手</text>
+
+                    <line x1="535" y1="258" x2="695" y2="400" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="660" y="381" width="130" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="725" y="397" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">子网划分计算</text>
+                    <text x="725" y="412" text-anchor="middle" font-size="9.5" fill="#5e574f">★★★计算题必考</text>
+
+                    <!-- sub tags -->
+                    <rect x="800" y="46" width="56" height="18" rx="9" fill="rgba(220,38,38,.1)" stroke="rgba(220,38,38,.25)"/>
+                    <text x="828" y="59" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">超高频考点</text>
+                    <line x1="798" y1="55" x2="760" y2="68" stroke="rgba(220,38,38,.25)" stroke-width=".8" stroke-dasharray="3,3"/>
+                    <rect x="372" y="188" width="90" height="18" rx="9" fill="rgba(217,119,6,.12)" stroke="rgba(217,119,6,.28)"/>
+                    <text x="417" y="201" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309">选择题 3-5分</text>
+                </svg>
+            </div>
+        </div>
+
+        <div class="kp-grid">
+            <div class="kp-item"><div class="kp-title">🔥 OSI七层+设备层级</div><div class="kp-body">物数网传会表应<br>一中集·二桥换·三路由</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 TCP vs UDP</div><div class="kp-body">三次握手·四次挥手<br>可靠慢 vs 快不靠</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 子网划分计算</div><div class="kp-body">借n位→2ⁿ子网<br>剩m位→2ᵐ-2主机</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 常用端口号</div><div class="kp-body">21FTP·22SSH·25SMTP<br>53DNS·80HTTP·443HTTPS</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 5G三大场景</div><div class="kp-body">eMBB快·mMTC多<br>uRLLC稳</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ RIP vs OSPF</div><div class="kp-body">RIP跳数15·距离矢量<br>OSPF带宽·Dijkstra</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 三层网络架构</div><div class="kp-body">核心快转·汇聚管策<br>接入连人</div></div>
+            <div class="kp-item"><div class="kp-title">📊 802标准族</div><div class="kp-body">802.3有线·802.11无线<br>802.15个人·802.16城域</div></div>
+        </div>
+    </section>
+
+    <!-- ══════════ S1: 基本概念 ══════════ -->
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>网络的基本概念</h1>
+            <p>六大性能指标 · 时延公式 · 考点密度 ★★☆☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📡</span>1.1 计算机网络定义</div>
+            <div class="analogy">
+                <strong>生活类比：小区网络</strong><br>
+                每栋楼=一台计算机，楼间道路=网络线路，物业=服务器，快递员=数据包。
+                整个小区=局域网，多个小区通过市政道路连接=广域网。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>要素</th><th>说明</th></tr>
+                    <tr><td>硬件</td><td>计算机、通信设备、传输介质</td></tr>
+                    <tr><td>软件</td><td>网络操作系统、协议软件、应用软件</td></tr>
+                    <tr><td class="badge-acc">协议</td><td>通信双方必须遵守的规则和约定（最重要）</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📊</span>1.2 六大网络性能指标 <span class="tag tag-key">★★</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>指标</th><th>高速公路类比</th><th>含义</th><th>单位</th></tr>
+                    <tr><td class="badge-acc">带宽（Bandwidth）</td><td>车道数量</td><td>单位时间能传输的最大数据量</td><td>bps</td></tr>
+                    <tr><td class="badge-acc">时延（Latency）</td><td>出发到到达的时间</td><td>数据从源到目的所需时间</td><td>s/ms</td></tr>
+                    <tr><td class="badge-acc">吞吐量（Throughput）</td><td>实际通过的车流量</td><td>单位时间内实际传输的数据量</td><td>bps</td></tr>
+                    <tr><td>丢包率</td><td>运输中丢失的货物比例</td><td>传输中丢失数据包的比例</td><td>%</td></tr>
+                    <tr><td>可用性</td><td>公路不封路时间占比</td><td>网络正常运行时间百分比</td><td>%</td></tr>
+                    <tr><td>误码率（BER）</td><td>送错地址的包裹比例</td><td>传输中出错比特占总比特的比例</td><td>—</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 带宽 vs 吞吐量：带宽是理论最大值（车道数），吞吐量是实际传输量（实际车流）。</div>
+            <div class="sub-title">时延四分量 <span class="tag tag-gold">★计算题</span></div>
+            <div class="formula-box">总时延 = 发送时延 + 传播时延 + 处理时延 + 排队时延
+
+                发送时延 = 数据长度(bit) ÷ 发送速率(bps)    → 把数据推上公路的时间
+                传播时延 = 信道长度(m)  ÷ 信号传播速率(m/s)  → 在公路上行驶的时间
+
+                例题：100Mbps链路传输1MB文件的发送时延：
+                发送时延 = 1MB × 8 ÷ 100Mbps = 8Mb ÷ 100Mbps = 0.08s</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                六大指标：<strong>「带时吞丢可误」</strong> → 谐音「戴石吞丢渴雾」<br>
+                注意：带宽≠吞吐量（理论最大值 vs 实际值）
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S2: 通信技术 ══════════ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>通信技术</h1>
+            <p>信号转换 · 复用技术 · 5G三场景 · 考点密度 ★★★☆</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>📻</span>2.0 通信系统基石：数据、信道与信号转换 <span class="tag tag-key">★★</span></div>
+            <div class="analogy">
+                <strong>生活类比：跨国快递运输网</strong><br>
+                <ul>
+                    <li><strong>信源/信宿：</strong>发件人（信源）和收件人（信宿）。</li>
+                    <li><strong>数据与信号：</strong>包裹里的物品（数据），打包好的实体快递盒（信号，分模拟和数字）。</li>
+                    <li><strong>物理信道 vs 逻辑信道：</strong><strong>物理信道</strong>是真实存在的高速公路或航线（载体）；<strong>逻辑信道</strong>是快递公司在系统中为你这单快递生成的虚拟追踪路线（建立在物理航线之上，可有连接或无连接）。</li>
+                    <li><strong>信号变换：</strong>寄件前需要把物品装箱打包（<strong>编码</strong>），贴防撞条混装（<strong>交织</strong>），装上货车（<strong>调制</strong>）；收件后卸货（<strong>解调</strong>），拆箱验货（<strong>解码</strong>）。</li>
+                </ul>
+            </div>
+            <div class="flow">
+                <div class="flow-step">信源发数据</div><div class="flow-arrow">→</div>
+                <div class="flow-step">编码/交织/调制</div><div class="flow-arrow">→</div>
+                <div class="flow-step" style="border-color:var(--accent);color:var(--accent)">信道传输</div><div class="flow-arrow">→</div>
+                <div class="flow-step">解调/解码</div><div class="flow-arrow">→</div>
+                <div class="flow-step">信宿收信息</div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「源宿发收，物实逻虚，编交调解」</strong><br>
+                （发送接收找源宿，物理真实逻辑虚，传输要过编交调解四道关）
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🚛</span>2.0.1 核心辨析：复用技术 vs 多址技术 <span class="tag tag-hot">★★★</span></div>
+            <div class="alert alert-warn">💡 考试常考两者概念区分！复用侧重于“路（数据流）”的划分，多址侧重于“人（用户）”的区分。</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">复用技术 (Multiplexing)</div>
+                    <div class="vs-item"><span class="label">核心定义</span><span>一条信道同时传多路数据</span></div>
+                    <div class="vs-item"><span class="label">生活类比</span><span class="badge-acc">一条路上行驶多辆货车</span></div>
+                    <div class="vs-item"><span class="label">重点解释</span><span>把宽阔的马路划分为多个车道（时分/频分/码分），让不同的车（数据流）各行其道，互不干扰。</span></div>
+                    <div class="vs-item"><span class="label">代表技术</span><span>TDM、FDM、CDM</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">多址技术 (Multiple Access)</div>
+                    <div class="vs-item"><span class="label">核心定义</span><span>一条线上同时传多用户数据</span></div>
+                    <div class="vs-item"><span class="label">生活类比</span><span class="badge-green">一辆大巴车上的乘客属于不同家庭</span></div>
+                    <div class="vs-item"><span class="label">重点解释</span><span>资源池共享。车还是那辆车，但车上的座位分配给了不同的乘客（多个用户），到站后再把他们各自独立分离出来。</span></div>
+                    <div class="vs-item"><span class="label">代表技术</span><span>TDMA、FDMA、CDMA</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「复用分车道（切分通道传多路），多址拼车坐（多用户共享资源）」</strong><br>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🚀</span>2.0.2 5G 通信网络基础特性 <span class="tag tag-key">★★</span></div>
+            <div class="analogy">
+                <strong>生活类比：未来智慧立体交通网</strong><br>
+                相比 4G 的普通马路，5G 就像是立体的磁悬浮交通网，不仅跑得快（下载秒完），遇到紧急情况零延迟刹车（低时延），而且就算是在演唱会现场几万人同时用网络也不卡（超高容量）。
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">💨 高速率 (快)</div><div class="kp-body">大幅提升数据传输速度，满足高清视频、AR/VR等需求（对应 eMBB 场景）。</div></div>
+                <div class="kp-item"><div class="kp-title">⏱️ 低时延 (稳)</div><div class="kp-body">网络响应时间极短，为自动驾驶、远程医疗等提供关键保障（对应 uRLLC 场景）。</div></div>
+                <div class="kp-item"><div class="kp-title">👥 接入用户数高 (多)</div><div class="kp-body">支持海量设备同时在线，是万物互联、智慧城市的基础（对应 mMTC 场景）。</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                5G 核心三板斧：<strong>「快（速率高）、稳（时延低）、多（接入广）」</strong>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🔄</span>2.1 四种信号转换 <span class="tag tag-key">★★</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>转换方式</th><th>含义</th><th>技术举例</th></tr>
+                    <tr><td class="badge-acc">数字→数字（编码）</td><td>数字数据用数字信号传输</td><td>曼彻斯特编码、差分曼彻斯特、NRZ、NRZI</td></tr>
+                    <tr><td class="badge-acc">数字→模拟（调制）</td><td>数字数据用模拟信号传输</td><td>ASK(调幅)、FSK(调频)、PSK(调相)、QAM</td></tr>
+                    <tr><td class="badge-acc">模拟→数字（采样）</td><td>模拟数据用数字信号传输</td><td>PCM脉冲编码调制（采样→量化→编码）</td></tr>
+                    <tr><td>模拟→模拟（调制）</td><td>模拟数据用模拟信号传输</td><td>频分复用调制</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">曼彻斯特编码 <span class="tag tag-hot">★★★历年高频</span></div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">编码效率</div><div class="kp-body"><strong class="badge-red">50%</strong>（跳变占用了一半带宽）</div></div>
+                <div class="kp-item"><div class="kp-title">自同步</div><div class="kp-body"><strong class="badge-green">✅ 可以</strong>从信号中提取时钟</div></div>
+                <div class="kp-item"><div class="kp-title">应用</div><div class="kp-body">传统以太网（10BASE-T）</div></div>
+                <div class="kp-item"><div class="kp-title">差分曼彻斯特</div><div class="kp-body">应用于令牌环网，每周期开始处跳变决定比特值</div></div>
+            </div>
+            <div class="sub-title">PCM 采样过程</div>
+            <div class="flow">
+                <div class="flow-step">采样</div><div class="flow-arrow">→</div>
+                <div class="flow-step">量化</div><div class="flow-arrow">→</div>
+                <div class="flow-step">编码</div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「编调采调」</strong> → 数数编码、数模调制、模数采样、模模调制<br>
+                曼彻斯特：<strong>效率50%，能自同步</strong>（这是考试最爱考的两点）
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🛤️</span>2.2 复用技术 <span class="tag tag-hot">★★★</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>技术</th><th>全称</th><th>分割维度</th><th>生活类比</th><th>典型应用</th></tr>
+                    <tr><td class="badge-acc">FDM</td><td>频分复用</td><td>频率</td><td>FM88.0·FM92.5同时播出</td><td>有线电视·广播</td></tr>
+                    <tr><td class="badge-acc">TDM</td><td>时分复用</td><td>时间</td><td>轮流发言各1分钟</td><td>电话系统T1/E1</td></tr>
+                    <tr><td>STDM</td><td>统计时分复用</td><td>时间（动态）</td><td>按需分配发言时间</td><td>异步传输</td></tr>
+                    <tr><td class="badge-acc">WDM/DWDM</td><td>波分复用</td><td>波长（光频率）</td><td>一根光纤传多种颜色的光</td><td><strong>光纤通信</strong></td></tr>
+                    <tr><td class="badge-acc">CDM</td><td>码分复用</td><td>编码</td><td>聚会中用暗语交流互不干扰</td><td>CDMA移动通信</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 复用(固定分配) vs 多址(动态分配)：复用=固定工位，多址=共享办公（谁来谁坐）</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「频时波码」</strong> → 谐音「贫时拨码」→ 穷困时拨打电话求助
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📱</span>2.3 移动通信代际 + 多址技术 <span class="tag tag-key">★★</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>代际</th><th>年代</th><th>多址技术</th><th>特点</th><th>代表</th></tr>
+                    <tr><td class="badge-acc">1G</td><td>1980s</td><td>FDMA（频分）</td><td>模拟通信，只能打电话</td><td>AMPS</td></tr>
+                    <tr><td class="badge-acc">2G</td><td>1990s</td><td>TDMA（时分）</td><td>数字通信，能发短信</td><td>GSM</td></tr>
+                    <tr><td class="badge-acc">3G</td><td>2000s</td><td>CDMA（码分）</td><td>移动互联网起步</td><td>WCDMA / TD-SCDMA</td></tr>
+                    <tr><td class="badge-acc">4G</td><td>2010s</td><td>OFDMA（正交频分）</td><td>高速移动宽带</td><td>LTE</td></tr>
+                    <tr><td class="badge-acc">5G</td><td>2020s</td><td>OFDMA+NOMA</td><td>三大场景</td><td>NR</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「1频2时3码4正5非」</strong> → 谐音「一瓶二十三毛四正五飞」
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🚀</span>2.4 5G 三大应用场景 <span class="tag tag-hot">★★★必考</span></div>
+            <div class="vs-grid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">eMBB 快</div>
+                    <div class="vs-item"><span class="label">全称</span><span>增强移动宽带</span></div>
+                    <div class="vs-item"><span class="label">峰值速率</span><span class="badge-acc">20 Gbps</span></div>
+                    <div class="vs-item"><span class="label">典型应用</span><span>4K/8K视频·VR/AR</span></div>
+                    <div class="vs-item"><span class="label">记忆词</span><span class="badge-green">猛（速度猛）</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">mMTC 多</div>
+                    <div class="vs-item"><span class="label">全称</span><span>海量机器类通信</span></div>
+                    <div class="vs-item"><span class="label">连接密度</span><span class="badge-acc">百万设备/km²</span></div>
+                    <div class="vs-item"><span class="label">典型应用</span><span>智慧城市·物联网</span></div>
+                    <div class="vs-item"><span class="label">记忆词</span><span class="badge-green">满（设备满）</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">uRLLC 稳</div>
+                    <div class="vs-item"><span class="label">全称</span><span>超可靠低时延</span></div>
+                    <div class="vs-item"><span class="label">时延</span><span class="badge-red">1 ms</span></div>
+                    <div class="vs-item"><span class="label">典型应用</span><span>自动驾驶·远程手术</span></div>
+                    <div class="vs-item"><span class="label">记忆词</span><span class="badge-red">稳（高可靠）</span></div>
+                </div>
+            </div>
+            <div class="sub-title">5G 关键技术</div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">网络切片</div><div class="kp-body">同一物理网络上创建多个虚拟网络，按需定制</div></div>
+                <div class="kp-item"><div class="kp-title">服务化架构SBA</div><div class="kp-body">控制面采用微服务化设计，网络功能模块化</div></div>
+                <div class="kp-item"><div class="kp-title">边缘计算MEC</div><div class="kp-body">将计算下沉到网络边缘，降低时延</div></div>
+                <div class="kp-item"><div class="kp-title">Massive MIMO</div><div class="kp-body">大规模天线阵列，提升系统容量</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「5G三兄弟：快(eMBB)多(mMTC)稳(uRLLC)」</strong><br>
+                自动驾驶/远程手术→uRLLC；智慧城市/物联网→mMTC；VR/4K→eMBB
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S3: 网络技术 ══════════ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>网络技术</h1>
+            <p>局域网 · 以太网 · WLAN · 广域网 · 考点密度 ★★★☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏙️</span>3.1 局域网拓扑结构</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>拓扑</th><th>优点</th><th>缺点</th><th>典型应用</th></tr>
+                    <tr><td>总线型</td><td>简单、成本低</td><td class="badge-red">故障诊断难、冲突多</td><td>早期以太网</td></tr>
+                    <tr><td class="badge-acc">星型</td><td class="badge-green">易管理、故障隔离好</td><td>中心节点是瓶颈</td><td>现代以太网（交换机）</td></tr>
+                    <tr><td>环型</td><td>延迟确定</td><td class="badge-red">一点故障全网瘫</td><td>令牌环网</td></tr>
+                    <tr><td>树型</td><td>易扩展</td><td>根节点是瓶颈</td><td>大型局域网</td></tr>
+                    <tr><td>网状型</td><td class="badge-green">可靠性最高</td><td class="badge-red">成本最高</td><td>骨干网</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">介质访问控制方法</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">CSMA/CD（有线以太网）</div>
+                    <div class="vs-item"><span class="label">全称</span><span>载波监听/冲突检测</span></div>
+                    <div class="vs-item"><span class="label">原理</span><span>先听后发，边听边发，冲突停发，随机重发</span></div>
+                    <div class="vs-item"><span class="label">应用</span><span class="badge-acc">有线以太网 802.3</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">CSMA/CA（无线WiFi）</div>
+                    <div class="vs-item"><span class="label">全称</span><span>载波监听/冲突避免</span></div>
+                    <div class="vs-item"><span class="label">原理</span><span>先听后发，等待确认ACK</span></div>
+                    <div class="vs-item"><span class="label">原因</span><span class="badge-red">无线存在隐藏终端问题</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「有线检测CD，无线避免CA」</strong> → 简记「有检无避」
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔌</span>3.2 IEEE 802 标准族 <span class="tag tag-hot">★★★</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>标准</th><th>名称</th><th>说明</th></tr>
+                    <tr><td class="badge-acc">802.3</td><td>以太网</td><td>CSMA/CD，有线局域网的事实标准</td></tr>
+                    <tr><td class="badge-acc">802.11</td><td>无线局域网（WiFi）</td><td>CSMA/CA；802.11i=WPA2安全标准</td></tr>
+                    <tr><td>802.15</td><td>无线个人区域网</td><td>蓝牙（802.15.1）、ZigBee（802.15.4）</td></tr>
+                    <tr><td>802.16</td><td>无线城域网（WiMAX）</td><td>宽带无线接入</td></tr>
+                    <tr><td>802.1Q</td><td>VLAN标准</td><td>虚拟局域网标签协议</td></tr>
+                    <tr><td>802.1D</td><td>生成树协议（STP）</td><td>防止网络环路</td></tr>
+                </table>
+            </div>
+            <div class="sub-title">WiFi 标准演进</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>标准</th><th>WiFi名称</th><th>频段</th><th>最高速率</th></tr>
+                    <tr><td>802.11n</td><td class="badge-gold">WiFi 4</td><td>2.4/5GHz</td><td>600Mbps</td></tr>
+                    <tr><td>802.11ac</td><td class="badge-gold">WiFi 5</td><td>5GHz</td><td>6.9Gbps</td></tr>
+                    <tr><td class="badge-acc">802.11ax</td><td class="badge-gold">WiFi 6</td><td>2.4/5/6GHz</td><td>9.6Gbps</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「3有线，11无线，15个人，16城域」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🌐</span>3.4 LAN vs MAN vs WAN</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>特性</th><th>局域网 LAN</th><th>城域网 MAN</th><th>广域网 WAN</th></tr>
+                    <tr><td>覆盖范围</td><td>几百米~几公里</td><td>5~50公里</td><td>几十公里~全球</td></tr>
+                    <tr><td>速率</td><td class="badge-green">高（100M~100G）</td><td>中</td><td>相对较低</td></tr>
+                    <tr><td>所有权</td><td>单一组织</td><td>运营商</td><td>多个运营商</td></tr>
+                    <tr><td>典型技术</td><td>以太网</td><td>城域以太网·MSTP</td><td>MPLS·ATM·Frame Relay</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 覆盖范围：PAN（个人，几米） &lt; LAN（几百米） &lt; MAN（城市） &lt; WAN（全球）</div>
+        </div>
+    </section>
+
+    <!-- ══════════ S4: 组网技术 ══════════ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>组网技术</h1>
+            <p>OSI七层 · TCP/IP · 子网计算 · 路由协议 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🗼</span>4.1 网络设备工作层级 <span class="tag tag-hot">★★★超高频</span></div>
+            <div class="analogy">
+                中继器/集线器=修路工人（物理层）· 交换机/网桥=交警（链路层）· 路由器=导航系统（网络层）· 网关=海关翻译（高层）
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>设备</th><th>工作层级</th><th>寻址方式</th><th>功能</th></tr>
+                    <tr><td>中继器（Repeater）</td><td>第1层（物理层）</td><td>无寻址</td><td>信号放大、整形</td></tr>
+                    <tr><td>集线器（Hub）</td><td>第1层（物理层）</td><td>无寻址</td><td>多端口中继器，<strong>广播</strong></td></tr>
+                    <tr><td class="badge-acc">网桥（Bridge）</td><td>第2层（数据链路层）</td><td>MAC地址</td><td>根据MAC地址转发</td></tr>
+                    <tr><td class="badge-acc">交换机（Switch）</td><td>第2层（数据链路层）</td><td>MAC地址</td><td>多端口网桥，MAC学习</td></tr>
+                    <tr><td class="badge-gold">路由器（Router）</td><td>第3层（网络层）</td><td>IP地址</td><td>路由转发，<strong>隔离广播域</strong></td></tr>
+                    <tr><td>网关（Gateway）</td><td>第4~7层（高层）</td><td>应用层地址</td><td>协议转换</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 陷阱：交换机隔离<strong>冲突域</strong>，但不能隔离广播域！只有路由器才能隔离广播域。</div>
+            <div class="alert alert-warn">⚠️ 陷阱：集线器（Hub）是第1层设备，不是第2层！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「一中集，二桥换，三路由，高网关」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>📋</span>4.2 OSI 七层模型 <span class="tag tag-hot">★★★必考</span></div>
+            <div class="analogy">
+                寄国际快递：写信（应用层）→ 翻译（表示层）→ 去邮局排号（会话层）→ 选快递方式（传输层）→ 写地址选路线（网络层）→ 打包贴标签（链路层）→ 装车运输（物理层）
+            </div>
+            <div class="osi-grid">
+                <div class="osi-row" style="border-color:#db2777;background:rgba(219,39,119,.04)">
+                    <div style="font-weight:900;font-family:'JetBrains Mono',monospace;color:#db2777;text-align:center">7</div>
+                    <div style="font-weight:700;color:#db2777">应用层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Data（数据）</div>
+                    <div style="color:var(--text2);font-size:.77rem">HTTP·FTP·SMTP·DNS·SNMP</div>
+                </div>
+                <div class="osi-row">
+                    <div style="font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text3);text-align:center">6</div>
+                    <div style="font-weight:700;color:var(--text)">表示层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Data</div>
+                    <div style="color:var(--text2);font-size:.77rem">JPEG·MPEG·ASCII·SSL/TLS</div>
+                </div>
+                <div class="osi-row">
+                    <div style="font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text3);text-align:center">5</div>
+                    <div style="font-weight:700;color:var(--text)">会话层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Data</div>
+                    <div style="color:var(--text2);font-size:.77rem">NFS·SQL·RPC</div>
+                </div>
+                <div class="osi-row" style="border-color:#059669;background:rgba(5,150,105,.04)">
+                    <div style="font-weight:900;font-family:'JetBrains Mono',monospace;color:#059669;text-align:center">4</div>
+                    <div style="font-weight:700;color:#059669">传输层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Segment（段）</div>
+                    <div style="color:var(--text2);font-size:.77rem">TCP · UDP</div>
+                </div>
+                <div class="osi-row" style="border-color:#0284c7;background:rgba(2,132,199,.04)">
+                    <div style="font-weight:900;font-family:'JetBrains Mono',monospace;color:#0284c7;text-align:center">3</div>
+                    <div style="font-weight:700;color:#0284c7">网络层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Packet（包）</div>
+                    <div style="color:var(--text2);font-size:.77rem">IP·ICMP·ARP·OSPF·BGP</div>
+                </div>
+                <div class="osi-row">
+                    <div style="font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text3);text-align:center">2</div>
+                    <div style="font-weight:700;color:var(--text)">数据链路层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Frame（帧）</div>
+                    <div style="color:var(--text2);font-size:.77rem">PPP·以太网·VLAN·STP</div>
+                </div>
+                <div class="osi-row">
+                    <div style="font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text3);text-align:center">1</div>
+                    <div style="font-weight:700;color:var(--text)">物理层</div>
+                    <div style="color:var(--text3);font-size:.77rem">Bit（比特）</div>
+                    <div style="color:var(--text2);font-size:.77rem">RS-232·RJ-45·光纤</div>
+                </div>
+            </div>
+            <div class="alert alert-warn">⚠️ ARP协议工作在<strong>网络层</strong>（将IP→MAC），虽然涉及MAC地址但属于网络层！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                从下到上：<strong>「物数网传会表应」</strong> → 谐音「巫师往前会表演」<br>
+                PDU：<strong>「比特·帧·包·段·数据」</strong>（物→链→网→传→高层）
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔗</span>4.3 TCP vs UDP <span class="tag tag-hot">★★★必考</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">TCP — 可靠但慢</div>
+                    <div class="vs-item"><span class="label">连接方式</span><span class="badge-acc">面向连接</span></div>
+                    <div class="vs-item"><span class="label">可靠性</span><span class="badge-green">可靠（确认+重传）</span></div>
+                    <div class="vs-item"><span class="label">首部大小</span><span>20 字节</span></div>
+                    <div class="vs-item"><span class="label">传输方式</span><span>字节流</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>打电话（先拨通再说）</span></div>
+                    <div class="vs-item"><span class="label">典型协议</span><span class="badge-acc">HTTP·FTP·SMTP·Telnet</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">UDP — 快但不可靠</div>
+                    <div class="vs-item"><span class="label">连接方式</span><span class="badge-red">无连接</span></div>
+                    <div class="vs-item"><span class="label">可靠性</span><span class="badge-red">不可靠</span></div>
+                    <div class="vs-item"><span class="label">首部大小</span><span>8 字节</span></div>
+                    <div class="vs-item"><span class="label">传输方式</span><span>数据报</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>发传单（直接投出去）</span></div>
+                    <div class="vs-item"><span class="label">典型协议</span><span class="badge-gold">DNS·DHCP·SNMP·TFTP·RTP</span></div>
+                </div>
+            </div>
+            <div class="alert alert-warn">⚠️ DNS默认使用UDP，区域传送使用TCP，选项说"DNS只用UDP"→错！</div>
+
+            <div class="sub-title">TCP 三次握手 <span class="tag tag-hot">★★★</span></div>
+            <div id="hs-wrap" style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 520 170" style="width:100%;min-width:380px;max-height:170px;font-family:'Noto Sans SC',sans-serif">
+                    <!-- columns -->
+                    <line x1="120" y1="20" x2="120" y2="160" stroke="#e8e2d5" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <line x1="400" y1="20" x2="400" y2="160" stroke="#e8e2d5" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    <text x="120" y="14" text-anchor="middle" font-size="11" font-weight="700" fill="#0284c7">客户端</text>
+                    <text x="400" y="14" text-anchor="middle" font-size="11" font-weight="700" fill="#059669">服务器</text>
+                    <!-- Arrow 1 -->
+                    <path d="M128,40 L392,65" stroke="#0284c7" stroke-width="1.5" fill="none" marker-end="url(#a2)"/>
+                    <text x="260" y="46" text-anchor="middle" font-size="10" fill="#0284c7" font-weight="600">① SYN → 你好，听得到吗？</text>
+                    <!-- Arrow 2 -->
+                    <path d="M392,75 L128,100" stroke="#059669" stroke-width="1.5" fill="none" marker-end="url(#a3)"/>
+                    <text x="260" y="83" text-anchor="middle" font-size="10" fill="#059669" font-weight="600">② SYN+ACK ← 听得到，你呢？</text>
+                    <!-- Arrow 3 -->
+                    <path d="M128,108 L392,133" stroke="#0284c7" stroke-width="1.5" fill="none" marker-end="url(#a2)"/>
+                    <text x="260" y="118" text-anchor="middle" font-size="10" fill="#0284c7" font-weight="600">③ ACK → 能听到，开始吧！</text>
+                    <!-- badge -->
+                    <rect x="195" y="148" width="130" height="17" rx="8" fill="rgba(5,150,105,.08)" stroke="rgba(5,150,105,.25)"/>
+                    <text x="260" y="160" text-anchor="middle" font-size="9.5" fill="#059669" font-weight="700">连接建立 ✓</text>
+                    <defs>
+                        <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0284c7"/></marker>
+                        <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+                    </defs>
+                </svg>
+            </div>
+            <div class="alert alert-red">⚠️ 三次握手建立，四次挥手断开！选项说「三次挥手」→ 错！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                TCP用UDP：<strong>「HTTP发(FTP)短(SMTP)信(Telnet)」</strong> → 都用TCP<br>
+                UDP用途：<strong>「DNS的(DHCP)脑(SNMP)子(TFTP)热(RTP)」</strong> → 都用UDP
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔢</span>4.4 常用协议与端口号 <span class="tag tag-hot">★★★</span></div>
+            <div class="port-grid">
+                <div class="port-item"><div class="port-num">20/21</div><div class="port-proto">FTP</div><div class="port-trans">TCP</div><div class="port-desc">文件传输（20数据·21控制）</div></div>
+                <div class="port-item"><div class="port-num">22</div><div class="port-proto">SSH</div><div class="port-trans">TCP</div><div class="port-desc">安全远程登录</div></div>
+                <div class="port-item"><div class="port-num">23</div><div class="port-proto">Telnet</div><div class="port-trans">TCP</div><div class="port-desc">远程登录（不安全）</div></div>
+                <div class="port-item"><div class="port-num">25</div><div class="port-proto">SMTP</div><div class="port-trans">TCP</div><div class="port-desc">发送邮件</div></div>
+                <div class="port-item" style="border-color:rgba(220,38,38,.25)"><div class="port-num" style="color:#dc2626">53</div><div class="port-proto">DNS</div><div class="port-trans">UDP/TCP</div><div class="port-desc">域名解析（默认UDP）</div></div>
+                <div class="port-item"><div class="port-num">67/68</div><div class="port-proto">DHCP</div><div class="port-trans">UDP</div><div class="port-desc">动态主机配置</div></div>
+                <div class="port-item" style="border-color:rgba(2,132,199,.25)"><div class="port-num" style="color:#0284c7">80</div><div class="port-proto">HTTP</div><div class="port-trans">TCP</div><div class="port-desc">网页浏览</div></div>
+                <div class="port-item"><div class="port-num">110</div><div class="port-proto">POP3</div><div class="port-trans">TCP</div><div class="port-desc">接收邮件</div></div>
+                <div class="port-item"><div class="port-num">161</div><div class="port-proto">SNMP</div><div class="port-trans">UDP</div><div class="port-desc">网络管理</div></div>
+                <div class="port-item" style="border-color:rgba(5,150,105,.25)"><div class="port-num" style="color:#059669">443</div><div class="port-proto">HTTPS</div><div class="port-trans">TCP</div><div class="port-desc">加密网页浏览</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「21传文件，22安全连，23远程登，25发邮件，53解域名，80看网页，443加密看」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🌍</span>4.5 IP地址与子网划分 <span class="tag tag-hot">★★★计算必考</span></div>
+            <div class="sub-title">IP 地址分类</div>
+            <div class="ip-bar">
+                <div class="ip-row" style="border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.03)">
+                    <div class="ip-class" style="color:#dc2626">A</div>
+                    <div style="font-weight:600;font-size:.83rem">1.0.0.0 ~ 126.x.x.x</div>
+                    <div class="ip-range">掩码 /8</div>
+                    <div class="ip-use"><span class="badge-acc">大型网络</span></div>
+                </div>
+                <div class="ip-row" style="border-color:rgba(217,119,6,.25)">
+                    <div class="ip-class" style="color:#d97706">B</div>
+                    <div style="font-weight:600;font-size:.83rem">128.0.0.0 ~ 191.x.x.x</div>
+                    <div class="ip-range">掩码 /16</div>
+                    <div class="ip-use"><span class="badge-gold">中型网络</span></div>
+                </div>
+                <div class="ip-row" style="border-color:rgba(5,150,105,.25)">
+                    <div class="ip-class" style="color:#059669">C</div>
+                    <div style="font-weight:600;font-size:.83rem">192.0.0.0 ~ 223.x.x.x</div>
+                    <div class="ip-range">掩码 /24</div>
+                    <div class="ip-use"><span class="badge-green">小型网络</span></div>
+                </div>
+                <div class="ip-row">
+                    <div class="ip-class" style="color:var(--purple)">D</div>
+                    <div style="font-weight:600;font-size:.83rem">224.0.0.0 ~ 239.x.x.x</div>
+                    <div class="ip-range">—</div>
+                    <div class="ip-use"><span class="badge-purple">组播</span></div>
+                </div>
+                <div class="ip-row">
+                    <div class="ip-class" style="color:var(--text3)">E</div>
+                    <div style="font-weight:600;font-size:.83rem">240.0.0.0 ~ 255.x.x.x</div>
+                    <div class="ip-range">—</div>
+                    <div class="ip-use" style="font-size:.77rem;color:var(--text3)">保留实验</div>
+                </div>
+            </div>
+            <div class="sub-title">子网划分计算 <span class="tag tag-gold">★★★必会</span></div>
+            <div class="formula-box">核心公式：
+                子网数  = 2ⁿ           （n = 借用的主机位数）
+                主机数  = 2ᵐ - 2       （m = 剩余主机位数，减去网络地址和广播地址）
+                子网掩码：网络位全1，主机位全0
+
+                ★ 例题（C类）：192.168.1.0 需要8个子网
+                步骤1：2³=8，借3位
+                步骤2：新掩码=/27 = 255.255.255.11100000 = 255.255.255.224
+                步骤3：剩余主机位 = 32-27 = 5位
+                步骤4：每子网主机数 = 2⁵-2 = 30台
+
+                ★ 例题（C类）：192.168.1.0 需要4个子网
+                借2位 → /26 = 255.255.255.192，每子网 2⁶-2 = 62台</div>
+            <div class="kp-grid">
+                <div class="kp-item"><div class="kp-title">127.0.0.1</div><div class="kp-body">本机回环地址（localhost）</div></div>
+                <div class="kp-item"><div class="kp-title">私有地址</div><div class="kp-body">10.x.x.x<br>172.16~31.x.x<br>192.168.x.x</div></div>
+                <div class="kp-item"><div class="kp-title">255.255.255.255</div><div class="kp-body">受限广播地址</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「A大B中C小D组E留」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🗺️</span>4.6 路由协议 <span class="tag tag-hot">★★★</span></div>
+            <div class="vs-grid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">RIP</div>
+                    <div class="vs-item"><span class="label">算法</span><span>距离矢量 Bellman-Ford</span></div>
+                    <div class="vs-item"><span class="label">度量</span><span class="badge-red">跳数（最大15跳）</span></div>
+                    <div class="vs-item"><span class="label">收敛</span><span class="badge-red">慢</span></div>
+                    <div class="vs-item"><span class="label">适用</span><span>小型网络</span></div>
+                    <div class="vs-item"><span class="label">类别</span><span class="badge-acc">内部网关（IGP）</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">OSPF</div>
+                    <div class="vs-item"><span class="label">算法</span><span>链路状态 Dijkstra</span></div>
+                    <div class="vs-item"><span class="label">度量</span><span class="badge-green">带宽（开销）</span></div>
+                    <div class="vs-item"><span class="label">收敛</span><span class="badge-green">快</span></div>
+                    <div class="vs-item"><span class="label">适用</span><span>大型网络</span></div>
+                    <div class="vs-item"><span class="label">类别</span><span class="badge-acc">内部网关（IGP）</span></div>
+                </div>
+                <div class="vs-card vs-d">
+                    <div class="vs-title">BGP</div>
+                    <div class="vs-item"><span class="label">算法</span><span>路径矢量</span></div>
+                    <div class="vs-item"><span class="label">度量</span><span>策略路由</span></div>
+                    <div class="vs-item"><span class="label">收敛</span><span>慢但稳</span></div>
+                    <div class="vs-item"><span class="label">适用</span><span>Internet自治系统间</span></div>
+                    <div class="vs-item"><span class="label">类别</span><span class="badge-gold">外部网关（EGP）</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 陷阱：OSPF使用<strong>带宽（开销）</strong>作度量值，不是跳数！RIP才用跳数，最大15跳。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「RIP跳数15，OSPF带宽快，BGP自治间」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔀</span>4.3 交换机 VLAN 要点</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>概念</th><th>说明</th></tr>
+                    <tr><td>MAC地址表</td><td>交换机学习并记录每个端口连接的MAC地址</td></tr>
+                    <tr><td class="badge-acc">VLAN（802.1Q）</td><td>虚拟局域网，逻辑上隔离广播域</td></tr>
+                    <tr><td>STP（802.1D）</td><td>生成树协议，防止网络环路</td></tr>
+                    <tr><td class="badge-red">冲突域</td><td>交换机每个端口是独立的冲突域（隔离冲突）</td></tr>
+                    <tr><td class="badge-red">广播域</td><td>交换机不隔离广播域！需路由器隔离</td></tr>
+                </table>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>交换方式</th><th>说明</th><th>特点</th></tr>
+                    <tr><td>存储转发</td><td>收完整帧→检查→转发</td><td>可差错检测，延迟大</td></tr>
+                    <tr><td>直通转发</td><td>只读目的MAC就转发</td><td>延迟小，无法检错</td></tr>
+                    <tr><td>碎片隔离</td><td>读前64字节再转发</td><td>折中方案</td></tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S5: 网络工程 ══════════ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>网络工程</h1>
+            <p>三层网络架构 · 冗余设计 · 考点密度 ★★★☆</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏙️</span>5.2 三层网络架构 <span class="tag tag-hot">★★★必考</span></div>
+            <div class="analogy">
+                三层架构 = 城市交通：高速公路（核心层）→ 城市主干道（汇聚层）→ 小区内部道路（接入层）
+            </div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#dc2626;background:rgba(220,38,38,.04)">
+                    <div class="layer-num" style="color:#dc2626">核</div>
+                    <div class="layer-name" style="color:#dc2626">核心层（Core）</div>
+                    <div class="layer-pdu" style="color:#dc2626">高速数据交换·骨干传输</div>
+                    <div class="layer-proto">高端路由器·三层交换机</div>
+                </div>
+                <div class="layer-row" style="border-color:#d97706;background:rgba(217,119,6,.04)">
+                    <div class="layer-num" style="color:#d97706">汇</div>
+                    <div class="layer-name" style="color:#d97706">汇聚层（Distribution）</div>
+                    <div class="layer-pdu" style="color:#d97706">策略控制·路由汇聚·ACL</div>
+                    <div class="layer-proto">三层交换机·路由器</div>
+                </div>
+                <div class="layer-row" style="border-color:#059669;background:rgba(5,150,105,.04)">
+                    <div class="layer-num" style="color:#059669">接</div>
+                    <div class="layer-name" style="color:#059669">接入层（Access）</div>
+                    <div class="layer-pdu" style="color:#059669">用户接入·端口认证</div>
+                    <div class="layer-proto">二层交换机·AP</div>
+                </div>
+            </div>
+            <div class="sub-title">各层设计要点</div>
+            <div class="vs-grid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="vs-card vs-a">
+                    <div class="vs-title">核心层</div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>高速转发</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>冗余设计</span></div>
+                    <div class="vs-item"><span class="badge-red">❌</span><span>不做ACL策略</span></div>
+                    <div class="vs-item"><span class="badge-red">❌</span><span>不直连用户设备</span></div>
+                </div>
+                <div class="vs-card vs-b">
+                    <div class="vs-title">汇聚层</div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>路由汇聚和过滤</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>安全策略·QoS</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>VLAN间路由</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>ACL访问控制列表</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">接入层</div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>用户认证和接入控制</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>VLAN划分</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>PoE供电（AP·IP电话）</span></div>
+                    <div class="vs-item"><span class="badge-green">✅</span><span>端口安全</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 核心层<strong>不应</strong>部署ACL——会降低转发性能！ACL应在汇聚层部署。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「核心快转，汇聚管策，接入连人」</strong>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>♻️</span>高频陷阱汇总</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>错误说法 ❌</th><th>正确理解 ✅</th></tr>
+                    <tr><td>交换机能隔离广播域</td><td class="badge-green">交换机隔离冲突域，<strong>路由器</strong>才能隔离广播域</td></tr>
+                    <tr><td>ARP工作在数据链路层</td><td class="badge-green">ARP工作在<strong>网络层</strong>（将IP→MAC）</td></tr>
+                    <tr><td>DNS只使用UDP</td><td class="badge-green">DNS查询默认UDP，区域传送用TCP</td></tr>
+                    <tr><td>OSPF使用跳数作为度量</td><td class="badge-green">OSPF使用<strong>带宽（开销）</strong>，RIP才用跳数</td></tr>
+                    <tr><td>核心层应部署ACL</td><td class="badge-green">ACL应部署在<strong>汇聚层</strong>，核心层只做快速转发</td></tr>
+                    <tr><td>Hub是第2层设备</td><td class="badge-green">Hub（集线器）是<strong>第1层</strong>设备，交换机才是第2层</td></tr>
+                    <tr><td>三次挥手断开TCP</td><td class="badge-green"><strong>三次握手</strong>建立，<strong>四次挥手</strong>断开</td></tr>
+                    <tr><td>CSMA/CA用于有线以太网</td><td class="badge-green">CSMA/<strong>CD</strong>用于有线，CSMA/<strong>CA</strong>用于无线</td></tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ QUIZ ══════════ -->
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>30道配套练习题</h1>
+            <p>覆盖全章知识点 · 含详细解析 · 模拟真实考试</p>
+        </div>
+        <div id="quiz-score">已作答：<span id="answered">0</span> / 30 题 &nbsp;|&nbsp; 答对：<span id="correct-count">0</span> 题</div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══════════ FLASH CARDS ══════════ -->
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">QUICK REF</div>
+            <h1>12张必背速记卡</h1>
+            <p>核心口诀 · 考前冲刺 · 快速过一遍</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+
+<script>
+    // ── NAV ──
+    function go(id, btn) {
+        document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // ── QUIZ DATA ──
+    const Q = [
+        // 基本概念与通信技术
+        {q:"在计算机网络的性能指标中，表示单位时间内网络实际传输数据量的是（　）。",opts:["带宽","时延","吞吐量","误码率"],ans:2,exp:"带宽是理论最大传输速率（车道数），吞吐量是实际传输的数据量（实际车流量）。题目问「实际传输数据量」，所以是吞吐量。"},
+        {q:"在一条带宽为10Mbps的链路上，发送一个大小为5000字节的数据帧，发送时延为（　）。",opts:["0.5ms","4ms","5ms","40ms"],ans:1,exp:"发送时延 = 数据长度 / 带宽 = 5000×8bit / 10×10⁶bps = 40000 / 10000000 = 0.004s = 4ms。注意字节到比特转换：1字节=8比特。"},
+        {q:"曼彻斯特编码的主要特点是（　）。",opts:["编码效率100%，不能自同步","编码效率50%，能自同步","编码效率100%，能自同步","编码效率50%，不能自同步"],ans:1,exp:"曼彻斯特编码每个比特中间都有跳变，因此可以自同步（从信号中提取时钟），但跳变占用了一半带宽，编码效率只有50%。"},
+        {q:"在光纤通信中，将多路光信号以不同波长同时传输的技术称为（　）。",opts:["频分复用（FDM）","时分复用（TDM）","码分复用（CDM）","波分复用（WDM）"],ans:3,exp:"波分复用（WDM）是光纤通信特有的复用技术，本质是光的频分复用，利用不同波长的光在同一根光纤中同时传输。"},
+        {q:"2G移动通信系统GSM主要采用的多址技术是（　）。",opts:["FDMA","TDMA","CDMA","OFDMA"],ans:1,exp:"移动通信代际与多址技术：1G-FDMA，2G-TDMA（GSM），3G-CDMA，4G-OFDMA。GSM是2G的代表，使用TDMA（时分多址）。"},
+        {q:"5G的三大应用场景中，适用于智慧城市和大规模物联网的是（　）。",opts:["eMBB","mMTC","uRLLC","NB-IoT"],ans:1,exp:"5G三大场景：eMBB（高速率，如VR/AR）、mMTC（大连接，如物联网/智慧城市）、uRLLC（低时延高可靠，如自动驾驶）。智慧城市属于mMTC。"},
+        {q:"以下关于5G网络切片技术的描述，正确的是（　）。",opts:["每个切片必须使用独立的物理网络","可以在同一物理网络上创建多个虚拟网络","网络切片只能用于eMBB场景","网络切片不支持定制化服务"],ans:1,exp:"网络切片的核心价值就是在同一物理网络上创建多个虚拟网络，每个虚拟网络可以根据不同业务需求进行定制化配置，不需要独立物理网络。"},
+        {q:"以下关于复用技术和多址技术的区别，正确的是（　）。",opts:["两者完全相同，只是叫法不同","复用是固定分配信道，多址是动态分配信道","复用用于无线通信，多址用于有线通信","复用只能在物理层使用"],ans:1,exp:"复用技术是固定分配信道资源（如固定工位），多址技术是动态分配信道资源（如共享办公空间）。多址技术主要用于无线移动通信。"},
+        {q:"PCM脉冲编码调制的过程依次为（　）。",opts:["编码→采样→量化","采样→编码→量化","采样→量化→编码","量化→采样→编码"],ans:2,exp:"PCM脉冲编码调制三个步骤按顺序：采样（连续信号→离散样本）→ 量化（样本值近似为有限等级）→ 编码（量化值转为二进制码）。口诀：「采量编」。"},
+        {q:"以下哪种调制方式是将数字信号转换为模拟信号？（　）",opts:["PCM","ASK","曼彻斯特编码","NRZ编码"],ans:1,exp:"ASK（幅移键控）是数字信号→模拟信号的调制技术。PCM是模拟→数字。曼彻斯特编码和NRZ是数字→数字的编码技术。"},
+        // 网络技术
+        {q:"IEEE 802.3标准定义的是（　）。",opts:["令牌环网","无线局域网","以太网","城域网"],ans:2,exp:"IEEE 802标准族：802.3=以太网（CSMA/CD），802.5=令牌环网，802.11=无线局域网（WiFi），802.16=无线城域网（WiMAX）。"},
+        {q:"以太网使用的介质访问控制方法是（　）。",opts:["CSMA/CA","CSMA/CD","令牌传递","ALOHA"],ans:1,exp:"以太网（有线局域网）使用CSMA/CD（载波监听多路访问/冲突检测）。口诀：先听后发，边听边发，冲突停发，随机重发。CSMA/CA用于无线局域网。"},
+        {q:"无线局域网（WiFi）使用CSMA/CA而不是CSMA/CD的原因是（　）。",opts:["CSMA/CA速度更快","无线环境中存在隐藏终端问题，无法有效检测冲突","CSMA/CD只能用于广域网","CSMA/CA的实现成本更低"],ans:1,exp:"无线环境中存在「隐藏终端」问题——两个终端互相听不到对方的信号，但都能到达同一个接入点，因此无法有效检测冲突，只能采用冲突避免（CA）策略。"},
+        {q:"以下关于局域网拓扑结构的描述，正确的是（　）。",opts:["总线型拓扑可靠性最高","星型拓扑的中心节点故障不影响网络","环型拓扑中一个节点故障可能导致全网瘫痪","网状拓扑的成本最低"],ans:2,exp:"环型拓扑中数据沿环单向传输，一个节点故障可能导致环路断裂，全网瘫痪。总线型可靠性不高（一断全断），星型中心故障影响全网，网状拓扑成本最高但可靠性最高。"},
+        {q:"IEEE 802.11i标准主要解决的是无线局域网的（　）问题。",opts:["传输速率","覆盖范围","安全认证和加密","频率分配"],ans:2,exp:"IEEE 802.11i是WiFi的安全标准，定义了WPA2安全协议，主要解决无线局域网的安全认证和加密问题，取代了原来脆弱的WEP加密。"},
+        {q:"ATM（异步传输模式）使用固定长度的信元，每个信元大小为（　）字节。",opts:["48","53","64","128"],ans:1,exp:"ATM使用固定长度的信元（Cell），每个信元53字节 = 5字节头部 + 48字节数据。这是ATM的标志性特征。"},
+        {q:"以下哪种网络覆盖范围最大？（　）",opts:["局域网（LAN）","城域网（MAN）","广域网（WAN）","个人区域网（PAN）"],ans:2,exp:"网络覆盖范围从小到大：PAN（个人区域网，几米）< LAN（局域网，几百米~几公里）< MAN（城域网，几十公里）< WAN（广域网，全球）。"},
+        {q:"WiFi 6对应的IEEE标准是（　）。",opts:["802.11n","802.11ac","802.11ax","802.11ad"],ans:2,exp:"WiFi代际与802.11标准：WiFi 4=802.11n，WiFi 5=802.11ac，WiFi 6=802.11ax。"},
+        // 组网技术
+        {q:"在OSI参考模型中，负责路由选择和逻辑寻址的是（　）。",opts:["物理层","数据链路层","网络层","传输层"],ans:2,exp:"OSI各层功能：物理层（比特传输）、数据链路层（帧传输/MAC寻址）、网络层（路由选择/逻辑寻址/IP）、传输层（端到端传输）。"},
+        {q:"交换机工作在OSI模型的（　），路由器工作在（　）。",opts:["物理层，数据链路层","数据链路层，网络层","网络层，传输层","数据链路层，传输层"],ans:1,exp:"交换机根据MAC地址转发，工作在第2层（数据链路层）；路由器根据IP地址路由，工作在第3层（网络层）。口诀：「二桥换，三路由」。"},
+        {q:"以下设备中，能够隔离广播域的是（　）。",opts:["集线器","中继器","交换机","路由器"],ans:3,exp:"集线器和中继器工作在物理层，不能隔离任何域。交换机能隔离冲突域但不能隔离广播域。只有路由器（第3层设备）能隔离广播域。"},
+        {q:"TCP建立连接需要（　）次握手，释放连接需要（　）次挥手。",opts:["2，3","3，4","3，3","4，4"],ans:1,exp:"TCP建立连接：三次握手（SYN→SYN+ACK→ACK）。释放连接：四次挥手（FIN→ACK→FIN→ACK），因为TCP是全双工，每个方向需要单独关闭。"},
+        {q:"以下协议中，默认使用UDP传输的是（　）。",opts:["HTTP","FTP","SMTP","DNS"],ans:3,exp:"HTTP、FTP、SMTP都使用TCP（需要可靠传输）。DNS既可以用UDP（普通查询，53端口），也可以用TCP（区域传送），但默认使用UDP。"},
+        {q:"HTTP协议默认使用的端口号是（　）。",opts:["21","25","80","443"],ans:2,exp:"常用端口号：FTP=21，SMTP=25，HTTP=80，HTTPS=443。口诀：「80看网页，443加密看」。"},
+        {q:"一个C类网络192.168.1.0需要划分为4个子网，子网掩码应为（　）。",opts:["255.255.255.128","255.255.255.192","255.255.255.224","255.255.255.240"],ans:1,exp:"C类网络默认掩码/24。需要4个子网 → 2²=4，借2位。新掩码 = /26 = 255.255.255.11000000 = 255.255.255.192。每个子网主机数 = 2⁶-2 = 62台。"},
+        {q:"以下关于OSPF协议的描述，正确的是（　）。",opts:["使用跳数作为度量值，最大支持15跳","采用Dijkstra算法计算最短路径","属于外部网关协议（EGP）","采用距离矢量算法"],ans:1,exp:"OSPF是链路状态协议，采用Dijkstra（SPF）算法计算最短路径，以带宽（开销）为度量值，属于内部网关协议（IGP）。A描述的是RIP，C描述的是BGP。"},
+        {q:"VLAN的标准协议是（　）。",opts:["IEEE 802.1D","IEEE 802.1Q","IEEE 802.3","IEEE 802.11"],ans:1,exp:"IEEE 802.1Q是VLAN标准（定义VLAN标签格式）。802.1D是生成树协议（STP）。802.3是以太网标准。802.11是无线局域网标准。"},
+        {q:"以下关于ARP协议的描述，正确的是（　）。",opts:["将MAC地址解析为IP地址","将IP地址解析为MAC地址","将域名解析为IP地址","将IP地址解析为域名"],ans:1,exp:"ARP（地址解析协议）将IP地址解析为MAC地址。RARP（反向ARP）将MAC地址解析为IP地址。DNS将域名解析为IP地址。"},
+        // 网络工程
+        {q:"在三层网络架构中，负责策略控制和路由汇聚的是（　）。",opts:["核心层","汇聚层","接入层","物理层"],ans:1,exp:"三层架构中，核心层负责高速转发，汇聚层负责策略控制（ACL、QoS、路由汇聚），接入层负责用户接入。口诀：「核心快转，汇聚管策，接入连人」。"},
+        {q:"以下关于三层网络架构的描述，错误的是（　）。",opts:["核心层负责高速数据交换和骨干传输","汇聚层负责策略控制和访问控制","接入层负责用户接入和端口认证","核心层应部署复杂的访问控制列表（ACL）"],ans:3,exp:"核心层的设计原则是高速转发，不应部署复杂的ACL等策略，因为这会降低转发性能。ACL等策略应部署在汇聚层。这是一个常见的考试陷阱。"},
+    ];
+
+    let answered=0, correct=0;
+    function renderQuiz(){
+        const c=document.getElementById('quiz-container');
+        Q.forEach((item,i)=>{
+            const d=document.createElement('div');
+            d.className='quiz-q';
+            d.innerHTML=`<div class="quiz-num">第 ${i+1} 题 / 共 30 题</div>
+    <div class="quiz-text">${item.q}</div>
+    <div class="quiz-options" id="opts-${i}">${['A','B','C','D'].map((L,j)=>`
+      <button class="opt-btn" data-q="${i}" data-opt="${j}" onclick="pick(${i},${j})">
+        <span class="opt-letter">${L}.</span><span>${item.opts[j]}</span>
+      </button>`).join('')}</div>
+    <button class="reveal-btn" id="rv-${i}" onclick="reveal(${i})" style="display:none">💡 查看解析</button>
+    <div class="quiz-ans" id="ans-${i}">
+      <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+      <div class="ans-body">${item.exp}</div>
+    </div>`;
+            c.appendChild(d);
+        });
+    }
+    function pick(qi,opt){
+        const item=Q[qi];
+        const btns=document.querySelectorAll(`[data-q="${qi}"]`);
+        if(btns[0].classList.contains('revealed'))return;
+        btns.forEach((b,j)=>{
+            b.classList.add('revealed');
+            if(j===item.ans)b.classList.add('correct');
+            else if(j===opt)b.classList.add('wrong');
+        });
+        answered++;
+        if(opt===item.ans)correct++;
+        document.getElementById('answered').textContent=answered;
+        document.getElementById('correct-count').textContent=correct;
+        document.getElementById(`rv-${qi}`).style.display='inline-flex';
+    }
+    function reveal(qi){document.getElementById(`ans-${qi}`).classList.toggle('show')}
+    renderQuiz();
+
+    // ── FLASH CARDS ──
+    const FC=[
+        {n:"01",t:"OSI七层（从下到上）",m:"巫师往前会表演",d:"物数网传会表应 → PDU：比特·帧·包·段·数据"},
+        {n:"02",t:"设备工作层级",m:"一中集，二桥换，三路由，高网关",d:"集线器=1层；交换机=2层；路由器=3层"},
+        {n:"03",t:"TCP vs UDP",m:"TCP可靠连接慢，UDP快速无连不靠",d:"三次握手建立；四次挥手断开"},
+        {n:"04",t:"复用技术",m:"频时波码（贫时拨码）",d:"FDM频·TDM时·WDM波·CDM码"},
+        {n:"05",t:"多址技术代际",m:"1频2时3码4正5非",d:"1G-FDMA·2G-TDMA·3G-CDMA·4G-OFDMA·5G-NOMA"},
+        {n:"06",t:"5G三大场景",m:"eMBB快，mMTC多，uRLLC稳",d:"自动驾驶/远程手术→uRLLC；物联网→mMTC；VR→eMBB"},
+        {n:"07",t:"路由协议",m:"RIP跳15，OSPF带宽快，BGP管自治",d:"RIP=距离矢量；OSPF=链路状态Dijkstra；BGP=外部网关"},
+        {n:"08",t:"802标准族",m:"3有线，11无线，15个人，16城域",d:"802.1Q=VLAN；802.1D=STP生成树"},
+        {n:"09",t:"三层架构",m:"核心快转，汇聚管策，接入连人",d:"ACL在汇聚层！核心层不做策略"},
+        {n:"10",t:"介质访问控制",m:"有线检测CD，无线避免CA",d:"有线=CSMA/CD；无线=CSMA/CA（隐藏终端问题）"},
+        {n:"11",t:"IP地址分类",m:"A大B中C小D组E留",d:"C类默认/24；子网=2ⁿ；主机=2ᵐ-2"},
+        {n:"12",t:"常用端口号",m:"21传·22安·23远·25邮·53名·80网·443密",d:"DNS默认UDP；HTTP=80；HTTPS=443"},
+    ];
+    function renderFlash(){
+        const g=document.getElementById('flash-grid');
+        FC.forEach(f=>{
+            const d=document.createElement('div');
+            d.className='flash-card';
+            d.innerHTML=`<div class="fc-num"># ${f.n}</div><div class="fc-topic">${f.t}</div><div class="fc-mnemonic">「${f.m}」</div><div class="fc-detail">${f.d}</div>`;
+            g.appendChild(d);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>

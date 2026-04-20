@@ -570,6 +570,65 @@
         </div>
 
         <div class="card">
+            <div class="card-title"><span class="icon">✨</span>3.1 嵌入式软件的主要特点 <span class="tag tag-key">★必考题型</span></div>
+
+            <div class="mnemonic">
+                <div class="label">🧠 核心速记口诀</div>
+                <strong>「确实安全可靠，只是减配了」</strong><br>
+                确(高确定性) · 实(强实时性) · 安全(安全性) · 可靠(可靠性) · 减(可剪裁性) · 配(可配置性)
+            </div>
+
+            <div class="analogy">
+                <strong>🚗 生活化类比：打造一台“神车”</strong><br>
+                把嵌入式软件开发想象成汽车制造商造车：你买了一台乞丐版的车，虽然功能少（减配），但质量杠杠的（可靠、确定），且遇到危险能保命（安全、实时）。
+            </div>
+
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>特点</th><th>设计方法（考试出题词）</th><th>生活类比记忆法</th></tr>
+                    <tr>
+                        <td class="badge-acc">① 可剪裁性</td>
+                        <td>静态编译、动态库、控制函数流程</td>
+                        <td><strong>高配与低配：</strong>没钱买天窗？出厂装配时直接把天窗模块的代码“砍掉”（不编译）。</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-acc">② 可配置性</td>
+                        <td>数据驱动、静态编译、配置表</td>
+                        <td><strong>座椅与驾驶记忆：</strong>根据驾驶员习惯，微调驾驶模式和空调温度（读配置表）。</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-red">③ 强实时性</td>
+                        <td>表驱动、配置、静/动态结合、汇编语言</td>
+                        <td><strong>安全气囊：</strong>0.1秒内必须弹出！用汇编（执行最快）和查表（提前算好直接查，不用临时算）。</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">④ 安全性<br><span style="font-size:0.8em">(Safety)</span></td>
+                        <td>编码标准、安全保障机制、<strong>FMECA</strong></td>
+                        <td><strong>刹车失灵防抱死：</strong>车可以坏，但绝不能伤人！提前设想最坏情况（关注失效后果）。</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">⑤ 可靠性<br><span style="font-size:0.8em">(Reliability)</span></td>
+                        <td><strong>容错技术</strong>、<strong>余度技术</strong>、鲁棒性设计</td>
+                        <td><strong>防爆胎与双擎：</strong>底盘结实扛坑洼（容错），带有备胎或双发动机（余度/冗余）。</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-acc">⑥ 高确定性</td>
+                        <td>静态分配资源、越界检查、状态机、静态任务调度</td>
+                        <td><strong>高铁轨道：</strong>资源开机就分好，绝不临时乱申请，像列车被固定在轨道上跑，不出轨（越界检查）。</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="alert alert-red">
+                <div>
+                    <strong>⚠️ 考场秒杀小贴士（极易混淆点）：</strong><br>
+                    • 看到 <strong>FMECA（故障模式分析）</strong>、防伤人机制 → 选 <strong>安全性 (Safety)</strong>。<br>
+                    • 看到 <strong>冗余/余度</strong>、<strong>容错</strong>、鲁棒性 → 选 <strong>可靠性 (Reliability)</strong>。<br>
+                    • 看到 <strong>表驱动</strong>、<strong>汇编语言</strong> → 选 <strong>强实时性</strong>（核心目的就是为了极致的快）。
+                </div>
+            </div>
+        </div>
+        <div class="card">
             <div class="card-title"><span class="icon">🧱</span>3.2 嵌入式软件四层架构 <span class="tag tag-key">★重要</span></div>
             <div class="layer-stack">
                 <div class="layer-row" style="border-color:#db2777;background:rgba(219,39,119,.04)">
