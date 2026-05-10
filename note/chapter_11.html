@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第十一章 · 软件可靠性 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbf7;
+            --bg2: #f4efe6;
+            --card: #ffffff;
+            --card2: #f9f7f2;
+            --border: #e8e2d5;
+            --border2: #d4cbb8;
+            --text: #2c2825;
+            --text2: #5e574f;
+            --text3: #8f877c;
+            --accent: #0284c7;
+            --accent2: #0369a1;
+            --gold: #d97706;
+            --gold2: #b45309;
+            --green: #059669;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --pink: #db2777;
+            --teal: #0d9488;
+            --nav-h: 56px;
+            --radius: 10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden;}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ── TOP NAV ── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+            background:rgba(253,251,247,.93);backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);z-index:1000;
+            display:flex;align-items:center;padding:0 16px;gap:2px;
+            overflow-x:auto;white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+        .nav-btn{
+            display:inline-flex;align-items:center;gap:5px;
+            padding:5px 12px;border-radius:6px;border:1px solid transparent;
+            background:transparent;color:var(--text2);font-family:inherit;
+            font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;
+            white-space:nowrap;flex-shrink:0;
+        }
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── MAIN ── */
+        main{padding-top:calc(var(--nav-h) + 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── HERO ── */
+        .section-hero{
+            text-align:center;padding:40px 20px 32px;
+            background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);
+            border:1px solid var(--border);border-radius:14px;margin-bottom:28px;
+            position:relative;overflow:hidden;
+        }
+        .section-hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:500px;margin:0 auto}
+        .section-tag{
+            display:inline-block;padding:3px 10px;
+            background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);
+            color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;
+            letter-spacing:.06em;margin-bottom:12px;
+        }
+
+        /* ── CARD ── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .card-title .icon{font-size:1.1rem}
+
+        /* ── ANALOGY ── */
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2);}
+        .analogy strong{color:var(--gold)}
+
+        /* ── MNEMONIC ── */
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple);}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ── FORMULA BOX ── */
+        .formula-box{
+            background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;
+            padding:14px 16px;font-family:'JetBrains Mono',monospace;
+            font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;
+            margin:12px 0;line-height:1.8;
+        }
+
+        /* ── TABLES ── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+
+        /* ── KP GRID ── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem;}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ── ALERT ── */
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid;}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+
+        /* ── SUB TITLE ── */
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ── TAG ── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+
+        /* ── VS GRID ── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        /* ── FLOW ── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* ── THREE-COL GRID ── */
+        .three-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+        @media(max-width:600px){.three-grid{grid-template-columns:1fr}}
+        .three-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .three-card-title{font-size:.82rem;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+        .three-card.tc-red .three-card-title{color:var(--red)}
+        .three-card.tc-blue .three-card-title{color:var(--accent)}
+        .three-card.tc-green .three-card-title{color:var(--green)}
+        .three-card.tc-purple .three-card-title{color:var(--purple)}
+        .three-card p{font-size:.8rem;color:var(--text2);line-height:1.55;margin-bottom:4px}
+
+        /* ── INLINE QUIZ (per knowledge point) ── */
+        .inline-quiz{background:rgba(2,132,199,.04);border:1px solid rgba(2,132,199,.18);border-radius:9px;padding:14px 16px;margin:14px 0}
+        .iq-label{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .iq-q{font-size:.88rem;font-weight:500;margin-bottom:10px;color:var(--text)}
+        .iq-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+        .iq-btn{
+            display:flex;gap:8px;align-items:flex-start;padding:7px 11px;border-radius:6px;
+            border:1px solid var(--border);background:var(--card);color:var(--text2);
+            font-family:inherit;font-size:.82rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .iq-btn:hover:not(.revealed){border-color:var(--accent2);background:rgba(2,132,199,.06);color:var(--text)}
+        .iq-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .iq-btn.wrong{background:rgba(220,38,38,.07);border-color:var(--red);color:var(--red)}
+        .iq-btn.revealed{pointer-events:none}
+        .iq-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.1em}
+        .iq-ans{display:none;padding:10px 12px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.18);border-radius:6px;font-size:.82rem;color:var(--text2);margin-top:4px;animation:fadeUp .25s ease;}
+        .iq-ans.show{display:block}
+        .iq-ans-label{color:var(--green);font-weight:700;margin-bottom:2px}
+
+        /* ── QUIZ SECTION ── */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s;}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{
+            display:flex;align-items:flex-start;gap:8px;padding:8px 11px;
+            border-radius:7px;border:1px solid var(--border);background:var(--bg2);
+            color:var(--text2);font-family:inherit;font-size:.83rem;
+            cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+            border-radius:6px;border:1px solid var(--border2);background:transparent;
+            color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s;
+        }
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease;}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        #quiz-score{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ── FLASH CARDS ── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s;}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ── SUMMARY TABLE ── */
+        .summary-table{border-radius:10px;overflow:hidden;border:1px solid var(--border);margin:16px 0}
+        .summary-row{display:flex;border-bottom:1px solid var(--border);font-size:.83rem;}
+        .summary-row:last-child{border-bottom:none}
+        .summary-row:hover{background:rgba(0,0,0,.015)}
+        .summary-k{padding:10px 14px;font-weight:700;color:var(--accent);min-width:120px;background:var(--card2);flex-shrink:0;display:flex;align-items:center}
+        .summary-v{padding:10px 14px;color:var(--text2);flex:1}
+    </style>
+</head>
+<body>
+
+<!-- ══ TOP NAV ══ -->
+<nav id="topnav">
+    <div class="nav-brand">🛡️ 第十一章</div>
+    <button class="nav-btn active" onclick="showSection('s1',this)">📖 基本概念</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">🔬 可靠性建模</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">📋 可靠性管理</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">🏗️ 可靠性设计 ★</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">🧪 可靠性测试</button>
+    <button class="nav-btn" onclick="showSection('s6',this)">📊 可靠性评价</button>
+    <button class="nav-btn" onclick="showSection('s7',this)">✏️ 综合练习题</button>
+    <button class="nav-btn" onclick="showSection('s8',this)">⚡ 速记闪卡</button>
+</nav>
+
+<main>
+
+    <!-- ══════════ S1: 基本概念 ══════════ -->
+    <section id="s1" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>软件可靠性基本概念</h1>
+            <p>定义 · 三大指标 · 易错辨析 | 考试权重 ★★</p>
+        </div>
+
+        <!-- KP1: 定义 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>1.1 软件可靠性的定义 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>生活类比：家里的电饭煲</strong><br>
+                "一年内不坏掉"的概率就是电饭煲的可靠性。不是"永远不坏"，而是在<strong>规定时间内</strong>不出问题的<strong>可能性</strong>。强调三个关键词：规定时间 · 不引起系统失效 · 概率。
+            </div>
+            <div class="formula-box">软件可靠性 = 在规定的时间内，在规定的条件下，
+                软件不引起系统失效的概率。
+
+                三大核心要素：
+                ① 规定时间（有时限，不是永久）
+                ② 不引起系统失效（强调"失效"而非"错误"）
+                ③ 概率（是个统计量，0~1之间）
+
+                注：可靠性 = f(时间, 输入, 缺陷)</div>
+            <div class="alert alert-warn">⚠️ 易错：可靠性 ≠ 正确性。软件功能正确但仍可能可靠性差（如偶尔崩溃）。可靠性是概率，不是绝对值。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「规定时间不失效，输入缺陷定概率」</strong><br>
+                谐音故事：小明"规定"自己"失效"前要把所有"缺陷"都"输入"电脑存档 → 可靠性 = f(时间, 输入, 缺陷)
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">软件可靠性是指（　）</div>
+                <div class="iq-opts" id="iq-opts-0">
+                    <button class="iq-btn" data-iq="0" data-opt="0" onclick="handleIQ(0,0)"><span class="iq-letter">A.</span><span>软件在任何情况下都不出错</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="1" onclick="handleIQ(0,1)"><span class="iq-letter">B.</span><span>在规定的时间内，软件不引起系统失效的概率</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="2" onclick="handleIQ(0,2)"><span class="iq-letter">C.</span><span>软件运行速度快且功能完整</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="3" onclick="handleIQ(0,3)"><span class="iq-letter">D.</span><span>软件经过严格测试后无缺陷</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-0">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    可靠性定义的三大要素缺一不可：①规定时间（有期限）②不引起系统失效（强调失效不是出错）③概率（是统计量）。A说"任何情况都不出错"是绝对表述，错误；C混淆了性能和可靠性；D混淆了测试与可靠性本质。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP2: 三大指标 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📐</span>1.2 可靠性三大描述指标 <span class="tag tag-key">理解</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>指标</th><th>英文</th><th>含义</th><th>记忆提示</th></tr>
+                    <tr><td class="badge-acc">可靠度</td><td>Reliability</td><td>规定时间内不失效的概率</td><td>最核心的可靠性度量</td></tr>
+                    <tr><td class="badge-gold">平均失效时间</td><td>MTTF</td><td>平均多久失效一次</td><td>时间越长越可靠</td></tr>
+                    <tr><td class="badge-red">故障强度</td><td>Failure Intensity</td><td>单位时间内的故障数</td><td>越小越可靠</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 代码行数、功能点数不是可靠性描述指标，它们是软件规模指标！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「可靠平均故障强」→ 可（靠度）+ 平（均失效时间）+ 故（障强度）</strong><br>
+                记住这三个，其他所有选项（代码行数、功能点、测试覆盖率）均为干扰项。
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">下列不属于软件可靠性描述指标的是（　）</div>
+                <div class="iq-opts" id="iq-opts-1">
+                    <button class="iq-btn" data-iq="1" data-opt="0" onclick="handleIQ(1,0)"><span class="iq-letter">A.</span><span>可靠度</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="1" onclick="handleIQ(1,1)"><span class="iq-letter">B.</span><span>平均失效时间（MTTF）</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="2" onclick="handleIQ(1,2)"><span class="iq-letter">C.</span><span>故障强度</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="3" onclick="handleIQ(1,3)"><span class="iq-letter">D.</span><span>代码行数</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-1">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    代码行数是软件规模的度量指标，不是可靠性的描述指标。可靠性的三大指标是：可靠度（不失效概率）、平均失效时间（MTTF）、故障强度（单位时间故障数）。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP3: 易错辨析 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">⚠️</span>1.3 易错点精讲 <span class="tag tag-hot">陷阱题</span></div>
+            <div class="alert alert-red">⚠️ 高频陷阱：可靠性与系统输入的关系！</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>错误说法</th><th>正确理解</th></tr>
+                    <tr><td class="badge-red">可靠性与系统输入无关</td><td class="badge-green">可靠性是时间、输入、缺陷三者的函数，与输入<strong>有关</strong></td></tr>
+                    <tr><td class="badge-red">可靠性是测出来的</td><td class="badge-green">可靠性最重要的是<strong>设计出来的</strong>，测试只能评价不能提升</td></tr>
+                    <tr><td class="badge-red">可靠性是绝对值</td><td class="badge-green">可靠性是<strong>概率</strong>（0到1之间的统计量）</td></tr>
+                    <tr><td class="badge-red">可靠性 = 正确性</td><td class="badge-green">功能正确但仍可能崩溃（可靠性差）</td></tr>
+                </table>
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">关于软件可靠性，下列说法错误的是（　）</div>
+                <div class="iq-opts" id="iq-opts-2">
+                    <button class="iq-btn" data-iq="2" data-opt="0" onclick="handleIQ(2,0)"><span class="iq-letter">A.</span><span>可靠性是一种概率</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="1" onclick="handleIQ(2,1)"><span class="iq-letter">B.</span><span>可靠性与规定的时间有关</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="2" onclick="handleIQ(2,2)"><span class="iq-letter">C.</span><span>可靠性与系统输入无关</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="3" onclick="handleIQ(2,3)"><span class="iq-letter">D.</span><span>可靠性与软件中存在的缺陷有关</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-2">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    可靠性是时间、输入和缺陷的函数，与系统输入<strong>有关</strong>。不同的输入序列会触发不同的执行路径，从而影响是否触发缺陷导致失效。选项C的说法是典型的高频错误陷阱。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S2: 可靠性建模 ══════════ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>软件可靠性建模</h1>
+            <p>5大影响因素 · 10种建模方法 | 考试权重 ★★★</p>
+        </div>
+
+        <!-- KP4: 影响因素 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🔍</span>2.1 影响软件可靠性的5大因素 <span class="tag tag-key">理解</span></div>
+            <div class="analogy">
+                <strong>老板的比喻</strong><br>
+                老板说："咱们软件要可靠，得看<strong>运</strong>气（运行环境）、<strong>规</strong>模大小、<strong>内</strong>功深浅（内部结构）、<strong>开</strong>发水平，还有你<strong>投</strong>多少钱（可靠性投入）！"
+            </div>
+            <div class="kp-grid">
+                <div class="kp-item">
+                    <div class="kp-title">① 运行环境</div>
+                    <div class="kp-body">操作系统、硬件、网络等运行条件直接影响失效率</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">② 软件规模</div>
+                    <div class="kp-body">规模越大，潜在缺陷数量越多，可靠性越难保证</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">③ 软件内部结构</div>
+                    <div class="kp-body">模块耦合度、层次结构等内部设计影响可靠性</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">④ 开发方法和环境</div>
+                    <div class="kp-body">开发流程、工具链、团队能力的综合影响</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">⑤ 可靠性投入</div>
+                    <div class="kp-body">在可靠性设计和测试上投入的资源和精力</div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「运规内开投」→ 谐音"运规内稿投"</strong><br>
+                运动员（运）规范（规）地在内部（内）稿子（开发方法）上投（投）入精力
+            </div>
+            <div class="alert alert-warn">⚠️ 考试干扰项：「开发人员的薪资」「用户满意度」「软件价格」均不属于影响可靠性的因素！</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">下列不属于影响软件可靠性的因素的是（　）</div>
+                <div class="iq-opts" id="iq-opts-3">
+                    <button class="iq-btn" data-iq="3" data-opt="0" onclick="handleIQ(3,0)"><span class="iq-letter">A.</span><span>运行环境</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="1" onclick="handleIQ(3,1)"><span class="iq-letter">B.</span><span>软件规模</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="2" onclick="handleIQ(3,2)"><span class="iq-letter">C.</span><span>开发人员的薪资</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="3" onclick="handleIQ(3,3)"><span class="iq-letter">D.</span><span>软件的内部结构</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-3">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    影响软件可靠性的五大因素口诀"运规内开投"：运行环境、软件规模、内部结构、开发方法和环境、可靠性投入。开发人员薪资不直接影响软件可靠性，是典型干扰项。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP5: 10种建模方法 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🔬</span>2.2 软件可靠性建模方法（10种）<span class="tag tag-hot">高频</span></div>
+            <div class="analogy">
+                <strong>医生诊断类比</strong><br>
+                建模就像医生诊断病情——不同的医生（模型）用不同的方法（听诊器、验血、CT扫描）来预测你什么时候会生病（软件失效）。10种建模方法各有适用场景。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>#</th><th>建模方法</th><th>核心思想</th></tr>
+                    <tr><td>01</td><td class="badge-acc">种子法</td><td>植入已知错误，通过比例估计软件总错误数</td></tr>
+                    <tr><td>02</td><td class="badge-acc">失效率类</td><td>基于失效率函数建立模型</td></tr>
+                    <tr><td>03</td><td class="badge-acc">曲线拟合类</td><td>用数学曲线拟合历史失效数据</td></tr>
+                    <tr><td>04</td><td class="badge-acc">可靠性增长</td><td>跟踪测试过程中可靠性随时间的增长趋势</td></tr>
+                    <tr><td>05</td><td class="badge-acc">程序结构分析</td><td>根据程序控制流结构分析可靠性</td></tr>
+                    <tr><td>06</td><td class="badge-acc">输入域分类</td><td>对输入域进行分类，分析各类输入触发失效的概率</td></tr>
+                    <tr><td>07</td><td class="badge-acc">执行路径分析</td><td>分析各执行路径的失效概率</td></tr>
+                    <tr><td>08</td><td class="badge-gold">非齐次泊松过程</td><td>经典随机过程模型，最常考！失效率随时间变化</td></tr>
+                    <tr><td>09</td><td class="badge-acc">马尔可夫过程</td><td>状态转移模型，适合有限状态软件</td></tr>
+                    <tr><td>10</td><td class="badge-acc">贝叶斯分析</td><td>结合先验知识进行概率更新</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀（10种方法）</div>
+                <strong>「种失曲增结，输执非马贝」</strong><br>
+                谐音故事：种子（种）失去（失）曲线（曲）增长（增）结果（结），输出（输）执行（执）非马（非齐次泊松·马尔可夫）必（贝）然如此
+            </div>
+            <div class="alert alert-red">⚠️ 注意："非齐次泊松过程" ≠ "齐次泊松过程"，考试明确考"非齐次"！瀑布模型、敏捷开发是开发模型，不是可靠性建模方法！</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">下列不属于软件可靠性建模方法的是（　）</div>
+                <div class="iq-opts" id="iq-opts-4">
+                    <button class="iq-btn" data-iq="4" data-opt="0" onclick="handleIQ(4,0)"><span class="iq-letter">A.</span><span>种子法</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="1" onclick="handleIQ(4,1)"><span class="iq-letter">B.</span><span>马尔可夫过程</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="2" onclick="handleIQ(4,2)"><span class="iq-letter">C.</span><span>贝叶斯分析</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="3" onclick="handleIQ(4,3)"><span class="iq-letter">D.</span><span>瀑布模型</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-4">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    瀑布模型是软件开发生命周期模型，不是可靠性建模方法。10种建模方法口诀"种失曲增结，输执非马贝"，种子法、马尔可夫过程、贝叶斯分析都是其中的方法。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S3: 可靠性管理 ══════════ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>软件可靠性管理</h1>
+            <p>全生命周期覆盖 · 设计出来而非测出来 | 考试权重 ★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📋</span>3.1 可靠性管理各阶段</div>
+            <div class="analogy">
+                <strong>盖房子的比喻</strong><br>
+                地基没打好（设计阶段没考虑可靠性），装修再豪华也会漏水。<strong>可靠性不是测出来的，是设计出来的！</strong>管理工作贯穿整个软件生命周期。
+            </div>
+            <div class="flow">
+                <div class="flow-step">需求分析</div><span class="flow-arrow">→</span>
+                <div class="flow-step">设计（最重要）</div><span class="flow-arrow">→</span>
+                <div class="flow-step">编码</div><span class="flow-arrow">→</span>
+                <div class="flow-step">测试</div><span class="flow-arrow">→</span>
+                <div class="flow-step">运行维护</div>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>阶段</th><th>可靠性管理工作重点</th></tr>
+                    <tr><td class="badge-acc">需求分析</td><td>确定可靠性需求目标，建立可靠性规格说明</td></tr>
+                    <tr><td class="badge-gold">设计阶段 ★</td><td>采用可靠性设计技术（容错、检错、降复杂度、系统配置）——<strong>最有效最重要</strong></td></tr>
+                    <tr><td class="badge-acc">编码阶段</td><td>遵循可靠性编程准则，进行代码审查</td></tr>
+                    <tr><td class="badge-acc">测试阶段</td><td>可靠性测试，收集失效数据，评估可靠性</td></tr>
+                    <tr><td class="badge-acc">运行维护</td><td>监控失效、收集数据、持续改进</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-green">✅ 核心结论（教材原话）：保障软件可靠性最有效、最经济、最重要的手段是——<strong>在软件设计阶段采用措施进行可靠性控制</strong>。</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">保障软件可靠性最有效、最经济、最重要的手段是（　）</div>
+                <div class="iq-opts" id="iq-opts-5">
+                    <button class="iq-btn" data-iq="5" data-opt="0" onclick="handleIQ(5,0)"><span class="iq-letter">A.</span><span>在软件测试阶段进行全面测试</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="1" onclick="handleIQ(5,1)"><span class="iq-letter">B.</span><span>在软件设计阶段采用措施进行可靠性控制</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="2" onclick="handleIQ(5,2)"><span class="iq-letter">C.</span><span>在软件运行阶段持续监控</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="3" onclick="handleIQ(5,3)"><span class="iq-letter">D.</span><span>增加开发人员数量</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-5">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    教材原文强调：保障软件可靠性最有效、最经济、最重要的手段是在<strong>设计阶段</strong>采取措施。可靠性不是测出来的，而是设计出来的。测试只能评估和发现问题，不能从根本上提升可靠性。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S4: 可靠性设计 ══════════ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04 ★★★★★</div>
+            <h1>软件可靠性设计</h1>
+            <p>容错 · 检错 · 降低复杂度 · 系统配置 | 本章核心，必须掌握！</p>
+        </div>
+
+        <!-- KP: 四大技术总览 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🏗️</span>4.1 四大可靠性设计技术总览 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>公司招员工类比</strong><br>
+                公司对新员工的要求：<strong>容</strong>忍错误（容错）、<strong>检</strong>查问题（检错）、<strong>降</strong>低压力（降低复杂度）、<strong>配</strong>合备份（系统配置）。这就是软件可靠性设计四大技术！
+            </div>
+            <div class="three-grid" style="grid-template-columns:repeat(2,1fr)">
+                <div class="three-card tc-blue">
+                    <div class="three-card-title">🛡️ 容错设计技术</div>
+                    <p>发生故障时，系统自动恢复正常运行</p>
+                    <p><strong>包括：</strong>恢复块、N版本程序、冗余设计</p>
+                </div>
+                <div class="three-card tc-red">
+                    <div class="three-card-title">🔍 检错技术</div>
+                    <p>检测到故障但不自动恢复，需要人工干预</p>
+                    <p><strong>代价：</strong>低于容错和冗余技术</p>
+                </div>
+                <div class="three-card tc-green">
+                    <div class="three-card-title">📉 降低复杂度设计</div>
+                    <p>简化软件结构，减少出错概率</p>
+                    <p><strong>方法：</strong>模块化、接口简化、数据流优化</p>
+                </div>
+                <div class="three-card tc-purple">
+                    <div class="three-card-title">⚙️ 系统配置技术</div>
+                    <p>通过双机热备等硬件配置提升可靠性</p>
+                    <p><strong>包括：</strong>双机热备、互备、双工、集群</p>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「容检降配」→ 谐音"容检降背"</strong><br>
+                能容忍（容）错误的人，会检查（检）问题，遇困难能降（降）级处理，背（配）上备用方案
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">软件可靠性设计技术不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-6">
+                    <button class="iq-btn" data-iq="6" data-opt="0" onclick="handleIQ(6,0)"><span class="iq-letter">A.</span><span>容错设计技术</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="1" onclick="handleIQ(6,1)"><span class="iq-letter">B.</span><span>检错技术</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="2" onclick="handleIQ(6,2)"><span class="iq-letter">C.</span><span>降低复杂度设计</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="3" onclick="handleIQ(6,3)"><span class="iq-letter">D.</span><span>增加代码量设计</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-6">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    四大可靠性设计技术口诀"容检降配"：容错设计、检错技术、降低复杂度设计、系统配置技术。"增加代码量"不仅不是可靠性设计技术，反而会增加复杂度，降低可靠性！
+                </div>
+            </div>
+        </div>
+
+        <!-- KP: 容错设计三种技术 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🛡️</span>4.2 容错设计技术（3种）<span class="tag tag-hot">极高频</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">🔄 恢复块设计</div>
+                    <div class="vs-item"><span class="label">机制</span><span>主块失败 → 回滚 → 备选块</span></div>
+                    <div class="vs-item"><span class="label">工作方式</span><span>串行尝试</span></div>
+                    <div class="vs-item"><span class="label">冗余类型</span><span>时间冗余</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>写错字用橡皮擦，回到上一步</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">🗳️ N版本程序设计</div>
+                    <div class="vs-item"><span class="label">机制</span><span>N个版本并行运行，多数表决</span></div>
+                    <div class="vs-item"><span class="label">工作方式</span><span>并行运行</span></div>
+                    <div class="vs-item"><span class="label">冗余类型</span><span>空间冗余</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>三个裁判投票，少数服从多数</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">📦 冗余设计</div>
+                    <div class="vs-item"><span class="label">机制</span><span>准备不同实现的备份系统</span></div>
+                    <div class="vs-item"><span class="label">工作方式</span><span>主系统出错时切换</span></div>
+                    <div class="vs-item"><span class="label">关键点</span><span>不同路径/算法/实现方式</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>手机带充电宝备用</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 极易混淆：N版本（并行·多数表决·空间冗余）vs 恢复块（串行·主备尝试·时间冗余）！这是高频选择题陷阱！</div>
+            <div class="alert alert-warn">⚠️ 冗余设计强调"不同路径、不同算法、不同实现方式"——使用完全相同的实现作为备份意义不大！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「恢N冗」→ 谐音"回N用"</strong><br>
+                回（恢复块·回滚）来N（N版本·并行）个，冗（冗余·备份）余使用<br>
+                <strong>关键区分：N版本=并行表决；恢复块=串行回滚</strong>
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">通过设计多个模块/版本，对相同输入实行多数表决的容错技术是（　）</div>
+                <div class="iq-opts" id="iq-opts-7">
+                    <button class="iq-btn" data-iq="7" data-opt="0" onclick="handleIQ(7,0)"><span class="iq-letter">A.</span><span>恢复块设计</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="1" onclick="handleIQ(7,1)"><span class="iq-letter">B.</span><span>N版本程序设计</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="2" onclick="handleIQ(7,2)"><span class="iq-letter">C.</span><span>冗余设计</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="3" onclick="handleIQ(7,3)"><span class="iq-letter">D.</span><span>降低复杂度设计</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-7">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    N版本程序设计的核心是：多个版本<strong>并行运行</strong>，对相同输入各自产生输出，最终通过<strong>多数表决</strong>决定最终结果。恢复块是串行的（失败了再试备选块），不是并行表决。
+                </div>
+            </div>
+            <div class="inline-quiz" style="margin-top:10px">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">恢复块设计与N版本程序设计的主要区别是（　）</div>
+                <div class="iq-opts" id="iq-opts-8">
+                    <button class="iq-btn" data-iq="8" data-opt="0" onclick="handleIQ(8,0)"><span class="iq-letter">A.</span><span>恢复块并行运行，N版本串行尝试</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="1" onclick="handleIQ(8,1)"><span class="iq-letter">B.</span><span>恢复块串行尝试（时间冗余），N版本并行运行（空间冗余）</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="2" onclick="handleIQ(8,2)"><span class="iq-letter">C.</span><span>二者均为并行运行，无本质区别</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="3" onclick="handleIQ(8,3)"><span class="iq-letter">D.</span><span>N版本需要单一验证标准，恢复块不需要</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-8">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    这是本章最重要的对比点：恢复块 = 一个主块失败后<strong>串行</strong>尝试备选块 = 时间冗余；N版本 = N个版本同时<strong>并行</strong>运行投票 = 空间冗余。D也是错的，N版本需要一个"裁决者"（表决算法），不是单一验证标准。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP: 检错技术 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🔍</span>4.3 检错技术四要素 <span class="tag tag-key">理解</span></div>
+            <div class="formula-box">检错技术的四大要素：
+                ① 检测对象   → 检测什么（哪些状态/数据）
+                ② 检测延时   → 何时检测（实时还是延迟）
+                ③ 实现方式   → 怎么检测（硬件/软件/混合）
+                ④ 处理方式   → 检测到后怎么办（报警/记录/停机）</div>
+            <div class="alert alert-red">⚠️ 核心考点：检错技术<strong>不能自动解决故障</strong>，必须经过<strong>人工干预</strong>！代价低于容错和冗余技术。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「对延实处」→ 谐音"对燕子实处"</strong><br>
+                检测<strong>对</strong>象、检测<strong>延</strong>时、<strong>实</strong>现方式、<strong>处</strong>理方式<br>
+                把对联上的燕子画在实处（记忆四个要素）
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">采用检错设计技术要着重考虑四个要素：检测对象、（　）、实现方法和处理方式</div>
+                <div class="iq-opts" id="iq-opts-9">
+                    <button class="iq-btn" data-iq="9" data-opt="0" onclick="handleIQ(9,0)"><span class="iq-letter">A.</span><span>检测延时</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="1" onclick="handleIQ(9,1)"><span class="iq-letter">B.</span><span>测试覆盖率</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="2" onclick="handleIQ(9,2)"><span class="iq-letter">C.</span><span>系统性能</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="3" onclick="handleIQ(9,3)"><span class="iq-letter">D.</span><span>功能测试结果</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-9">
+                    <div class="iq-ans-label">✅ 答案：A</div>
+                    检错技术四要素口诀"对延实处"：检测<strong>对</strong>象、检测<strong>延</strong>时、<strong>实</strong>现方式、<strong>处</strong>理方式。缺失的是"检测延时"（即何时进行检测）。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP: 系统配置技术 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">⚙️</span>4.4 系统配置技术：双机模式 <span class="tag tag-hot">高频必考</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>模式</th><th>别名</th><th>工作方式</th><th>关键特征</th><th>生活类比</th></tr>
+                    <tr>
+                        <td class="badge-acc">双机热备</td>
+                        <td>Active/Standby</td>
+                        <td>一台工作，一台备用监控</td>
+                        <td>应用运行于主机，备机就绪等候</td>
+                        <td>主播 + 候补主播</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-green">双机互备</td>
+                        <td>互为后备</td>
+                        <td>两台分别运行<strong>不同</strong>的应用</td>
+                        <td>互为后备，应用相对独立</td>
+                        <td>夫妻俩，一人做饭一人洗衣</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">双机双工</td>
+                        <td>同时运行</td>
+                        <td>两台同时运行<strong>相同</strong>的应用</td>
+                        <td>互为备份，性能最高</td>
+                        <td>双胞胎一起做同样的工作</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 三个必考辨析点：①热备=Active/Standby②互备=不同应用互为备份③双工=相同应用同时运行</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>热备一工一备 · 互备各干各活 · 双工一起干活</strong><br>
+                热备（一台工作一台备着）→ 互备（各做各的但能互顶）→ 双工（两台同时做一样的事）
+            </div>
+
+            <div class="sub-title">心跳机制 与 服务器集群</div>
+            <div class="three-grid">
+                <div class="three-card tc-blue">
+                    <div class="three-card-title">💓 心跳机制</div>
+                    <p>主备系统通过"心跳信号"定期确认对方是否存活</p>
+                    <p>如同情侣每天互发"在吗"确认状态</p>
+                    <p>心跳停止 → 触发故障切换</p>
+                </div>
+                <div class="three-card tc-green">
+                    <div class="three-card-title">🌐 服务器集群</div>
+                    <p>多台服务器通过<strong>内部局域网</strong>相互通信</p>
+                    <p>某节点故障时应用<strong>自动接管</strong></p>
+                    <p>对用户透明，不感知故障</p>
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">（　）是通常所说的 Active/Standby 方式</div>
+                <div class="iq-opts" id="iq-opts-10">
+                    <button class="iq-btn" data-iq="10" data-opt="0" onclick="handleIQ(10,0)"><span class="iq-letter">A.</span><span>双机热备</span></button>
+                    <button class="iq-btn" data-iq="10" data-opt="1" onclick="handleIQ(10,1)"><span class="iq-letter">B.</span><span>双机互备</span></button>
+                    <button class="iq-btn" data-iq="10" data-opt="2" onclick="handleIQ(10,2)"><span class="iq-letter">C.</span><span>双机双工</span></button>
+                    <button class="iq-btn" data-iq="10" data-opt="3" onclick="handleIQ(10,3)"><span class="iq-letter">D.</span><span>服务器集群</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-10">
+                    <div class="iq-ans-label">✅ 答案：A</div>
+                    Active/Standby = 双机热备。其中Active（活跃）是主机负责运行业务，Standby（待机）是备机实时监控主机状态，一旦主机故障立即接管。这是最经典的高可用配置模式。
+                </div>
+            </div>
+            <div class="inline-quiz" style="margin-top:10px">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">两台服务器运行相对独立的应用，互为后备的是（　）</div>
+                <div class="iq-opts" id="iq-opts-11">
+                    <button class="iq-btn" data-iq="11" data-opt="0" onclick="handleIQ(11,0)"><span class="iq-letter">A.</span><span>双机热备</span></button>
+                    <button class="iq-btn" data-iq="11" data-opt="1" onclick="handleIQ(11,1)"><span class="iq-letter">B.</span><span>双机互备</span></button>
+                    <button class="iq-btn" data-iq="11" data-opt="2" onclick="handleIQ(11,2)"><span class="iq-letter">C.</span><span>双机双工</span></button>
+                    <button class="iq-btn" data-iq="11" data-opt="3" onclick="handleIQ(11,3)"><span class="iq-letter">D.</span><span>冷备份</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-11">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    双机互备的特点：两台服务器各自运行<strong>不同</strong>（独立）的应用，正常情况下互不干涉，但当一台出故障时，另一台可以接管其应用。区别：双工是运行<strong>相同</strong>的应用同时工作。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S5: 可靠性测试 ══════════ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>软件可靠性测试</h1>
+            <p>测试流程 · 数据4类 · 广义vs狭义 | 考试权重 ★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🧪</span>5.1 可靠性测试流程（5步）<span class="tag tag-key">理解</span></div>
+            <div class="flow">
+                <div class="flow-step">①确定可靠性目标</div><span class="flow-arrow">→</span>
+                <div class="flow-step">②开发运行剖面</div><span class="flow-arrow">→</span>
+                <div class="flow-step">③设计测试用例</div><span class="flow-arrow">→</span>
+                <div class="flow-step">④实施测试</div><span class="flow-arrow">→</span>
+                <div class="flow-step">⑤分析结果</div>
+            </div>
+            <div class="alert alert-info">💡 运行剖面（Operational Profile）= 描述软件在实际运行中各种输入场景的概率分布，是可靠性测试区别于普通测试的关键概念。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「目标剖面，用例实施，分析结果」</strong><br>
+                目标（目）+ 剖面（剖）→ 用（例）→ 实（施）→ 分析（析）
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">软件可靠性测试不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-12">
+                    <button class="iq-btn" data-iq="12" data-opt="0" onclick="handleIQ(12,0)"><span class="iq-letter">A.</span><span>可靠性目标的确定</span></button>
+                    <button class="iq-btn" data-iq="12" data-opt="1" onclick="handleIQ(12,1)"><span class="iq-letter">B.</span><span>运行剖面的开发</span></button>
+                    <button class="iq-btn" data-iq="12" data-opt="2" onclick="handleIQ(12,2)"><span class="iq-letter">C.</span><span>测试用例的设计</span></button>
+                    <button class="iq-btn" data-iq="12" data-opt="3" onclick="handleIQ(12,3)"><span class="iq-letter">D.</span><span>软件价格的评估</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-12">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    可靠性测试关注技术层面（目标、剖面、用例、实施、分析），不涉及商务价格评估。"软件价格"是项目管理/商务谈判的内容，与可靠性测试无关。
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>5.2 广义 vs 狭义可靠性测试 <span class="tag tag-hot">易混淆</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">🌐 广义可靠性测试</div>
+                    <div class="vs-item"><span class="label">目的</span><span>评价软件系统的可靠性</span></div>
+                    <div class="vs-item"><span class="label">手段</span><span>建模、统计、试验、分析、评价</span></div>
+                    <div class="vs-item"><span class="label">特点</span><span>大而全，综合评价</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">🎯 狭义可靠性测试</div>
+                    <div class="vs-item"><span class="label">目的</span><span>获取可靠性数据</span></div>
+                    <div class="vs-item"><span class="label">手段</span><span>按预定测试用例执行</span></div>
+                    <div class="vs-item"><span class="label">特点</span><span>小而专，数据收集</span></div>
+                </div>
+            </div>
+            <div class="sub-title">可靠性数据的4种类型（按时间定义）</div>
+            <div class="kp-grid">
+                <div class="kp-item">
+                    <div class="kp-title">① 失效时间数据</div>
+                    <div class="kp-body">记录每次失效发生的具体时刻</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">② 失效间隔时间数据</div>
+                    <div class="kp-body">记录相邻两次失效之间的时间间隔</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">③ 分组时间内的失效数</div>
+                    <div class="kp-body">在某个时间段内发生的失效次数</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">④ 分组时间的累积失效数</div>
+                    <div class="kp-body">截止某时间点的累积失效总次数</div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>广义=评价（大）；狭义=数据（小）</strong><br>
+                数据4类：「时间、间隔、分组内、分组累」
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">广义的可靠性测试的主要目的是（　）</div>
+                <div class="iq-opts" id="iq-opts-13">
+                    <button class="iq-btn" data-iq="13" data-opt="0" onclick="handleIQ(13,0)"><span class="iq-letter">A.</span><span>获取可靠性数据</span></button>
+                    <button class="iq-btn" data-iq="13" data-opt="1" onclick="handleIQ(13,1)"><span class="iq-letter">B.</span><span>评价软件系统的可靠性</span></button>
+                    <button class="iq-btn" data-iq="13" data-opt="2" onclick="handleIQ(13,2)"><span class="iq-letter">C.</span><span>发现软件缺陷</span></button>
+                    <button class="iq-btn" data-iq="13" data-opt="3" onclick="handleIQ(13,3)"><span class="iq-letter">D.</span><span>测试软件性能</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-13">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    广义的可靠性测试目的是<strong>评价</strong>软件系统的可靠性，手段包括建模、统计分析、试验等综合方法。狭义的可靠性测试目的才是<strong>获取数据</strong>（A选项）。两者目的不同，是典型混淆题。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S6: 可靠性评价 ══════════ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>软件可靠性评价</h1>
+            <p>选模型 · 收数据 · 评估预测 | 考试权重 ★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>6.1 可靠性评价三步走 <span class="tag tag-key">流程</span></div>
+            <div class="flow">
+                <div class="flow-step">① 选择可靠性模型</div><span class="flow-arrow">→</span>
+                <div class="flow-step">② 收集可靠性数据</div><span class="flow-arrow">→</span>
+                <div class="flow-step">③ 评估和预测可靠性</div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「选收评」→ 谐音"宣传收入凭证"</strong><br>
+                宣传（选模型）→ 收入（收数据）→ 凭证（评估证明）
+            </div>
+            <div class="alert alert-info">💡 评估 ≠ 预测：评估是对<strong>现状</strong>的度量，预测是对<strong>未来</strong>趋势的推断。</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">评估和预测软件可靠性的过程不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-14">
+                    <button class="iq-btn" data-iq="14" data-opt="0" onclick="handleIQ(14,0)"><span class="iq-letter">A.</span><span>选择可靠性模型</span></button>
+                    <button class="iq-btn" data-iq="14" data-opt="1" onclick="handleIQ(14,1)"><span class="iq-letter">B.</span><span>收集可靠性数据</span></button>
+                    <button class="iq-btn" data-iq="14" data-opt="2" onclick="handleIQ(14,2)"><span class="iq-letter">C.</span><span>可靠性评估和预测</span></button>
+                    <button class="iq-btn" data-iq="14" data-opt="3" onclick="handleIQ(14,3)"><span class="iq-letter">D.</span><span>重新编写全部代码</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-14">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    可靠性评价的三步口诀"选收评"：选模型→收数据→评估预测。重新编写代码是开发工作，不是可靠性评价过程的内容。D是明显的干扰项。
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>6.2 选择可靠性模型的4个标准 <span class="tag tag-hot">高频</span></div>
+            <div class="kp-grid">
+                <div class="kp-item">
+                    <div class="kp-title">① 适用性</div>
+                    <div class="kp-body">模型假设是否适合当前软件的特点和使用场景</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">② 预测能力与质量</div>
+                    <div class="kp-body">模型预测未来可靠性的精度和质量</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">③ 满足评价需求</div>
+                    <div class="kp-body">模型输出值是否能满足可靠性评价的具体需求</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">④ 简便性</div>
+                    <div class="kp-body">模型使用是否简便，工程人员是否易于掌握</div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「适预需简」→ 谐音"试着预测需要简单"</strong><br>
+                适用性（适）→ 预测能力（预）→ 满足需求（需）→ 简便性（简）<br>
+                干扰项：模型开发者知名度、模型发布年份——均不是选择标准！
+            </div>
+            <div class="sub-title">数据收集4要点</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>#</th><th>要点</th></tr>
+                    <tr><td>01</td><td>尽早确定可靠性模型，指导数据收集方向</td></tr>
+                    <tr><td>02</td><td>数据收集计划须具有可操作性</td></tr>
+                    <tr><td>03</td><td>重视测试数据的分析整理</td></tr>
+                    <tr><td>04</td><td>利用<strong>数据库技术</strong>辅助存储和分析数据</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ 评估和预测以<strong>模型分析为主</strong>，图形分析法和试探性数据分析为辅！</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">选择可靠性模型时，不需要考虑的因素是（　）</div>
+                <div class="iq-opts" id="iq-opts-15">
+                    <button class="iq-btn" data-iq="15" data-opt="0" onclick="handleIQ(15,0)"><span class="iq-letter">A.</span><span>模型假设的适用性</span></button>
+                    <button class="iq-btn" data-iq="15" data-opt="1" onclick="handleIQ(15,1)"><span class="iq-letter">B.</span><span>预测的能力与质量</span></button>
+                    <button class="iq-btn" data-iq="15" data-opt="2" onclick="handleIQ(15,2)"><span class="iq-letter">C.</span><span>模型使用的简便性</span></button>
+                    <button class="iq-btn" data-iq="15" data-opt="3" onclick="handleIQ(15,3)"><span class="iq-letter">D.</span><span>模型开发者的知名度</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-15">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    选模型4标准口诀"适预需简"：适用性、预测能力、满足评价需求、简便性。"模型开发者的知名度"与模型质量没有必然联系，不是选择标准，是典型干扰项。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S7: 综合练习题 ══════════ -->
+    <section id="s7" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 07</div>
+            <h1>综合练习题（30题）</h1>
+            <p>覆盖全章考点 · 点击选项即时反馈 · 💡查看详解</p>
+        </div>
+        <div id="quiz-score">已作答：<span id="answered">0</span> 题 &nbsp;|&nbsp; 答对：<span id="correct-count">0</span> 题</div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══════════ S8: 速记闪卡 ══════════ -->
+    <section id="s8" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 08</div>
+            <h1>速记闪卡</h1>
+            <p>考前最后冲刺 · 核心口诀速查</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+
+        <div class="card" style="margin-top:28px">
+            <div class="card-title"><span class="icon">🏆</span>本章核心速记总表</div>
+            <div class="summary-table">
+                <div class="summary-row">
+                    <div class="summary-k">可靠性定义</div>
+                    <div class="summary-v">规定时间 · 不失效 · 概率 → 三要素缺一不可</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">三大指标</div>
+                    <div class="summary-v">可靠平均故障强 → 可靠度 · MTTF · 故障强度</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">影响5因素</div>
+                    <div class="summary-v">运规内开投 → 运行环境 · 规模 · 内部结构 · 开发方法 · 可靠性投入</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">10种建模方法</div>
+                    <div class="summary-v">种失曲增结，输执非马贝</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">设计四技术</div>
+                    <div class="summary-v">容检降配 → 容错 · 检错 · 降复杂度 · 系统配置</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">容错三技术</div>
+                    <div class="summary-v">恢N冗 → N版本(并行·表决·空间) / 恢复块(串行·回滚·时间)</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">检错四要素</div>
+                    <div class="summary-v">对延实处 → 检测对象 · 检测延时 · 实现方式 · 处理方式</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">双机模式</div>
+                    <div class="summary-v">热备=Active/Standby · 互备=不同应用 · 双工=相同应用</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">广义vs狭义测试</div>
+                    <div class="summary-v">广义=评价（大）/ 狭义=获取数据（小）</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">评价三步</div>
+                    <div class="summary-v">选收评 → 选模型 · 收数据 · 评估预测</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">选模型4标准</div>
+                    <div class="summary-v">适预需简 → 适用性 · 预测能力 · 满足需求 · 简便性</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">最重要的手段</div>
+                    <div class="summary-v">可靠性在<strong>设计阶段</strong>控制最有效、最经济、最重要！</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id, btn) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (btn) btn.classList.add('active');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // ─── INLINE QUIZ ───
+    const iqAnswers = {
+        0: 1, 1: 3, 2: 2,   // S1
+        3: 2, 4: 3,          // S2
+        5: 1,                // S3
+        6: 3, 7: 1, 8: 1, 9: 0, 10: 0, 11: 1,  // S4
+        12: 3, 13: 1,        // S5
+        14: 3, 15: 3         // S6
+    };
+
+    function handleIQ(qi, opt) {
+        const correct = iqAnswers[qi];
+        const btns = document.querySelectorAll(`[data-iq="${qi}"]`);
+        if (btns[0].classList.contains('revealed')) return;
+        btns.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if (j === correct) btn.classList.add('correct');
+            else if (j === opt) btn.classList.add('wrong');
+        });
+        document.getElementById(`iq-ans-${qi}`).classList.add('show');
+    }
+
+    // ─── QUIZ DATA ───
+    const quizData = [
+        // 基本概念 1-5
+        {q:"软件可靠性的定义是（　）",opts:["软件永远不出错","在规定的时间内，软件不引起系统失效的概率","软件的运行速度快","软件的功能完整性"],ans:1,exp:"可靠性定义三要素：规定时间（有期限）、不引起系统失效（强调失效）、概率（统计量）。A说'永远'是绝对表述，C是性能，D是功能完整性，均不是可靠性定义。"},
+        {q:"下列不属于软件可靠性描述指标的是（　）",opts:["可靠度","平均失效时间（MTTF）","故障强度","代码行数"],ans:3,exp:"代码行数是软件规模的度量，不是可靠性指标。三大可靠性指标：可靠度（不失效概率）、MTTF（平均失效时间）、故障强度（单位时间故障数）。"},
+        {q:"关于软件可靠性，下列说法错误的是（　）",opts:["可靠性是一种概率","可靠性与规定的时间有关","可靠性与系统输入无关","可靠性与软件中存在的缺陷有关"],ans:2,exp:"可靠性 = f(时间, 输入, 缺陷)，与系统输入有关！C说'与输入无关'是错误的。不同的输入序列触发不同执行路径，会影响是否触发缺陷导致失效。"},
+        {q:"广义的可靠性测试的主要目的是（　）",opts:["获取可靠性数据","评价软件系统的可靠性","发现软件缺陷","测试软件性能"],ans:1,exp:"广义测试目的是评价可靠性（大而全，综合评价），手段包括建模、统计、分析等。狭义测试目的才是获取数据（A选项）。两者目的完全不同！"},
+        {q:"狭义的可靠性测试的主要目的是（　）",opts:["获取可靠性数据","评价软件系统的可靠性","修复软件缺陷","提升用户体验"],ans:0,exp:"狭义可靠性测试目的是按预定测试用例执行，收集并获取可靠性数据。广义才是评价可靠性（B选项）。记忆：广义=评价，狭义=数据。"},
+        // 可靠性建模 6-10
+        {q:"下列不属于影响软件可靠性的因素的是（　）",opts:["运行环境","软件规模","开发人员的薪资","软件的内部结构"],ans:2,exp:"五大因素口诀'运规内开投'：运行环境、软件规模、内部结构、开发方法和环境、可靠性投入。开发人员薪资与可靠性没有直接关系，是常见干扰项。"},
+        {q:"下列不属于软件可靠性建模方法的是（　）",opts:["种子法","马尔可夫过程","贝叶斯分析","瀑布模型"],ans:3,exp:"10种建模方法口诀'种失曲增结，输执非马贝'，瀑布模型是软件开发生命周期模型，不是可靠性建模方法。"},
+    {q:"以下属于软件可靠性建模方法的是（　）",opts:["非齐次泊松过程","面向对象方法","结构化方法","敏捷开发"],ans:0,exp:"非齐次泊松过程是经典的可靠性建模方法，考试高频考点，注意是'非齐次'而非'齐次'！面向对象、结构化、敏捷都是开发方法论，不是可靠性建模方法。"},
+    {q:"影响软件可靠性的因素包括运行环境、软件规模、（　）、开发方法和环境、可靠性投入",opts:["软件的内部结构","开发人员数量","软件价格","用户满意度"],ans:0,exp:"五大影响因素口诀'运规内开投'，第三个是软件的内部结构（内）。开发人员数量、软件价格、用户满意度均不在五大因素之列。"},
+    {q:"可靠性建模方法中，'种子法'主要用于（　）",opts:["估计软件中的错误数","预测软件性能","分析用户需求","优化排序算法"],ans:0,exp:"种子法：在软件中人为植入一定数量的已知错误（种子），然后通过测试发现的已植入错误比例，推断软件中错误的总数。这是一种缺陷密度估算方法。"},
+    // 可靠性设计 11-20
+    {q:"软件可靠性设计技术不包括（　）",opts:["容错设计技术","检错技术","降低复杂度设计","增加代码量设计"],ans:3,exp:"四大技术口诀'容检降配'：容错、检错、降低复杂度、系统配置。增加代码量不仅不提升可靠性，反而增加复杂度和潜在缺陷数，与可靠性设计目标背道而驰。"},
+    {q:"容错设计技术不包括（　）",opts:["恢复块设计","N版本程序设计","冗余设计","检错设计"],ans:3,exp:"容错三技术：恢复块、N版本程序、冗余设计（口诀'恢N冗'）。检错设计是独立的设计技术，代价低于容错，但不能自动恢复故障，需要人工干预。"},
+    {q:"通过设计多个模块/版本，对相同输入实行多数表决的容错技术是（　）",opts:["恢复块设计","N版本程序设计","冗余设计","降低复杂度设计"],ans:1,exp:"N版本程序设计：N个版本并行运行 + 多数表决。恢复块是串行尝试（主块失败→备选块），不是并行表决。"},
+    {q:"采用检错设计技术要着重考虑四个要素：检测对象、（　）、实现方法和处理方式",opts:["检测延时","测试结果","系统性能","功能测试"],ans:0,exp:"检错四要素口诀'对延实处'：检测对象、检测延时、实现方式、处理方式。空缺的是第二个要素：检测延时（何时进行检测）。"},
+    {q:"关于检错技术的说法，错误的是（　）",opts:["代价低于容错技术","代价低于冗余技术","可以自动解决故障","需要人工干预"],ans:2,exp:"检错技术只能检测到故障，不能自动解决，必须经过人工干预处理。这是与容错技术的本质区别——容错技术可以自动恢复，检错技术不能。"},
+    {q:"（　）是通常所说的 Active/Standby 方式",opts:["双机热备","双机互备","双机双工","服务器集群"],ans:0,exp:"Active/Standby = 双机热备。Active为主机（活跃运行），Standby为备机（待机监控），主机故障时备机自动接管。这是本章送分题，必须记住！"},
+    {q:"两台服务器同时运行相同的应用，互为备份的是（　）",opts:["双机热备","双机互备","双机双工","冷备份"],ans:2,exp:"双机双工：两台服务器同时运行相同的应用，性能最高，可靠性最强。区别：互备是运行不同的应用各自备份；热备是一台运行一台待机。"},
+    {q:"两台服务器运行相对独立的应用，互为后备的是（　）",opts:["双机热备","双机互备","双机双工","服务器集群"],ans:1,exp:"双机互备：两台服务器各运行不同的（独立）应用，正常情况下互不干涉。当一台故障时，另一台兼顾接管其应用。关键词：不同应用 + 互为后备。"},
+    {q:"双机热备技术采用（　）方法保证主系统与备用系统的联系",opts:["心跳","轮询","广播","中断"],ans:0,exp:"心跳机制：主备系统定期互发'心跳信号'确认对方是否存活。心跳停止则认为对方已故障，触发故障切换。'心跳'是标准术语，必考点！"},
+    {q:"服务器集群技术中，各节点服务器通过（　）相互通信",opts:["互联网","内部局域网","无线信号","蓝牙"],ans:1,exp:"服务器集群中各节点通过内部局域网高速通信，保证低延迟的状态同步和故障检测。使用互联网会导致延迟过高，无法保证高可靠性需求。"},
+    // 可靠性测试与评价 21-25
+    {q:"软件可靠性测试不包括（　）",opts:["可靠性目标的确定","运行剖面的开发","测试用例的设计","软件价格的评估"],ans:3,exp:"可靠性测试五步流程：确定目标→开发运行剖面→设计测试用例→实施测试→分析结果。软件价格评估是商务管理工作，与可靠性测试流程无关。"},
+    {q:"用时间定义的软件可靠性数据不包括（　）",opts:["失效时间数据","失效间隔时间数据","分组时间内的失效数","代码行数"],ans:3,exp:"时间定义的数据4类：失效时间、失效间隔时间、分组时间内失效数、分组时间累积失效数。代码行数是规模指标，不是时间维度的可靠性数据。"},
+    {q:"评估和预测软件可靠性的过程不包括（　）",opts:["选择可靠性模型","收集可靠性数据","可靠性评估和预测","重新编写代码"],ans:3,exp:"评价三步口诀'选收评'：选模型→收数据→评估预测。重新编写代码是开发工作，不在可靠性评价流程中。"},
+    {q:"选择可靠性模型时，不需要考虑的因素是（　）",opts:["模型假设的适用性","预测的能力与质量","模型使用的简便性","模型开发者的知名度"],ans:3,exp:"选模型4标准口诀'适预需简'：适用性、预测能力与质量、输出满足评价需求、使用简便性。模型开发者知名度与模型质量无必然联系，不是考量标准。"},
+    {q:"软件可靠性的评估和预测以（　）为主",opts:["软件可靠性模型分析","图形分析法","试探性数据分析","专家经验"],ans:0,exp:"评估和预测以软件可靠性模型分析为主，图形分析法和试探性数据分析为辅。专家经验可作参考，但不是主要手段。记住：模型分析是主，其他是辅！"},
+    // 综合应用 26-30
+    {q:"某航空订票系统要求极高可靠性，最适合采用的容错技术是（　）",opts:["降低复杂度设计","N版本程序设计","不做任何设计","只做功能测试"],ans:1,exp:"航空订票等高安全要求场景，适合N版本程序设计：多个独立团队开发的N个版本并行运行，通过多数表决容错，即使某版本出错也不影响最终结果，可靠性极高。"},
+    {q:"关于冗余设计，下列说法正确的是（　）",opts:["使用完全相同的算法作为备份","使用不同路径、算法或不同实现方式的模块备份","不需要任何备份","只在硬件层面实现"],ans:1,exp:"冗余设计的核心：必须使用不同的路径、不同的算法或不同的实现方式作为备份。如果备份用相同的实现，那么同样的缺陷会同时触发，冗余失去意义！"},
+    {q:"降低复杂度设计的核心思想不包括（　）",opts:["简化软件结构","缩短程序代码长度","增加代码注释量","优化软件数据流向"],ans:2,exp:"降低复杂度设计的目标是'简化'：简化软件结构、缩短代码长度、优化数据流。增加代码注释量是提高可读性的手段，不是降低复杂度的核心内容，也不会直接降低软件复杂度。"},
+    {q:"恢复块设计的核心思想是（　）",opts:["运行多个版本并行投票","把普通程序块变成可恢复的块，失败后尝试备选块","增加硬件冗余","降低软件复杂度"],ans:1,exp:"恢复块设计：把普通程序块改造为可恢复的块。执行时先用主选块，执行验收测试——通过则继续；不通过则回滚状态，换备选块再试。是串行尝试，属于时间冗余。"},
+    {q:"保障软件可靠性最有效、最经济、最重要的手段是（　）",opts:["在软件测试阶段进行全面测试","在软件设计阶段采用措施进行可靠性控制","在软件运行阶段持续监控","增加开发人员数量"],ans:1,exp:"教材原文结论（高频考点）：保障软件可靠性最有效、最经济、最重要的手段是在设计阶段采取措施。可靠性是设计出来的，不是测出来的。测试只能评估，无法从根本上提升可靠性。"},
+    ];
+
+    let answered = 0, correct = 0;
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        quizData.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-q';
+            div.innerHTML = `
+      <div class="quiz-num">第 ${i+1} 题 / 共 30 题</div>
+      <div class="quiz-text">${item.q}</div>
+      <div class="quiz-options" id="opts-${i}">
+        ${['A','B','C','D'].map((L,j)=>`
+          <button class="opt-btn" data-q="${i}" data-opt="${j}" onclick="handleOpt(${i},${j})">
+            <span class="opt-letter">${L}.</span>
+            <span>${item.opts[j]}</span>
+          </button>`).join('')}
+      </div>
+      <button class="reveal-btn" id="reveal-${i}" onclick="revealAns(${i})" style="display:none">💡 查看解析</button>
+      <div class="quiz-ans" id="ans-${i}">
+        <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+        <div class="ans-body">${item.exp}</div>
+      </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleOpt(qi, opt) {
+        const item = quizData[qi];
+        const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed')) return;
+        opts.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === item.ans) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt === item.ans) correct++;
+        document.getElementById('answered').textContent = answered;
+        document.getElementById('correct-count').textContent = correct;
+        document.getElementById(`reveal-${qi}`).style.display = 'inline-flex';
+    }
+
+    function revealAns(qi) {
+        document.getElementById(`ans-${qi}`).classList.toggle('show');
+    }
+    renderQuiz();
+
+    // ─── FLASH CARDS ───
+    const flashData = [
+        {n:"01",topic:"软件可靠性定义",mnemonic:"规定时间 · 不失效 · 概率",detail:"三要素缺一不可！可靠性≠正确性，可靠性是概率不是绝对值"},
+        {n:"02",topic:"可靠性三大指标",mnemonic:"可靠平均故障强",detail:"可靠度 · MTTF · 故障强度。代码行数=规模指标，不是可靠性指标！"},
+        {n:"03",topic:"可靠性与输入的关系",mnemonic:"可靠性 = f(时间, 输入, 缺陷)",detail:"⚠️高频陷阱：可靠性与系统输入「有关」，不是无关！"},
+        {n:"04",topic:"影响可靠性5因素",mnemonic:"运规内开投",detail:"运行环境·规模·内部结构·开发方法·可靠性投入。薪资/价格是干扰项"},
+        {n:"05",topic:"10种建模方法",mnemonic:"种失曲增结，输执非马贝",detail:"非齐次泊松过程最常考！瀑布/敏捷/面向对象均不是可靠性建模方法"},
+        {n:"06",topic:"设计四技术",mnemonic:"容检降配",detail:"容错·检错·降复杂度·系统配置。增加代码量不是！"},
+        {n:"07",topic:"容错三技术",mnemonic:"恢N冗",detail:"N版本=并行+表决+空间冗余；恢复块=串行+回滚+时间冗余"},
+        {n:"08",topic:"N版本 vs 恢复块",mnemonic:"N版本并行·恢复块串行",detail:"最易混淆！N版本多数表决，恢复块主备切换。这是高频陷阱题！"},
+        {n:"09",topic:"检错四要素",mnemonic:"对延实处",detail:"检测对象·检测延时·实现方式·处理方式。检错不能自动恢复，需人工干预！"},
+        {n:"10",topic:"双机热备",mnemonic:"Active/Standby = 双机热备",detail:"一台主机工作，一台备机监控待命。心跳机制保持联系。送分题必记！"},
+        {n:"11",topic:"双机互备 vs 双机双工",mnemonic:"互备=不同应用 / 双工=相同应用",detail:"互备：各做各的互顶替；双工：俩人做同一件事。靠关键词区分！"},
+        {n:"12",topic:"广义vs狭义可靠性测试",mnemonic:"广=评价 / 狭=获取数据",detail:"广义目的是评价可靠性；狭义目的是获取可靠性数据。目的完全不同"},
+        {n:"13",topic:"可靠性评价三步",mnemonic:"选收评",detail:"选模型→收数据→评估预测。以模型分析为主，图形和试探性分析为辅"},
+        {n:"14",topic:"选模型4标准",mnemonic:"适预需简",detail:"适用性·预测能力·满足需求·简便性。开发者知名度不是标准！"},
+        {n:"15",topic:"最重要的手段",mnemonic:"设计阶段控制可靠性",detail:"教材原话：最有效、最经济、最重要的手段是在「设计阶段」进行可靠性控制"},
+    ];
+
+    function renderFlash() {
+        const grid = document.getElementById('flash-grid');
+        flashData.forEach(fc => {
+            const div = document.createElement('div');
+            div.className = 'flash-card';
+            div.innerHTML = `<div class="fc-num"># ${fc.n}</div>
+      <div class="fc-topic">${fc.topic}</div>
+      <div class="fc-mnemonic">「${fc.mnemonic}」</div>
+      <div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>

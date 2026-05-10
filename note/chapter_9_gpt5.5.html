@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>第九小时：系统架构设计基础知识 - 交互记忆版</title>
+    <style>
+        :root {
+            --bg: #f7f0df;
+            --bg2: #fffaf0;
+            --card: #fff8e8;
+            --card2: #f3e4c7;
+            --text: #3f321f;
+            --muted: #7b6a4d;
+            --primary: #9b6b2f;
+            --primary2: #c28a3e;
+            --accent: #d98c27;
+            --ok: #4f8a5b;
+            --bad: #b8574d;
+            --line: #e3d0aa;
+            --shadow: rgba(91, 66, 31, 0.14);
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    "PingFang SC",
+                    "Hiragino Sans GB",
+                    "Microsoft YaHei",
+                    Arial,
+                    sans-serif;
+            line-height: 1.75;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .hero {
+            background:
+                    radial-gradient(circle at top left, rgba(255,255,255,.65), transparent 30%),
+                    linear-gradient(135deg, #fff7e2, #ead5aa);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: 0 18px 38px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "SA";
+            position: absolute;
+            right: 24px;
+            bottom: -36px;
+            font-size: 130px;
+            font-weight: 900;
+            color: rgba(155,107,47,.08);
+            letter-spacing: -8px;
+        }
+
+        h1, h2, h3, h4 {
+            color: #3b2a13;
+            line-height: 1.35;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(26px, 4vw, 42px);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        h4 {
+            font-size: 17px;
+            margin-bottom: 4px;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 16px;
+            max-width: 800px;
+        }
+
+        .top-actions {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button, .btn {
+            border: 0;
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 8px 18px rgba(120, 78, 30, .2);
+            transition: .2s ease;
+        }
+
+        button:hover, .btn:hover {
+            transform: translateY(-1px);
+            background: #7d5222;
+        }
+
+        button.secondary {
+            background: #fff3d6;
+            color: var(--primary);
+            border: 1px solid var(--line);
+            box-shadow: none;
+        }
+
+        button.secondary:hover {
+            background: #f4e1b9;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 12px;
+            align-self: start;
+            background: rgba(255, 250, 240, .92);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 14px;
+            box-shadow: 0 10px 22px var(--shadow);
+            max-height: calc(100vh - 24px);
+            overflow: auto;
+        }
+
+        .search {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fffdf7;
+            color: var(--text);
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        .toc a {
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .toc a:hover {
+            background: #f1dfb9;
+        }
+
+        .progress-box {
+            margin-top: 14px;
+            padding: 12px;
+            background: #f8ead0;
+            border-radius: 14px;
+            border: 1px dashed #cba66b;
+        }
+
+        .progress-bar {
+            height: 10px;
+            border-radius: 999px;
+            background: #e0c898;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #9b6b2f, #d98c27);
+        }
+
+        .content {
+            min-width: 0;
+        }
+
+        .section {
+            background: var(--bg2);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            box-shadow: 0 10px 24px var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 18px 20px;
+            cursor: pointer;
+            background: linear-gradient(90deg, #fff6df, #f1dfb7);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .chev {
+            font-weight: 900;
+            color: var(--primary);
+            transition: .25s ease;
+        }
+
+        .section.closed .chev {
+            transform: rotate(-90deg);
+        }
+
+        .section-body {
+            padding: 20px;
+        }
+
+        .section.closed .section-body {
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .mini-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 15px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1d9a7;
+            color: #6d4212;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            margin: 3px 4px 3px 0;
+        }
+
+        .memory {
+            background: linear-gradient(135deg, #fff1c7, #f8d99b);
+            border: 1px solid #d9aa5d;
+            border-radius: 16px;
+            padding: 15px;
+            margin: 12px 0;
+        }
+
+        .memory strong {
+            color: #7c4712;
+        }
+
+        .analogy {
+            background: #fffdf7;
+            border-left: 6px solid var(--accent);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+
+        .wrong {
+            background: #fff2ee;
+            border-left: 6px solid var(--bad);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+
+        .key {
+            background: #eef8ed;
+            border-left: 6px solid var(--ok);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            background: #fffdf7;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--line);
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1dfb9;
+        }
+
+        .flashcards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 12px;
+        }
+
+        .flashcard {
+            perspective: 1000px;
+            min-height: 128px;
+            cursor: pointer;
+        }
+
+        .flash-inner {
+            position: relative;
+            width: 100%;
+            min-height: 128px;
+            transition: transform .5s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flash-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flash-front, .flash-back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #fff8e8;
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        .flash-front {
+            font-size: 20px;
+            font-weight: 800;
+            color: #7d5222;
+            text-align: center;
+        }
+
+        .flash-back {
+            transform: rotateY(180deg);
+            font-size: 14px;
+            background: #f7e7c4;
+        }
+
+        .palace {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap: 12px;
+            counter-reset: palace;
+        }
+
+        .palace-room {
+            background: #fffdf7;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            position: relative;
+        }
+
+        .palace-room::before {
+            counter-increment: palace;
+            content: counter(palace);
+            position: absolute;
+            right: 12px;
+            top: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+        }
+
+        .quiz-card {
+            background: #fffdf7;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .options {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .option {
+            background: #fff8e8;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: #f5e2bd;
+        }
+
+        .option.correct {
+            background: #e8f5e6;
+            border-color: #75aa7a;
+        }
+
+        .option.incorrect {
+            background: #ffe8e4;
+            border-color: #cf7569;
+        }
+
+        .explain {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #f1dfb9;
+        }
+
+        .quiz-card.answered .explain {
+            display: block;
+        }
+
+        .quiz-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0 18px;
+        }
+
+        mark {
+            background: #ffd86b;
+            color: #39280f;
+            padding: 0 2px;
+            border-radius: 4px;
+        }
+
+        .hidden-by-search {
+            display: none !important;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 30px 10px;
+        }
+
+        @media (max-width: 860px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+
+            .grid, .flashcards, .palace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            .sidebar, .top-actions, .quiz-toolbar, button {
+                display: none !important;
+            }
+
+            body {
+                background: #fff;
+            }
+
+            .section {
+                break-inside: avoid;
+                box-shadow: none;
+            }
+
+            .section-body {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <header class="hero">
+        <h1>第九小时：系统架构设计基础知识</h1>
+        <p class="subtitle">
+            高级软考系统架构设计师备考交互记忆版：通俗解释、生活类比、速记口诀、易错点、记忆宫殿、例题与 30 道练习题。
+        </p>
+        <div class="top-actions">
+            <button onclick="expandAll()">全部展开</button>
+            <button onclick="collapseAll()">全部折叠</button>
+            <button class="secondary" onclick="toggleHighlight()">关键词高亮</button>
+            <button class="secondary" onclick="window.print()">打印/导出 PDF</button>
+            <button class="secondary" onclick="resetQuiz()">重置练习</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <input id="searchInput" class="search" placeholder="搜索知识点，例如 ABSD、DSSA、B/S..." oninput="searchSections()" />
+            <nav class="toc">
+                <a href="#overview">本章定位</a>
+                <a href="#definition">1. 软件架构定义</a>
+                <a href="#lifecycle">2. 架构与生命周期</a>
+                <a href="#importance">3. 架构重要性</a>
+                <a href="#absd">4. ABSD 方法</a>
+                <a href="#absdm">5. ABSDM 六过程</a>
+                <a href="#style">6. 软件架构风格</a>
+                <a href="#dataflow">7. 数据流风格</a>
+                <a href="#callreturn">8. 调用/返回风格</a>
+                <a href="#datacenter">9. 数据中心风格</a>
+                <a href="#vm">10. 虚拟机风格</a>
+                <a href="#independent">11. 独立构件风格</a>
+                <a href="#c2">12. C2 风格</a>
+                <a href="#reuse">13. 架构复用</a>
+                <a href="#dssa">14. DSSA</a>
+                <a href="#palace">记忆宫殿</a>
+                <a href="#flash">速记卡片</a>
+                <a href="#quiz">30 道练习题</a>
+            </nav>
+            <div class="progress-box">
+                <strong>练习进度</strong>
+                <div id="progressText">已答 0 / 30，正确 0</div>
+                <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+            </div>
+        </aside>
+
+        <main class="content">
+
+            <section id="overview" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>本章考试定位</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>第九小时主要学习软件架构的基本概念、基于架构的软件开发方法、软件架构风格、软件架构复用以及特定领域软件体系结构等内容。</p>
+                    <div class="key">
+                        <strong>考试价值：</strong>
+                        上午选择题常考 8～15 分；下午案例题可能考 25 分；论文也可以作为架构设计素材。
+                    </div>
+                    <table>
+                        <tr><th>主题</th><th>需要掌握</th></tr>
+                        <tr><td>软件架构概念</td><td>构件、连接件、外部可见属性、关系</td></tr>
+                        <tr><td>ABSD</td><td>商业、质量、功能需求驱动；视角视图、用例、质量场景</td></tr>
+                        <tr><td>架构风格</td><td>数据流、调用返回、数据中心、虚拟机、独立构件、C2</td></tr>
+                        <tr><td>架构复用</td><td>机会复用、系统复用</td></tr>
+                        <tr><td>DSSA</td><td>领域分析、领域设计、领域实现</td></tr>
+                    </table>
+                </div>
+            </section>
+
+            <section id="definition" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>1. 软件架构定义</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <div class="grid">
+                        <div class="mini-card">
+                            <h3>通俗解释</h3>
+                            <p>软件架构是软件系统的整体结构设计。它描述系统由哪些部分组成、这些部分如何交互、对外表现出什么属性，以及它们之间存在什么关系。</p>
+                        </div>
+                        <div class="mini-card">
+                            <h3>生活类比</h3>
+                            <p>软件架构像一栋大楼的建筑图纸。构件是房间、电梯、楼梯；连接件是走廊、水管、电线；属性是房间用途和承重要求；关系是客厅连卧室、厨房连餐厅。</p>
+                        </div>
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>架构四件套：<strong>件、连、属、关</strong>。<br>
+                        <strong>谐音故事：</strong>架构师建房，先数几<strong>件</strong>家具，再看水电<strong>连</strong>接，确认房间<strong>属</strong>性，最后理清房间<strong>关</strong>系。
+                    </div>
+                    <div class="key">
+                        <strong>关键要点：</strong>
+                        <span class="tag">构件</span>
+                        <span class="tag">连接件</span>
+                        <span class="tag">外部可见属性</span>
+                        <span class="tag">构件关系</span>
+                        <span class="tag">多视图描述</span>
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>
+                        软件架构不等于详细设计，也不只是模块划分。架构主要关注整体结构、关键交互和质量属性。
+                    </div>
+                </div>
+            </section>
+
+            <section id="lifecycle" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>2. 软件架构与生命周期</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>软件架构贯穿整个软件生命周期，不是只在设计阶段才有用。</p>
+                    <table>
+                        <tr><th>阶段</th><th>架构作用</th></tr>
+                        <tr><td>需求分析阶段</td><td>促进参与者交流，保持需求到架构的可追踪性</td></tr>
+                        <tr><td>设计阶段</td><td>关注最早、最多，是架构工作的核心阶段</td></tr>
+                        <tr><td>实现阶段</td><td>指导从软件架构设计到实现的转换</td></tr>
+                        <tr><td>构件组装阶段</td><td>支持可复用构件组装，提高实现效率</td></tr>
+                        <tr><td>部署阶段</td><td>组织和展示软硬件部署架构，评估部署方案</td></tr>
+                        <tr><td>后开发阶段</td><td>围绕维护、演化、复用展开</td></tr>
+                    </table>
+                    <div class="analogy">
+                        <strong>生活类比：</strong>软件架构像城市规划。需求阶段确定需要住宅、学校、医院；设计阶段规划道路、地铁和管网；实现阶段施工；部署阶段投入使用；后开发阶段扩建和改造。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>需设实现组，部署后维护。<br>
+                        <strong>重点：</strong>需求关注<strong>问题空间</strong>，架构关注<strong>解空间</strong>。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>
+                        体系结构失配包括构件本身失配、连接子失配、部分和整体失配。
+                    </div>
+                </div>
+            </section>
+
+            <section id="importance" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>3. 软件架构的重要性</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>软件架构是降低成本、改进质量、按时和按需交付产品的关键因素。</p>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>品一计导，复杂复维冲。<br>
+                        <strong>含义：</strong>满足品质、受益人一致、支持计划、指导开发、管理复杂性、支持复用、降低维护费用、支持冲突分析。
+                    </div>
+                    <ol>
+                        <li>架构设计能够满足系统品质。</li>
+                        <li>架构设计使受益人达成一致目标。</li>
+                        <li>架构设计能够支持计划编制过程。</li>
+                        <li>架构设计对系统开发具有指导性。</li>
+                        <li>架构设计能够有效管理复杂性。</li>
+                        <li>架构设计为复用奠定基础。</li>
+                        <li>架构设计能够降低维护费用。</li>
+                        <li>架构设计能够支持冲突分析。</li>
+                    </ol>
+                    <div class="wrong">
+                        <strong>易错点：</strong>软件架构的主要作用不是直接表达系统是否满足用户的功能性需求。
+                    </div>
+                </div>
+            </section>
+
+            <section id="absd" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>4. 基于架构的软件开发方法 ABSD</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>ABSD，即 Architecture-Based Software Design，基于体系结构的软件设计方法。它强调软件开发由架构驱动。</p>
+                    <table>
+                        <tr><th>内容</th><th>要点</th></tr>
+                        <tr><td>驱动因素</td><td>商业需求、质量需求、功能需求</td></tr>
+                        <tr><td>架构描述</td><td>视角与视图</td></tr>
+                        <tr><td>功能需求描述</td><td>用例</td></tr>
+                        <tr><td>质量需求描述</td><td>质量场景</td></tr>
+                        <tr><td>三个基础</td><td>功能分解、选择体系结构风格、软件模板使用</td></tr>
+                        <tr><td>特点</td><td>自顶向下、递归细化、迭代、步骤清晰</td></tr>
+                    </table>
+                    <div class="analogy">
+                        <strong>生活类比：</strong>ABSD 像拍电影。商业需求是票房，功能需求是剧情，质量需求是画面和音效，架构视图是分镜和拍摄计划。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>
+                        <br>驱动：<strong>商质功，三轮驱</strong>。
+                        <br>三基础：<strong>分风模</strong>，即功能分解、架构风格、软件模板。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>功能需求用<strong>用例</strong>描述，质量需求用<strong>质量场景</strong>描述，架构用<strong>视角与视图</strong>描述。
+                    </div>
+                </div>
+            </section>
+
+            <section id="absdm" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>5. ABSDM 开发过程</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>ABSDM 将基于体系结构的软件开发过程划分为六个子过程。</p>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>需设文审，实演成真。
+                    </div>
+                    <table>
+                        <tr><th>过程</th><th>核心内容</th></tr>
+                        <tr><td>体系结构需求</td><td>获取用户需求，标识拟用构件</td></tr>
+                        <tr><td>体系结构设计</td><td>提出架构模型、映射构件、分析构件相互作用、产生设计评审</td></tr>
+                        <tr><td>体系结构文档化</td><td>输出体系结构规格说明和质量设计说明书</td></tr>
+                        <tr><td>体系结构复审</td><td>由外部人员、用户代表、领域专家参与，识别风险和缺陷</td></tr>
+                        <tr><td>体系结构实现</td><td>分析与设计、构件实现、构件组装、系统测试</td></tr>
+                        <tr><td>体系结构演化</td><td>需求变化归类、演化计划、构件变动、组装测试、技术评审</td></tr>
+                    </table>
+                    <div class="key">
+                        <strong>构件标识三步：</strong>生成类图 → 对类进行分组 → 把类打包成构件。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>设计评审必须邀请独立于系统开发的外部人员。
+                    </div>
+                </div>
+            </section>
+
+            <section id="style" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>6. 软件架构风格概述</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>软件架构风格是描述某一特定应用领域中系统组织方式的惯用模式。它定义一个系统家族。</p>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>风格三件事：定、词、约。
+                        <br>定：架构定义；词：词汇表；约：约束。
+                    </div>
+                    <table>
+                        <tr><th>概念</th><th>解释</th></tr>
+                        <tr><td>词汇表</td><td>包含构件和连接件</td></tr>
+                        <tr><td>约束</td><td>定义构件和连接件的组合方式</td></tr>
+                        <tr><td>核心目标</td><td>复用重复的体系结构模式</td></tr>
+                    </table>
+                    <div class="wrong">
+                        <strong>易错点：</strong>架构风格不是某个系统的具体架构，而是一类系统共有的组织模式。
+                    </div>
+                </div>
+            </section>
+
+            <section id="dataflow" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>7. 数据流体系结构风格</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>数据流风格强调数据按流程在多个处理步骤之间流动。</p>
+                    <div class="grid">
+                        <div class="mini-card">
+                            <h3>批处理风格</h3>
+                            <p>每个处理步骤是独立程序，必须等前一步结束后才能开始，数据以整体方式传递。</p>
+                        </div>
+                        <div class="mini-card">
+                            <h3>管道-过滤器风格</h3>
+                            <p>系统分为多个顺序处理步骤，一个步骤的输出是另一个步骤的输入。</p>
+                        </div>
+                    </div>
+                    <div class="analogy">
+                        <strong>类比：</strong>批处理像工厂批量生产；管道-过滤器像净水器，一层一层过滤。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>批等整，管流接。
+                    </div>
+                </div>
+            </section>
+
+            <section id="callreturn" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>8. 调用/返回体系结构风格</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>调用/返回风格采用调用与返回机制，本质是分而治之，降低复杂度，提高可修改性。</p>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>主面对层，客浏服。
+                    </div>
+                    <table>
+                        <tr><th>风格</th><th>说明</th></tr>
+                        <tr><td>主程序/子程序</td><td>单线程控制，把问题划分为若干处理步骤</td></tr>
+                        <tr><td>面向对象</td><td>构件是对象，即抽象数据类型的实例</td></tr>
+                        <tr><td>层次型</td><td>每一层为上层服务，并作为下层接口，通常只相邻层有接口</td></tr>
+                        <tr><td>二层 C/S</td><td>数据库服务器、客户应用程序、网络</td></tr>
+                        <tr><td>三层 C/S</td><td>表示层、功能层、数据层；又称瘦客户端模式</td></tr>
+                        <tr><td>B/S</td><td>浏览器、Web 服务器、数据库服务器</td></tr>
+                    </table>
+                    <div class="key">
+                        <strong>C/S 三层口诀：</strong>表功数。<br>
+                        <strong>B/S 三层口诀：</strong>浏网数。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>三层 C/S 是表示层、功能层、数据层；B/S 是浏览器、Web 服务器、数据库服务器。不要混淆。
+                    </div>
+                </div>
+            </section>
+
+            <section id="datacenter" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>9. 以数据为中心的体系结构风格</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>以数据为中心的风格围绕中心数据结构或数据存储组织系统。</p>
+                    <div class="grid">
+                        <div class="mini-card">
+                            <h3>仓库风格</h3>
+                            <p>由中央数据结构和一组独立构件组成，构件对中央数据进行操作。</p>
+                        </div>
+                        <div class="mini-card">
+                            <h3>黑板风格</h3>
+                            <p>是一种问题求解模型，包含黑板、知识源和控制模块，常用于语音识别、模式识别。</p>
+                        </div>
+                    </div>
+                    <div class="analogy">
+                        <strong>类比：</strong>仓库像图书馆书库；黑板像一群专家围着黑板破案。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>仓库管数据，黑板众专家。
+                    </div>
+                </div>
+            </section>
+
+            <section id="vm" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>10. 虚拟机体系结构风格</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>虚拟机风格的人为构建运行环境，可以解析和运行自定义语言，增加架构灵活性。</p>
+                    <table>
+                        <tr><th>类型</th><th>说明</th></tr>
+                        <tr><td>解释器风格</td><td>用于建立虚拟机，弥合程序语义与硬件语义差异；缺点是执行效率较低</td></tr>
+                        <tr><td>规则系统风格</td><td>包括知识库、规则解释器、规则/数据选择器、工作内存</td></tr>
+                    </table>
+                    <div class="analogy">
+                        <strong>类比：</strong>解释器像翻译官，你说一句它翻译一句，灵活但慢；规则系统像医生诊断，根据知识库和症状推理。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>虚机造环境，解释效偏低；规则四件套：知解选工。
+                    </div>
+                </div>
+            </section>
+
+            <section id="independent" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>11. 独立构件体系结构风格</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>独立构件风格强调系统中的构件相对独立，它们之间不直接通信，从而降低耦合度、提升灵活性。</p>
+                    <table>
+                        <tr><th>类型</th><th>说明</th></tr>
+                        <tr><td>进程通信风格</td><td>构件是独立的过程，连接件是消息传递</td></tr>
+                        <tr><td>事件系统风格</td><td>构件不直接调用过程，而是触发或广播一个或多个事件</td></tr>
+                    </table>
+                    <div class="analogy">
+                        <strong>类比：</strong>进程通信像部门之间发邮件；事件系统像小区广播通知。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>独立不直聊，进程靠消息，事件靠广播。
+                    </div>
+                </div>
+            </section>
+
+            <section id="c2" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>12. C2 风格</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>C2 风格通过连接件连接构件或某个构件组，构件与构件之间无连接。</p>
+                    <div class="analogy">
+                        <strong>生活类比：</strong>像快递中转站，人与人不直接交包裹，都通过中转站传递。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>C2 靠连接，构件不相见。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>C2 的重点是构件之间无直接连接，而是通过连接件连接。
+                    </div>
+                </div>
+            </section>
+
+            <section id="reuse" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>13. 软件架构复用</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>软件架构复用是把已有的架构、构件或其他软件资产再次使用，以提高效率、质量和性能。</p>
+                    <table>
+                        <tr><th>类型</th><th>说明</th></tr>
+                        <tr><td>机会复用</td><td>开发过程中只要发现可复用资产就复用</td></tr>
+                        <tr><td>系统复用</td><td>开发前进行规划，决定哪些资产可以复用</td></tr>
+                    </table>
+                    <div class="key">
+                        <strong>复用原因：</strong>减少开发工作、减少开发时间、降低成本、提高生产力、提高产品质量、提升互操作性。
+                    </div>
+                    <div class="key">
+                        <strong>可复用资产：</strong>需求、架构设计、元素、建模分析、测试、项目规划、过程/方法/工具、人员、样本系统、缺陷消除。
+                    </div>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>机会见了就用，系统先想再用。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>可复用资产不只是代码，也包括需求、架构、测试、工具、方法和经验。
+                    </div>
+                </div>
+            </section>
+
+            <section id="dssa" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>14. 特定领域软件体系结构 DSSA</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>DSSA，即 Domain Specific Software Architecture，是在特定应用领域中，为一组应用提供组织结构参考的标准软件体系结构。</p>
+                    <div class="analogy">
+                        <strong>生活类比：</strong>DSSA 像连锁奶茶店标准模板。不同门店位置不同，但都有点餐区、制作区、收银系统、库存管理、会员系统。
+                    </div>
+                    <table>
+                        <tr><th>项目</th><th>内容</th></tr>
+                        <tr><td>特征</td><td>领域性、普遍性、抽象性、可复用性</td></tr>
+                        <tr><td>基本活动</td><td>领域分析、领域设计、领域实现</td></tr>
+                        <tr><td>参与人员</td><td>领域专家、领域分析师、领域设计人员、领域实现人员</td></tr>
+                        <tr><td>建立过程</td><td>定义领域范围、定义领域特定元素、定义设计和实现约束、定义领域模型和体系结构、产生搜集可重用单元</td></tr>
+                        <tr><td>三层模型</td><td>领域开发环境、领域特定应用开发环境、应用执行环境</td></tr>
+                    </table>
+                    <div class="memory">
+                        <strong>速记口诀：</strong>
+                        <br>特征：领普抽复。
+                        <br>活动：分设实。
+                        <br>建立过程：范元约，模构用。
+                    </div>
+                    <div class="wrong">
+                        <strong>易错点：</strong>应用工程师主要在<strong>领域特定应用开发环境</strong>中工作。
+                    </div>
+                </div>
+            </section>
+
+            <section id="palace" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>记忆宫殿：一条路线记完整章</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <p>把第九小时想象成一次参观“架构师考试城堡”的路线。每天睡前走一遍，强化长期记忆。</p>
+                    <div class="palace">
+                        <div class="palace-room"><h3>城堡大门</h3><p><strong>件连属关</strong>刻在门上，提醒软件架构定义。</p></div>
+                        <div class="palace-room"><h3>城市规划厅</h3><p>墙上写着<strong>需设实现组，部署后维护</strong>。</p></div>
+                        <div class="palace-room"><h3>会议室</h3><p>八位干系人讨论<strong>品一计导，复杂复维冲</strong>。</p></div>
+                        <div class="palace-room"><h3>导演棚</h3><p>导演开着三轮车：<strong>商质功</strong>，车上放<strong>分风模</strong>。</p></div>
+                        <div class="palace-room"><h3>项目工厂</h3><p>流水线是<strong>需设文审，实演成真</strong>。</p></div>
+                        <div class="palace-room"><h3>装修展厅</h3><p>每种装修风格都有<strong>定词约</strong>。</p></div>
+                        <div class="palace-room"><h3>净水间</h3><p>批处理整批等，管道过滤器层层流。</p></div>
+                        <div class="palace-room"><h3>办公楼</h3><p>主程序、对象、分层、C/S、B/S 都在办公。</p></div>
+                        <div class="palace-room"><h3>图书馆</h3><p>仓库保存数据，专家围黑板推理。</p></div>
+                        <div class="palace-room"><h3>翻译屋</h3><p>解释器像翻译官，灵活但慢；规则系统拿<strong>知解选工</strong>。</p></div>
+                        <div class="palace-room"><h3>广播站</h3><p>进程发消息，事件靠广播。</p></div>
+                        <div class="palace-room"><h3>中转站</h3><p>C2 靠连接，构件不相见。</p></div>
+                        <div class="palace-room"><h3>旧货市场</h3><p>机会见了就用，系统先想再用。</p></div>
+                        <div class="palace-room"><h3>奶茶连锁店</h3><p>DSSA：领普抽复、分设实、范元约模构用。</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="flash" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>速记卡片：点击翻面</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <div class="flashcards">
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">件连属关</div><div class="flash-back">软件架构定义：构件、连接件、外部可见属性、构件之间的关系。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">商质功</div><div class="flash-back">ABSD 的三类驱动：商业需求、质量需求、功能需求。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">分风模</div><div class="flash-back">ABSD 三基础：功能分解、选择体系结构风格、软件模板使用。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">需设文审实演</div><div class="flash-back">ABSDM 六过程：需求、设计、文档化、复审、实现、演化。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">定词约</div><div class="flash-back">架构风格三要素：架构定义、架构词汇表、架构约束。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">表功数</div><div class="flash-back">三层 C/S：表示层、功能层、数据层。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">浏网数</div><div class="flash-back">B/S 三层：浏览器、Web 服务器、数据库服务器。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">知解选工</div><div class="flash-back">规则系统四件套：知识库、规则解释器、规则/数据选择器、工作内存。</div></div></div>
+                        <div class="flashcard" onclick="flip(this)"><div class="flash-inner"><div class="flash-front">领普抽复</div><div class="flash-back">DSSA 特征：领域性、普遍性、抽象性、可复用性。</div></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="quiz" class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>30 道练习题：即时判题</h2><span class="chev">▼</span>
+                </div>
+                <div class="section-body">
+                    <div class="quiz-toolbar">
+                        <button onclick="showWrongOnly()">只看错题</button>
+                        <button class="secondary" onclick="showAllQuiz()">显示全部</button>
+                        <button class="secondary" onclick="resetQuiz()">重置答题</button>
+                    </div>
+                    <div id="quizContainer"></div>
+                </div>
+            </section>
+
+            <div class="footer">
+                第九小时交互记忆版 · 建议每天快速刷一遍口诀卡片，再做 30 题巩固。
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            q: "软件架构主要描述系统中的构件、构件外部可见属性以及什么？",
+            options: ["构件之间的关系", "程序代码数量", "用户操作手册", "项目进度计划"],
+            answer: 0,
+            explain: "软件架构包括构件、构件外部可见属性及其之间的关系。"
+        },
+        {
+            q: "软件架构设计中，软件结构设计主要关注什么？",
+            options: ["财务预算", "软件构件的结构、属性和交互作用", "人员绩效考核", "用户培训计划"],
+            answer: 1,
+            explain: "软件结构设计关注构件结构、属性和交互作用。"
+        },
+        {
+            q: "在需求分析阶段，需求关注的是问题空间，架构关注的是：",
+            options: ["存储空间", "解空间", "网络空间", "测试空间"],
+            answer: 1,
+            explain: "需求描述问题，架构描述解决方案，因此架构关注解空间。"
+        },
+        {
+            q: "从需求模型向架构模型转换时，需要重点关注什么？",
+            options: ["如何减少项目人数", "如何保证模型转换的可追踪性", "如何减少文档页数", "如何删除测试环节"],
+            answer: 1,
+            explain: "需求模型到架构模型转换重点关注如何构建架构模型以及保证可追踪性。"
+        },
+        {
+            q: "ADL 是指：",
+            options: ["软件测试语言", "体系结构描述语言", "数据定义语言", "项目计划语言"],
+            answer: 1,
+            explain: "ADL 是 Architecture Description Language，即体系结构描述语言。"
+        },
+        {
+            q: "ADL 相比其他建模语言，最大的区别在于更关注：",
+            options: ["用户界面颜色", "构件间互联机制", "程序代码行数", "数据库字段长度"],
+            answer: 1,
+            explain: "ADL 更关注构件间互联机制，也就是连接子。"
+        },
+        {
+            q: "以下哪项不是典型的软件架构多视图模型？",
+            options: ["4+1 模型", "Hofmeister 的 4 视图模型", "CMU-SEI 的 Views and Beyond 模型", "瀑布编码模型"],
+            answer: 3,
+            explain: "瀑布编码模型不是典型的软件架构多视图模型。"
+        },
+        {
+            q: "在构件组装阶段，体系结构失配不包括：",
+            options: ["构件本身失配", "连接子失配", "部分和整体失配", "用户年龄失配"],
+            answer: 3,
+            explain: "体系结构失配包括构件本身失配、连接子失配、部分和整体失配。"
+        },
+        {
+            q: "部署阶段的软件架构作用不包括：",
+            options: ["提供高层软硬件部署视图", "分析部署方案质量属性", "选择合理部署方案", "编写每一行源代码"],
+            answer: 3,
+            explain: "部署阶段架构关注软硬件部署视图和质量属性分析，不是逐行编码。"
+        },
+        {
+            q: "以下哪项不是软件架构的重要性体现？",
+            options: ["支持计划编制", "管理复杂性", "为复用奠定基础", "保证不需要测试"],
+            answer: 3,
+            explain: "好的架构不能保证不需要测试。"
+        },
+        {
+            q: "ABSD 方法是由什么驱动的？",
+            options: ["商业、质量和功能需求", "代码行数", "用户年龄", "硬盘容量"],
+            answer: 0,
+            explain: "ABSD 是体系结构驱动的，由商业、质量和功能需求共同驱动。"
+        },
+        {
+            q: "在 ABSD 中，功能需求通常用什么描述？",
+            options: ["用例", "质量场景", "数据仓库", "黑板"],
+            answer: 0,
+            explain: "ABSD 中，功能需求用用例描述。"
+        },
+        {
+            q: "在 ABSD 中，质量需求通常用什么描述？",
+            options: ["用例", "质量场景", "数据表", "源代码"],
+            answer: 1,
+            explain: "质量需求用质量场景描述。"
+        },
+        {
+            q: "ABSD 的三个基础不包括：",
+            options: ["功能分解", "选择体系结构风格", "软件模板使用", "随机编码"],
+            answer: 3,
+            explain: "ABSD 三个基础是功能分解、通过选择架构风格实现质量和商业需求、软件模板使用。"
+        },
+        {
+            q: "ABSDM 的六个子过程正确的是：",
+            options: ["需求、设计、文档化、复审、实现、演化", "需求、编码、销售、部署、财务、验收", "设计、编码、测试、销售、维护、归档", "计划、采购、测试、上线、收费、培训"],
+            answer: 0,
+            explain: "ABSDM 包括体系结构需求、设计、文档化、复审、实现和演化。"
+        },
+        {
+            q: "体系结构需求中的构件标识步骤正确的是：",
+            options: ["生成类图、对类分组、将类打包成构件", "编写代码、发布系统、删除文档", "测试系统、购买硬件、培训用户", "创建数据库、删除接口、压缩文件"],
+            answer: 0,
+            explain: "标识构件分三步：生成类图，对类分组，把类打包成构件。"
+        },
+        {
+            q: "体系结构设计评审必须邀请：",
+            options: ["独立于系统开发的外部人员", "只邀请程序员", "只邀请财务人员", "只邀请销售人员"],
+            answer: 0,
+            explain: "设计评审必须邀请独立于系统开发的外部人员。"
+        },
+        {
+            q: "软件架构风格定义了一类架构的共有特征，主要包括架构定义、架构词汇表和：",
+            options: ["架构约束", "架构工资", "架构年龄", "架构颜色"],
+            answer: 0,
+            explain: "架构风格包括架构定义、架构词汇表和架构约束。"
+        },
+        {
+            q: "批处理体系结构风格的特点是：",
+            options: ["每一步必须在前一步结束后才能开始", "所有构件直接广播事件", "所有对象共享黑板", "浏览器直接访问数据库文件"],
+            answer: 0,
+            explain: "批处理风格中每个处理步骤是独立程序，下一步需等待前一步结束。"
+        },
+        {
+            q: "管道-过滤器风格中，每个处理步骤通常具有：",
+            options: ["输入和输出", "用户名和密码", "图片和视频", "工资和奖金"],
+            answer: 0,
+            explain: "管道-过滤器中每个过滤器都有输入和输出。"
+        },
+        {
+            q: "调用/返回风格的主要思想是：",
+            options: ["分而治之", "数据全部广播", "构件完全不能通信", "不需要模块划分"],
+            answer: 0,
+            explain: "调用/返回风格通过分解系统降低复杂度，是分而治之思想。"
+        },
+        {
+            q: "三层 C/S 模式包括：",
+            options: ["表示层、功能层、数据层", "浏览器、Web服务器、数据库服务器", "用户层、领导层、员工层", "文件层、打印层、显示层"],
+            answer: 0,
+            explain: "三层 C/S 包括表示层、功能层、数据层。"
+        },
+        {
+            q: "B/S 风格的三层结构包括：",
+            options: ["浏览器、Web服务器、数据库服务器", "表示层、功能层、数据层", "主程序、子程序、函数", "知识库、解释器、工作内存"],
+            answer: 0,
+            explain: "B/S 风格三层结构是浏览器、Web服务器和数据库服务器。"
+        },
+        {
+            q: "仓库体系结构风格由中央数据结构和什么组成？",
+            options: ["一组独立构件", "一个浏览器", "一个主程序", "一个翻译器"],
+            answer: 0,
+            explain: "仓库风格由中央数据结构和一组对中央数据进行操作的独立构件组成。"
+        },
+        {
+            q: "黑板体系结构风格常用于：",
+            options: ["语音识别和模式识别", "简单加法计算", "静态网页展示", "文件复制"],
+            answer: 0,
+            explain: "黑板风格常用于复杂问题求解，如语音识别、模式识别。"
+        },
+        {
+            q: "解释器体系结构风格的主要缺点是：",
+            options: ["执行效率较低", "无法提高灵活性", "不能解释语言", "不能构建虚拟机"],
+            answer: 0,
+            explain: "解释器风格灵活，但解释执行导致效率较低。"
+        },
+        {
+            q: "规则系统体系结构风格通常不包括：",
+            options: ["知识库", "规则解释器", "工作内存", "浏览器"],
+            answer: 3,
+            explain: "规则系统包括知识库、规则解释器、规则/数据选择器和工作内存。"
+        },
+        {
+            q: "事件系统体系结构风格中，构件之间交互通常通过：",
+            options: ["触发或广播事件", "直接调用所有函数", "共享同一个全局变量", "删除连接件"],
+            answer: 0,
+            explain: "事件系统中构件不直接调用过程，而是触发或广播事件。"
+        },
+        {
+            q: "软件架构复用中，在开发过程中发现可复用资产就复用，属于：",
+            options: ["机会复用", "系统复用", "强制复用", "无效复用"],
+            answer: 0,
+            explain: "机会复用是在开发过程中，只要发现可复用资产就复用。"
+        },
+        {
+            q: "DSSA 的基本活动包括：",
+            options: ["领域分析、领域设计、领域实现", "编码、销售、培训", "预算、招聘、考核", "打包、压缩、删除"],
+            answer: 0,
+            explain: "DSSA 的基本活动包括领域分析、领域设计和领域实现。"
+        }
+    ];
+
+    let highlighted = false;
+
+    function toggleSection(header) {
+        const section = header.parentElement;
+        section.classList.toggle("closed");
+    }
+
+    function expandAll() {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("closed"));
+    }
+
+    function collapseAll() {
+        document.querySelectorAll(".section").forEach(s => s.classList.add("closed"));
+    }
+
+    function flip(card) {
+        card.classList.toggle("flipped");
+    }
+
+    function renderQuiz() {
+        const container = document.getElementById("quizContainer");
+        container.innerHTML = "";
+        const saved = JSON.parse(localStorage.getItem("chapter9Quiz") || "{}");
+
+        quizData.forEach((item, index) => {
+            const card = document.createElement("div");
+            card.className = "quiz-card";
+            card.dataset.index = index;
+
+            const selected = saved[index]?.selected;
+            const answered = selected !== undefined;
+            if (answered) card.classList.add("answered");
+
+            const title = document.createElement("h3");
+            title.textContent = `${index + 1}. ${item.q}`;
+            card.appendChild(title);
+
+            const opts = document.createElement("div");
+            opts.className = "options";
+
+            item.options.forEach((opt, optIndex) => {
+                const div = document.createElement("div");
+                div.className = "option";
+                div.textContent = String.fromCharCode(65 + optIndex) + ". " + opt;
+
+                if (answered) {
+                    if (optIndex === item.answer) div.classList.add("correct");
+                    if (optIndex === selected && selected !== item.answer) div.classList.add("incorrect");
+                }
+
+                div.onclick = () => answerQuestion(index, optIndex);
+                opts.appendChild(div);
+            });
+
+            card.appendChild(opts);
+
+            const exp = document.createElement("div");
+            exp.className = "explain";
+            exp.innerHTML = `<strong>答案：</strong>${String.fromCharCode(65 + item.answer)}<br><strong>解析：</strong>${item.explain}`;
+            card.appendChild(exp);
+
+            container.appendChild(card);
+        });
+
+        updateProgress();
+    }
+
+    function answerQuestion(index, selected) {
+        const saved = JSON.parse(localStorage.getItem("chapter9Quiz") || "{}");
+        saved[index] = {
+            selected,
+            correct: selected === quizData[index].answer
+        };
+        localStorage.setItem("chapter9Quiz", JSON.stringify(saved));
+        renderQuiz();
+    }
+
+    function updateProgress() {
+        const saved = JSON.parse(localStorage.getItem("chapter9Quiz") || "{}");
+        const answered = Object.keys(saved).length;
+        const correct = Object.values(saved).filter(x => x.correct).length;
+        document.getElementById("progressText").textContent = `已答 ${answered} / ${quizData.length}，正确 ${correct}`;
+        document.getElementById("progressFill").style.width = `${answered / quizData.length * 100}%`;
+    }
+
+    function resetQuiz() {
+        if (!confirm("确定要重置本章练习进度吗？")) return;
+        localStorage.removeItem("chapter9Quiz");
+        renderQuiz();
+    }
+
+    function showWrongOnly() {
+        const saved = JSON.parse(localStorage.getItem("chapter9Quiz") || "{}");
+        document.querySelectorAll(".quiz-card").forEach(card => {
+            const idx = card.dataset.index;
+            const record = saved[idx];
+            if (record && record.correct === false) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+    function showAllQuiz() {
+        document.querySelectorAll(".quiz-card").forEach(card => {
+            card.style.display = "";
+        });
+    }
+
+    function searchSections() {
+        const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+        document.querySelectorAll(".section").forEach(sec => {
+            const text = sec.innerText.toLowerCase();
+            if (!keyword || text.includes(keyword)) {
+                sec.classList.remove("hidden-by-search");
+            } else {
+                sec.classList.add("hidden-by-search");
+            }
+        });
+    }
+
+    function toggleHighlight() {
+        const keywords = [
+            "软件架构", "构件", "连接件", "外部可见属性", "ABSD", "ABSDM",
+            "商业需求", "质量需求", "功能需求", "用例", "质量场景",
+            "架构风格", "批处理", "管道-过滤器", "调用/返回",
+            "C/S", "B/S", "仓库", "黑板", "解释器", "规则系统",
+            "事件系统", "C2", "复用", "DSSA", "领域分析", "领域设计", "领域实现"
+        ];
+
+        if (!highlighted) {
+            document.querySelectorAll(".section-body, .subtitle").forEach(el => {
+                if (!el.dataset.original) el.dataset.original = el.innerHTML;
+                let html = el.innerHTML;
+                keywords.forEach(k => {
+                    const reg = new RegExp(`(${escapeReg(k)})`, "g");
+                    html = html.replace(reg, "<mark>$1</mark>");
+                });
+                el.innerHTML = html;
+            });
+            highlighted = true;
+        } else {
+            document.querySelectorAll("[data-original]").forEach(el => {
+                el.innerHTML = el.dataset.original;
+            });
+            highlighted = false;
+        }
+    }
+
+    function escapeReg(str) {
+        return str.replace("/[.*+?^${}()|[$\$/g", "\\$&");
+    }
+
+    renderQuiz();
+
+    /* iframe 自适应：向父页面发送高度，方便外部页面监听 */
+    function postHeight() {
+        const height = document.documentElement.scrollHeight;
+        try {
+            window.parent.postMessage({ type: "chapter9Height", height }, "*");
+        } catch (e) {}
+    }
+    window.addEventListener("load", postHeight);
+    window.addEventListener("resize", postHeight);
+    setInterval(postHeight, 1000);
+</script>
+</body>
+</html>

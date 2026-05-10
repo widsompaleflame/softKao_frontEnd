@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第十章 · 系统质量属性与架构评估 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbf7;
+            --bg2: #f4efe6;
+            --card: #ffffff;
+            --card2: #f9f7f2;
+            --border: #e8e2d5;
+            --border2: #d4cbb8;
+            --text: #2c2825;
+            --text2: #5e574f;
+            --text3: #8f877c;
+            --accent: #0284c7;
+            --accent2: #0369a1;
+            --gold: #d97706;
+            --gold2: #b45309;
+            --green: #059669;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --pink: #db2777;
+            --teal: #0d9488;
+            --nav-h: 56px;
+            --radius: 10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden;}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ── TOP NAV ── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+            background:rgba(253,251,247,.93);backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);z-index:1000;
+            display:flex;align-items:center;padding:0 16px;gap:2px;
+            overflow-x:auto;white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+        .nav-btn{
+            display:inline-flex;align-items:center;gap:5px;
+            padding:5px 12px;border-radius:6px;border:1px solid transparent;
+            background:transparent;color:var(--text2);font-family:inherit;
+            font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;
+            white-space:nowrap;flex-shrink:0;
+        }
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── MAIN ── */
+        main{padding-top:calc(var(--nav-h) + 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── HERO ── */
+        .section-hero{
+            text-align:center;padding:40px 20px 32px;
+            background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);
+            border:1px solid var(--border);border-radius:14px;margin-bottom:28px;
+            position:relative;overflow:hidden;
+        }
+        .section-hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:500px;margin:0 auto}
+        .section-tag{
+            display:inline-block;padding:3px 10px;
+            background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);
+            color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;
+            letter-spacing:.06em;margin-bottom:12px;
+        }
+
+        /* ── CARD ── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .card-title .icon{font-size:1.1rem}
+
+        /* ── ANALOGY ── */
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2);}
+        .analogy strong{color:var(--gold)}
+
+        /* ── MNEMONIC ── */
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple);}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ── FORMULA BOX ── */
+        .formula-box{
+            background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;
+            padding:14px 16px;font-family:'JetBrains Mono',monospace;
+            font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;
+            margin:12px 0;line-height:1.8;
+        }
+
+        /* ── TABLES ── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+
+        /* ── KP GRID ── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem;}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ── ALERT ── */
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid;}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+
+        /* ── SUB TITLE ── */
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ── TAG ── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+
+        /* ── VS GRID ── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem}
+
+        /* ── FLOW ── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* ── STRATEGY GRID ── */
+        .strat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:12px 0}
+        .strat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px}
+        .strat-title{font-size:.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+        .strat-list{font-size:.78rem;color:var(--text2);line-height:1.8}
+        .strat-list li{margin-left:14px}
+
+        /* ── CONCEPT CARDS ── */
+        .concept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0}
+        .concept-card{border-radius:9px;padding:14px;border:1px solid;text-align:center}
+        .concept-title{font-size:.8rem;font-weight:700;margin-bottom:4px}
+        .concept-desc{font-size:.78rem;line-height:1.5}
+        .concept-card.c1{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.22)}
+        .concept-card.c1 .concept-title{color:var(--accent)}
+        .concept-card.c1 .concept-desc{color:var(--accent2)}
+        .concept-card.c2{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.22)}
+        .concept-card.c2 .concept-title{color:var(--gold)}
+        .concept-card.c2 .concept-desc{color:var(--gold2)}
+        .concept-card.c3{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22)}
+        .concept-card.c3 .concept-title{color:var(--red)}
+        .concept-card.c3 .concept-desc{color:var(--red)}
+        .concept-card.c4{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22)}
+        .concept-card.c4 .concept-title{color:var(--green)}
+        .concept-card.c4 .concept-desc{color:var(--green)}
+
+        /* ── SCENARIO BOX ── */
+        .scenario-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;margin:12px 0}
+        .scenario-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:.83rem;align-items:flex-start}
+        .scenario-row:last-child{border-bottom:none}
+        .sc-key{min-width:80px;font-weight:700;color:var(--accent);flex-shrink:0}
+        .sc-val{color:var(--text2)}
+
+        /* ── INLINE QUIZ (per knowledge point) ── */
+        .inline-quiz{background:rgba(2,132,199,.04);border:1px solid rgba(2,132,199,.18);border-radius:9px;padding:14px 16px;margin:14px 0}
+        .iq-label{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .iq-q{font-size:.88rem;font-weight:500;margin-bottom:10px;color:var(--text)}
+        .iq-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+        .iq-btn{
+            display:flex;gap:8px;align-items:flex-start;padding:7px 11px;border-radius:6px;
+            border:1px solid var(--border);background:var(--card);color:var(--text2);
+            font-family:inherit;font-size:.82rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .iq-btn:hover:not(.revealed){border-color:var(--accent2);background:rgba(2,132,199,.06);color:var(--text)}
+        .iq-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .iq-btn.wrong{background:rgba(220,38,38,.07);border-color:var(--red);color:var(--red)}
+        .iq-btn.revealed{pointer-events:none}
+        .iq-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.1em}
+        .iq-ans{display:none;padding:10px 12px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.18);border-radius:6px;font-size:.82rem;color:var(--text2);margin-top:4px;animation:fadeUp .25s ease;}
+        .iq-ans.show{display:block}
+        .iq-ans-label{color:var(--green);font-weight:700;margin-bottom:2px}
+
+        /* ── QUIZ SECTION ── */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s;}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{
+            display:flex;align-items:flex-start;gap:8px;padding:8px 11px;
+            border-radius:7px;border:1px solid var(--border);background:var(--bg2);
+            color:var(--text2);font-family:inherit;font-size:.83rem;
+            cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+            border-radius:6px;border:1px solid var(--border2);background:transparent;
+            color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s;
+        }
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease;}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        #quiz-score{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ── FLASH CARDS ── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s;}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ── PHASE BOX ── */
+        .phase-box{border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:12px 0}
+        .phase-header{background:var(--card2);padding:8px 14px;font-size:.82rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+        .phase-body{padding:12px 14px;font-size:.83rem;color:var(--text2);line-height:1.8}
+        .phase-step{display:flex;gap:8px;align-items:flex-start;padding:3px 0}
+        .phase-num{min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    </style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<nav id="topnav">
+    <div class="nav-brand">📐 第十章</div>
+    <button class="nav-btn active" onclick="showSection('s1')">🏠 概览</button>
+    <button class="nav-btn" onclick="showSection('s2')">📊 质量属性分类</button>
+    <button class="nav-btn" onclick="showSection('s3')">🔧 提升策略</button>
+    <button class="nav-btn" onclick="showSection('s4')">🎯 场景描述</button>
+    <button class="nav-btn" onclick="showSection('s5')">⚖️ 评估概念</button>
+    <button class="nav-btn" onclick="showSection('s6')">🔍 SAAM</button>
+    <button class="nav-btn" onclick="showSection('s7')">🏆 ATAM</button>
+    <button class="nav-btn" onclick="showSection('s8')">📚 其他方法</button>
+    <button class="nav-btn" onclick="showSection('s9')">✏️ 真题练习</button>
+    <button class="nav-btn" onclick="showSection('s10')">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══════════ S1: 概览 ══════════ -->
+    <section id="s1" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 10</div>
+            <h1>系统质量属性与架构评估</h1>
+            <p>质量属性分类 · 提升策略 · 场景描述 · SAAM · ATAM · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🗺️</span>本章知识地图</div>
+            <div class="analogy">
+                <strong>一句话记住本章：</strong>好的架构要"又快又安全又好改"——质量属性帮你量化"好"，评估方法帮你验证"好"，场景六要素帮你描述"好在哪里"。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>模块</th><th>核心内容</th><th>考试权重</th></tr>
+                    <tr><td>质量属性分类</td><td>开发期 vs 运行期，口诀「易扩重测维移」「性安伸互可鲁」</td><td class="badge-red">★★★★</td></tr>
+                    <tr><td>提升策略</td><td>可用性、性能、可修改性、安全性四大策略族</td><td class="badge-red">★★★★★</td></tr>
+                    <tr><td>场景六要素</td><td>源刺环制响度 / 刺激源·刺激·环境·制品·响应·响应度量</td><td class="badge-red">★★★★★</td></tr>
+                    <tr><td>评估核心概念</td><td>敏感点·权衡点·风险·非风险 辨析</td><td class="badge-red">★★★★★</td></tr>
+                    <tr><td>SAAM</td><td>最早方法，主要关注可修改性，5步流程</td><td class="badge-gold">★★★</td></tr>
+                    <tr><td>ATAM</td><td>多质量属性权衡，效用树，4阶段9步骤</td><td class="badge-red">★★★★★</td></tr>
+                    <tr><td>其他方法</td><td>CBAM/SAEM/COSMIC+UML等，了解特点即可</td><td class="badge-acc">★★</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 <strong>考试命中率极高提示：</strong>权衡点/敏感点/风险/非风险辨析 + ATAM效用树关注的4个质量属性 + 场景6要素，几乎年年必考！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⚡</span>核心速记总览</div>
+            <div class="kp-grid">
+                <div class="kp-item">
+                    <div class="kp-title">开发期口诀</div>
+                    <div class="kp-body">易扩重测维移<br><small>（易理解·可扩展·可重用·可测试·可维护·可移植）</small></div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">运行期口诀</div>
+                    <div class="kp-body">性安伸互可鲁<br><small>（性能·安全·可伸缩·互操作·可靠·鲁棒）</small></div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">场景6要素</div>
+                    <div class="kp-body">源刺环制响度<br><small>（刺激源·刺激·环境·制品·响应·度量）</small></div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">敏感 vs 权衡</div>
+                    <div class="kp-body">敏感点 → 影响1个属性<br>权衡点 → 影响多个属性</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">SAAM特点</div>
+                    <div class="kp-body">最早·可修改性·场景技术·5步</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">ATAM效用树</div>
+                    <div class="kp-body">性能·可修改性·可用性·安全<br><small>（4个！不含可测试性）</small></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S2: 质量属性分类 ══════════ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>软件系统质量属性</h1>
+            <p>开发期 vs 运行期 · 口诀记忆 · 易混淆辨析 · 考点密度 ★★★★</p>
+        </div>
+
+        <!-- KP1: 质量属性分类 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>1.1 质量属性两大分类 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>通俗理解：买车的两套评价标准</strong><br>
+                开发期质量属性就像车的"好不好修、能不能改装"——评价的是开发、测试、维护的便利性。运行期质量属性就像"跑得快不快、安不安全"——评价的是系统实际运行的表现。
+            </div>
+            <div class="mnemonic">
+                <div class="label">🔑 速记口诀</div>
+                <strong>开发期：易扩重测维移</strong>（易理解性 · 可扩展性 · 可重用性 · 可测试性 · 可维护性 · 可移植性）<br>
+                <strong>运行期：性安伸互可鲁</strong>（性能 · 安全性 · 可伸缩性 · 互操作性 · 可靠性/可用性 · 鲁棒性）
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">开发期质量属性</div>
+                    <div class="vs-item"><span>易理解性</span><span>代码逻辑清晰，易于理解</span></div>
+                    <div class="vs-item"><span>可扩展性</span><span class="badge-gold">加功能，不影响现有结构</span></div>
+                    <div class="vs-item"><span>可重用性</span><span>模块可在其他项目复用</span></div>
+                    <div class="vs-item"><span>可测试性</span><span>便于验证正确性</span></div>
+                    <div class="vs-item"><span>可维护性</span><span>发现问题、修复问题容易</span></div>
+                    <div class="vs-item"><span>可移植性</span><span>迁移到不同平台成本低</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">运行期质量属性</div>
+                    <div class="vs-item"><span>性能</span><span>处理时间·吞吐量</span></div>
+                    <div class="vs-item"><span>安全性</span><span>合法访问+阻止非法访问</span></div>
+                    <div class="vs-item"><span>可伸缩性</span><span class="badge-gold">加资源，适应负载变化</span></div>
+                    <div class="vs-item"><span>互操作性</span><span>与其他系统协同工作</span></div>
+                    <div class="vs-item"><span>可靠性/可用性</span><span>无故障·时间占比</span></div>
+                    <div class="vs-item"><span>鲁棒性</span><span>= 容错性 = 健壮性</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 三大易错点：① 可扩展性（加功能）≠ 可伸缩性（加资源）② 可用性（时间占比）≠ 可靠性（持续无故障）③ 鲁棒性 = 容错性 = 健壮性，三者同义！</div>
+            <div class="tbl-wrap" style="margin-top:14px">
+                <table>
+                    <tr><th>概念</th><th>公式/定义</th><th>记忆点</th></tr>
+                    <tr><td>可用性</td><td>正常运行时间 / 总时间</td><td class="badge-red">强调「时间占比」，如99.9%</td></tr>
+                    <tr><td>可靠性</td><td>持续无故障运行能力</td><td class="badge-gold">强调「持续无故障」</td></tr>
+                    <tr><td>可扩展性</td><td>增加新功能的容易程度</td><td class="badge-acc">「扩」= 扩充功能</td></tr>
+                    <tr><td>可伸缩性</td><td>增加资源适应负载的能力</td><td class="badge-acc">「伸」= 伸展规模</td></tr>
+                    <tr><td>鲁棒性</td><td>在异常条件下继续运行</td><td class="badge-green">= 容错 = 健壮</td></tr>
+                </table>
+            </div>
+
+            <!-- 配套例题 -->
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">以下属于开发期质量属性的是（　）</div>
+                <div class="iq-opts" id="iq-opts-0">
+                    <button class="iq-btn" data-iq="0" data-opt="0" onclick="handleIQ(0,0)"><span class="iq-letter">A.</span><span>性能</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="1" onclick="handleIQ(0,1)"><span class="iq-letter">B.</span><span>可维护性</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="2" onclick="handleIQ(0,2)"><span class="iq-letter">C.</span><span>安全性</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="3" onclick="handleIQ(0,3)"><span class="iq-letter">D.</span><span>可用性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-0">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    可维护性属于开发期质量属性。性能、安全性、可用性都属于运行期质量属性。口诀「易扩重<strong>测维移</strong>」中的"维"就是可维护性。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">软件系统在一定时间内正常工作的时间所占比例，指的是（　）</div>
+                <div class="iq-opts" id="iq-opts-1">
+                    <button class="iq-btn" data-iq="1" data-opt="0" onclick="handleIQ(1,0)"><span class="iq-letter">A.</span><span>可靠性</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="1" onclick="handleIQ(1,1)"><span class="iq-letter">B.</span><span>可用性</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="2" onclick="handleIQ(1,2)"><span class="iq-letter">C.</span><span>鲁棒性</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="3" onclick="handleIQ(1,3)"><span class="iq-letter">D.</span><span>性能</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-1">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    可用性 = 正常运行时间 / 总时间，强调时间占比（如99.9%）。可靠性强调"持续无故障"，侧重质量而非比例。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 3</div>
+                <div class="iq-q">某系统通过增加服务器节点来应对用户访问量的增长，该系统具备良好的（　）</div>
+                <div class="iq-opts" id="iq-opts-2">
+                    <button class="iq-btn" data-iq="2" data-opt="0" onclick="handleIQ(2,0)"><span class="iq-letter">A.</span><span>可扩展性</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="1" onclick="handleIQ(2,1)"><span class="iq-letter">B.</span><span>可维护性</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="2" onclick="handleIQ(2,2)"><span class="iq-letter">C.</span><span>可伸缩性</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="3" onclick="handleIQ(2,3)"><span class="iq-letter">D.</span><span>可移植性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-2">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    通过增加资源（服务器节点）来应对负载增长，这是<strong>可伸缩性</strong>（加资源）。注意与可扩展性（加功能）区分！
+                </div>
+            </div>
+        </div>
+
+        <!-- KP2: 面向架构评估的质量属性 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🏛️</span>1.2 面向架构评估的质量属性 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>通俗理解：买房的七大关注点</strong><br>
+                地段好（性能）、建筑质量过硬（可靠性）、门禁森严（安全性）、可以改造装修（可修改性）、功能设施齐全（功能性）、风格可以变化（可变性）、交通配套齐备（互操作性）。
+            </div>
+            <div class="mnemonic">
+                <div class="label">🔑 速记口诀</div>
+                <strong>「性可安可功可互」</strong><br>
+                性能 · 可靠性 · 安全性 · 可修改性 · 功能性 · 可变性 · 互操作性
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>质量属性</th><th>核心含义</th><th>子属性/注意</th></tr>
+                    <tr><td class="badge-acc">性能</td><td>效率指标：处理时间、吞吐量</td><td>响应时间 · 资源利用率</td></tr>
+                    <tr><td class="badge-acc">可靠性</td><td>容错（自动修正）+ 健壮性（忽略错误继续运行）</td><td class="badge-red">容错≠健壮性，前者修正后者忽略</td></tr>
+                    <tr><td class="badge-acc">安全性</td><td>合法用户正常服务 + 阻止非法访问</td><td>机密性·完整性·可用性</td></tr>
+                    <tr><td class="badge-acc">可修改性</td><td>可维护性 + 可扩展性 + 结构重组 + 可移植性</td><td class="badge-gold">四个子属性，是最大的"属性家族"</td></tr>
+                    <tr><td class="badge-acc">功能性</td><td>系统完成预期工作的能力</td><td>功能正确性·完备性</td></tr>
+                    <tr><td class="badge-acc">可变性</td><td>架构经扩展修改后仍符合规范</td><td>不影响系统整体结构</td></tr>
+                    <tr><td class="badge-acc">互操作性</td><td>与其他系统交互工作的能力</td><td>标准接口·数据格式</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 <strong>可修改性是个"大家族"</strong>，包含4个子属性：可维护性（改现有）、可扩展性（加功能）、结构重组（调整结构）、可移植性（迁移平台）</div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">面向架构评估的质量属性中，"可修改性"包含的子属性不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-3">
+                    <button class="iq-btn" data-iq="3" data-opt="0" onclick="handleIQ(3,0)"><span class="iq-letter">A.</span><span>可维护性</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="1" onclick="handleIQ(3,1)"><span class="iq-letter">B.</span><span>可扩展性</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="2" onclick="handleIQ(3,2)"><span class="iq-letter">C.</span><span>可伸缩性</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="3" onclick="handleIQ(3,3)"><span class="iq-letter">D.</span><span>可移植性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-3">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    可修改性的4个子属性：可维护性·可扩展性·结构重组·可移植性。<strong>可伸缩性</strong>是运行期质量属性（加资源应对负载），不是可修改性的子属性！这是高频陷阱。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S3: 提升策略 ══════════ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>质量属性提升策略</h1>
+            <p>可用性 · 性能 · 可修改性 · 安全性 · 四大策略族 · 考点密度 ★★★★★</p>
+        </div>
+
+        <!-- KP3: 可用性策略 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🛡️</span>2.1 可用性提升策略 <span class="tag tag-hot">高频</span></div>
+            <div class="analogy">
+                <strong>通俗理解：医院急救体系</strong><br>
+                首先能发现病人有问题（错误检测），然后能抢救回来（错误恢复），最好是提前预防不生病（错误避免）。
+            </div>
+            <div class="strat-grid">
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--red)">🔍 错误检测</div>
+                    <ul class="strat-list">
+                        <li>心跳（Heartbeat）</li>
+                        <li>Ping / Echo</li>
+                        <li>异常检测</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--gold)">🔄 错误恢复</div>
+                    <ul class="strat-list">
+                        <li>表决（投票冗余）</li>
+                        <li>主动冗余（热备）</li>
+                        <li>被动冗余（冷备）</li>
+                        <li>检查点 / 回滚</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--green)">🚫 错误避免</div>
+                    <ul class="strat-list">
+                        <li>服务下线维护</li>
+                        <li>事务（原子性）</li>
+                        <li>进程监控器</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 陷阱：「高内聚低耦合」是提升<strong>可修改性</strong>的策略，不是可用性！</div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">以下不属于提升可用性策略的是（　）</div>
+                <div class="iq-opts" id="iq-opts-4">
+                    <button class="iq-btn" data-iq="4" data-opt="0" onclick="handleIQ(4,0)"><span class="iq-letter">A.</span><span>心跳检测</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="1" onclick="handleIQ(4,1)"><span class="iq-letter">B.</span><span>主动冗余（热备）</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="2" onclick="handleIQ(4,2)"><span class="iq-letter">C.</span><span>高内聚低耦合</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="3" onclick="handleIQ(4,3)"><span class="iq-letter">D.</span><span>检查点/回滚</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-4">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    高内聚低耦合是提升<strong>可修改性</strong>策略中「局部化修改」的手段。心跳(错误检测)、主动冗余(错误恢复)、检查点回滚(错误恢复)都是可用性策略。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP4: 性能策略 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">⚡</span>2.2 性能提升策略</div>
+            <div class="analogy">
+                <strong>通俗理解：餐厅提升翻台效率</strong><br>
+                减少每道菜的烹饪时间（减少资源需求）、多雇厨师同时开灶（并发机制）、增加厨房设备（增加资源）、规定上菜优先顺序（资源仲裁）。
+            </div>
+            <div class="strat-grid">
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--accent)">📉 资源需求</div>
+                    <ul class="strat-list">
+                        <li>减少计算量/中间数据</li>
+                        <li>减少处理事件数量</li>
+                        <li>限制执行时间</li>
+                        <li>控制采样频率</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--teal)">🔧 资源管理</div>
+                    <ul class="strat-list">
+                        <li>并发机制（多线程）</li>
+                        <li>增加资源（CPU/内存/带宽）</li>
+                        <li>维护多个副本（缓存）</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--purple)">⚖️ 资源仲裁</div>
+                    <ul class="strat-list">
+                        <li>先来先服务（FCFS）</li>
+                        <li>固定优先级调度</li>
+                        <li>动态优先级（轮询/最早截止）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">以下不属于提升性能策略的是（　）</div>
+                <div class="iq-opts" id="iq-opts-5">
+                    <button class="iq-btn" data-iq="5" data-opt="0" onclick="handleIQ(5,0)"><span class="iq-letter">A.</span><span>并发机制</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="1" onclick="handleIQ(5,1)"><span class="iq-letter">B.</span><span>增加资源</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="2" onclick="handleIQ(5,2)"><span class="iq-letter">C.</span><span>固定优先级调度</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="3" onclick="handleIQ(5,3)"><span class="iq-letter">D.</span><span>主动冗余（热备）</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-5">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    主动冗余（热备）是提升<strong>可用性</strong>（错误恢复）的策略。并发机制（资源管理）、增加资源（资源管理）、固定优先级（资源仲裁）都是性能策略。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP5: 可修改性策略 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🔧</span>2.3 可修改性提升策略 <span class="tag tag-hot">高频</span></div>
+            <div class="analogy">
+                <strong>通俗理解：装修房子的哲学</strong><br>
+                「局部化修改」= 把相关的东西都放一个房间（高内聚），不同房间尽量独立（低耦合）。「防止连锁反应」= 不要让拆一面墙导致整栋楼垮掉（信息隐藏）。「推迟绑定」= 装修风格留到入住时再定（运行时配置）。
+            </div>
+            <div class="strat-grid">
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--accent)">🎯 局部化修改</div>
+                    <ul class="strat-list">
+                        <li>高内聚低耦合</li>
+                        <li>预测变更（封装变化点）</li>
+                        <li>模块通用化</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--red)">🔒 防止连锁反应</div>
+                    <ul class="strat-list">
+                        <li>信息隐藏</li>
+                        <li>维持接口稳定</li>
+                        <li>限制通信路径</li>
+                        <li>使用中介（Broker）</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--green)">⏳ 推迟绑定时间</div>
+                    <ul class="strat-list">
+                        <li>运行时注册</li>
+                        <li>多态</li>
+                        <li>配置文件</li>
+                        <li>插件机制</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="alert alert-warn">⭐ 记忆技巧：「防止连锁反应」中的信息隐藏是最重要的手段，也是高内聚低耦合的底层原理。</div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">以下属于提升可修改性策略中「防止连锁反应」的是（　）</div>
+                <div class="iq-opts" id="iq-opts-6">
+                    <button class="iq-btn" data-iq="6" data-opt="0" onclick="handleIQ(6,0)"><span class="iq-letter">A.</span><span>高内聚低耦合</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="1" onclick="handleIQ(6,1)"><span class="iq-letter">B.</span><span>信息隐藏</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="2" onclick="handleIQ(6,2)"><span class="iq-letter">C.</span><span>运行时注册</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="3" onclick="handleIQ(6,3)"><span class="iq-letter">D.</span><span>预测变更</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-6">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    信息隐藏属于「防止连锁反应」策略。高内聚低耦合和预测变更是「局部化修改」策略，运行时注册是「推迟绑定时间」策略。
+                </div>
+            </div>
+        </div>
+
+        <!-- KP6: 安全性策略 -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🔐</span>2.4 安全性提升策略</div>
+            <div class="analogy">
+                <strong>通俗理解：银行的三道防线</strong><br>
+                第一道：门禁+身份认证（抵抗攻击）；第二道：报警系统（检测攻击）；第三道：保险柜+报警后恢复（从攻击中恢复）。
+            </div>
+            <div class="strat-grid">
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--red)">🛡️ 抵抗攻击</div>
+                    <ul class="strat-list">
+                        <li>用户身份验证（Authentication）</li>
+                        <li>授权（Authorization）</li>
+                        <li>数据机密性（加密）</li>
+                        <li>限制暴露面（最小权限）</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--gold)">🚨 检测攻击</div>
+                    <ul class="strat-list">
+                        <li>入侵检测系统（IDS）</li>
+                        <li>审计日志</li>
+                    </ul>
+                </div>
+                <div class="strat-card">
+                    <div class="strat-title" style="color:var(--green)">🔁 从攻击中恢复</div>
+                    <ul class="strat-list">
+                        <li>恢复系统状态</li>
+                        <li>识别攻击者</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">以下属于提升安全性策略中「抵抗攻击」的是（　）</div>
+                <div class="iq-opts" id="iq-opts-7">
+                    <button class="iq-btn" data-iq="7" data-opt="0" onclick="handleIQ(7,0)"><span class="iq-letter">A.</span><span>入侵检测系统</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="1" onclick="handleIQ(7,1)"><span class="iq-letter">B.</span><span>恢复系统状态</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="2" onclick="handleIQ(7,2)"><span class="iq-letter">C.</span><span>用户身份验证</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="3" onclick="handleIQ(7,3)"><span class="iq-letter">D.</span><span>识别攻击者</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-7">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    用户身份验证（Authentication）属于「抵抗攻击」策略。入侵检测系统属于「检测攻击」，恢复系统状态和识别攻击者属于「从攻击中恢复」。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S4: 场景描述 ══════════ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>质量属性场景描述</h1>
+            <p>六大要素 · 场景类型识别 · 例题实战 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>3.1 场景六要素 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>通俗理解：描述一次交通事故</strong><br>
+                谁（司机=刺激源）→ 做什么（急刹车=刺激）→ 在什么情况下（雨天路滑=环境）→ 对什么（汽车=制品）→ 产生什么结果（停车=响应）→ 如何度量（刹车距离20米=响应度量）
+            </div>
+            <div class="mnemonic">
+                <div class="label">🔑 速记口诀</div>
+                <strong>「源刺环制响度」</strong><br>
+                刺激源（Source）· 刺激（Stimulus）· 环境（Environment）· 制品（Artifact）· 响应（Response）· 响应度量（Measurement）
+            </div>
+
+            <div class="scenario-box">
+                <div class="scenario-row">
+                    <span class="sc-key">① 刺激源</span>
+                    <span class="sc-val">产生刺激的人、系统或其他实体（如"用户"、"黑客"、"第三方系统"）</span>
+                </div>
+                <div class="scenario-row">
+                    <span class="sc-key">② 刺激</span>
+                    <span class="sc-val">到达系统时需要考虑的条件（如"发出支付请求"、"发起注入攻击"）</span>
+                </div>
+                <div class="scenario-row">
+                    <span class="sc-key">③ 环境</span>
+                    <span class="sc-val">刺激发生时系统所处的状态（如"正常运行"、"高峰负载"、"网络故障"）</span>
+                </div>
+                <div class="scenario-row">
+                    <span class="sc-key">④ 制品</span>
+                    <span class="sc-val">被刺激的对象（整个系统、某个模块、数据、进程等）</span>
+                </div>
+                <div class="scenario-row">
+                    <span class="sc-key">⑤ 响应</span>
+                    <span class="sc-val">系统接收刺激后采取的行动（如"完成支付"、"拒绝访问"、"切换备用系统"）</span>
+                </div>
+                <div class="scenario-row">
+                    <span class="sc-key">⑥ 响应度量</span>
+                    <span class="sc-val">对响应的量化方式（如"10秒内"、"99.9%可用性"、"4人·月"）</span>
+                </div>
+            </div>
+
+            <div class="sub-title">场景类型快速识别</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>场景类型</th><th>关键词</th><th>典型响应度量</th></tr>
+                    <tr><td class="badge-acc">性能</td><td>响应时间·吞吐量·高峰负载</td><td class="badge-red">X毫秒内·每秒N个请求</td></tr>
+                    <tr><td class="badge-gold">可用性</td><td>故障恢复·冗余·99.X%</td><td class="badge-gold">X秒内恢复·N%可用时间</td></tr>
+                    <tr><td class="badge-red">安全性</td><td>身份验证·加密·攻击·非法访问</td><td class="badge-red">访问被拒绝·攻击被识别</td></tr>
+                    <tr><td class="badge-purple">可修改性</td><td>修改工作量·人·月·代码行数</td><td class="badge-purple">X人·月内完成·影响N个模块</td></tr>
+                </table>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">质量属性场景描述的6个要素中，不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-8">
+                    <button class="iq-btn" data-iq="8" data-opt="0" onclick="handleIQ(8,0)"><span class="iq-letter">A.</span><span>刺激源</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="1" onclick="handleIQ(8,1)"><span class="iq-letter">B.</span><span>刺激</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="2" onclick="handleIQ(8,2)"><span class="iq-letter">C.</span><span>成本</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="3" onclick="handleIQ(8,3)"><span class="iq-letter">D.</span><span>响应度量</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-8">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    场景6要素：刺激源·刺激·环境·制品·响应·响应度量。「成本」不是6要素之一，「成本效益」是CBAM评估方法关注的内容。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">"在高峰负载情况下，用户发起支付请求后，系统必须在10秒内完成支付功能" —— 该场景属于（　）质量属性</div>
+                <div class="iq-opts" id="iq-opts-9">
+                    <button class="iq-btn" data-iq="9" data-opt="0" onclick="handleIQ(9,0)"><span class="iq-letter">A.</span><span>性能</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="1" onclick="handleIQ(9,1)"><span class="iq-letter">B.</span><span>可用性</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="2" onclick="handleIQ(9,2)"><span class="iq-letter">C.</span><span>安全性</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="3" onclick="handleIQ(9,3)"><span class="iq-letter">D.</span><span>可修改性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-9">
+                    <div class="iq-ans-label">✅ 答案：A</div>
+                    关键词：「高峰负载」（环境）+「10秒内完成」（响应度量），是对响应时间的要求，属于<strong>性能</strong>质量属性场景。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 3</div>
+                <div class="iq-q">"系统需要对Web界面风格进行修改，修改工作必须在4人·月内完成" —— 该场景属于（　）质量属性</div>
+                <div class="iq-opts" id="iq-opts-10">
+                    <button class="iq-btn" data-iq="10" data-opt="0" onclick="handleIQ(10,0)"><span class="iq-letter">A.</span><span>性能</span></button>
+                    <button class="iq-btn" data-iq="10" data-opt="1" onclick="handleIQ(10,1)"><span class="iq-letter">B.</span><span>可用性</span></button>
+                    <button class="iq-btn" data-iq="10" data-opt="2" onclick="handleIQ(10,2)"><span class="iq-letter">C.</span><span>安全性</span></button>
+                    <button class="iq-btn" data-iq="10" data-opt="3" onclick="handleIQ(10,3)"><span class="iq-letter">D.</span><span>可修改性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-10">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    关键词：「修改」+「4人·月」（工作量度量），是对修改成本的要求，属于<strong>可修改性</strong>质量属性场景。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S5: 评估核心概念 ══════════ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>架构评估核心概念</h1>
+            <p>敏感点 · 权衡点 · 风险 · 非风险 · 场景辨析实战 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⚖️</span>4.1 四大核心概念辨析 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>通俗理解：开车的类比</strong><br>
+                油门（只影响速度）= 敏感点 | 空调（影响舒适度和油耗）= 权衡点 | 刹车失灵（危险决策）= 风险 | 定期保养（良好决策）= 非风险
+            </div>
+            <div class="concept-grid">
+                <div class="concept-card c1">
+                    <div class="concept-title">🎯 敏感点（Sensitivity Point）</div>
+                    <div class="concept-desc">影响<strong>某一个</strong>质量属性的关键架构决策<br><small>例：改变处理器速度 → 只影响性能</small></div>
+                </div>
+                <div class="concept-card c2">
+                    <div class="concept-title">⚖️ 权衡点（Tradeoff Point）</div>
+                    <div class="concept-desc">影响<strong>多个</strong>质量属性的敏感点<br><small>例：加密 → 同时影响安全性和性能</small></div>
+                </div>
+                <div class="concept-card c3">
+                    <div class="concept-title">⚠️ 风险（Risk）</div>
+                    <div class="concept-desc"><strong>有问题</strong>的架构决策，可能导致潜在故障<br><small>例：紧耦合 → 难以修改</small></div>
+                </div>
+                <div class="concept-card c4">
+                    <div class="concept-title">✅ 非风险（Non-Risk）</div>
+                    <div class="concept-desc"><strong>良好</strong>的架构决策，分析后认为可接受<br><small>例：合理的响应时间设定</small></div>
+                </div>
+            </div>
+
+            <div class="mnemonic">
+                <div class="label">🔑 辨析速记</div>
+                <strong>看「影响几个」：</strong>影响1个质量属性 → 敏感点；影响多个质量属性 → 权衡点<br>
+                <strong>看「有没有问题」：</strong>有问题/隐患 → 风险；合理决策 → 非风险
+            </div>
+
+            <div class="sub-title">四大概念辨析例题解析</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>场景描述</th><th>答案</th><th>核心判断依据</th></tr>
+                    <tr><td>改变业务数据编码方式会对系统的性能和安全性产生影响</td><td class="badge-gold">权衡点</td><td>影响"性能"和"安全性"两个属性 → 多个 = 权衡点</td></tr>
+                    <tr><td>假设用户请求频率每秒1个，响应时间设定为1秒是可以接受的</td><td class="badge-green">非风险</td><td>合理的、经过分析可接受的决策 → 非风险</td></tr>
+                    <tr><td>对交易请求处理时间的要求将影响数据传输协议和处理过程的设计</td><td class="badge-acc">敏感点</td><td>只影响"性能"这一个质量属性 → 敏感点</td></tr>
+                    <tr><td>系统的支付部分与第三方平台紧耦合，需要支持新平台时会导致大量修改</td><td class="badge-red">风险</td><td>存在隐患（紧耦合），影响可修改性 → 风险</td></tr>
+                    <tr><td>系统拟采用新加密算法，会提高安全性，但降低性能</td><td class="badge-gold">权衡点</td><td>影响"安全性"和"性能"两个属性 → 多个 = 权衡点</td></tr>
+                </table>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">影响多个质量属性的敏感点称为（　）</div>
+                <div class="iq-opts" id="iq-opts-11">
+                    <button class="iq-btn" data-iq="11" data-opt="0" onclick="handleIQ(11,0)"><span class="iq-letter">A.</span><span>风险点</span></button>
+                    <button class="iq-btn" data-iq="11" data-opt="1" onclick="handleIQ(11,1)"><span class="iq-letter">B.</span><span>非风险点</span></button>
+                    <button class="iq-btn" data-iq="11" data-opt="2" onclick="handleIQ(11,2)"><span class="iq-letter">C.</span><span>敏感点</span></button>
+                    <button class="iq-btn" data-iq="11" data-opt="3" onclick="handleIQ(11,3)"><span class="iq-letter">D.</span><span>权衡点</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-11">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    权衡点是影响多个质量属性的敏感点。敏感点只影响一个质量属性；权衡点是敏感点的特殊情况（影响多个）。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">"改变业务数据编码方式会对系统的性能和安全性产生影响"是对（　）的描述</div>
+                <div class="iq-opts" id="iq-opts-12">
+                    <button class="iq-btn" data-iq="12" data-opt="0" onclick="handleIQ(12,0)"><span class="iq-letter">A.</span><span>风险点</span></button>
+                    <button class="iq-btn" data-iq="12" data-opt="1" onclick="handleIQ(12,1)"><span class="iq-letter">B.</span><span>非风险</span></button>
+                    <button class="iq-btn" data-iq="12" data-opt="2" onclick="handleIQ(12,2)"><span class="iq-letter">C.</span><span>敏感点</span></button>
+                    <button class="iq-btn" data-iq="12" data-opt="3" onclick="handleIQ(12,3)"><span class="iq-letter">D.</span><span>权衡点</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-12">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    影响"性能"和"安全性"两个质量属性 → 多个属性 → 权衡点。记住：权衡 = 权衡多个利益（多个属性）。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 3</div>
+                <div class="iq-q">"假设用户请求频率为每秒1个，业务处理时间小于30毫秒，则将请求响应时间设定为1秒是可以接受的"是对（　）的描述</div>
+                <div class="iq-opts" id="iq-opts-13">
+                    <button class="iq-btn" data-iq="13" data-opt="0" onclick="handleIQ(13,0)"><span class="iq-letter">A.</span><span>风险点</span></button>
+                    <button class="iq-btn" data-iq="13" data-opt="1" onclick="handleIQ(13,1)"><span class="iq-letter">B.</span><span>非风险</span></button>
+                    <button class="iq-btn" data-iq="13" data-opt="2" onclick="handleIQ(13,2)"><span class="iq-letter">C.</span><span>敏感点</span></button>
+                    <button class="iq-btn" data-iq="13" data-opt="3" onclick="handleIQ(13,3)"><span class="iq-letter">D.</span><span>权衡点</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-13">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    这是一个经过分析后认为合理、可接受的架构决策，属于<strong>非风险</strong>。关键词：「可以接受的」→ 非风险（良好决策）。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S6: SAAM ══════════ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>SAAM — 软件架构分析方法</h1>
+            <p>最早评估方法 · 主关注可修改性 · 5步流程 · 考点密度 ★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔍</span>5.1 SAAM 方法详解</div>
+            <div class="analogy">
+                <strong>通俗理解：新房验收</strong><br>
+                先看设计图（架构描述），再模拟各种使用场景（场景开发），逐个检查每个场景（单个场景评估），观察场景间是否互相影响（场景交互），最后给出整体报告（总体评估）。
+            </div>
+            <div class="formula-box">SAAM = Software Architecture Analysis Method
+                输入：① 问题描述  ② 需求说明  ③ 架构描述
+                主要分析内容：可修改性（主要）
+                评估技术：场景技术</div>
+
+            <div class="sub-title">SAAM 五步流程</div>
+            <div class="phase-box">
+                <div class="phase-header">🗺️ 五步执行顺序（口诀：场架单交总）</div>
+                <div class="phase-body">
+                    <div class="phase-step"><span class="phase-num">1</span><span><strong>场景开发</strong>：收集和提炼系统任务场景，确定需要分析的使用场景</span></div>
+                    <div class="phase-step"><span class="phase-num">2</span><span><strong>架构描述</strong>：以相关涉众能理解的方式描述候选架构</span></div>
+                    <div class="phase-step"><span class="phase-num">3</span><span><strong>单个场景评估</strong>：逐一评估每个场景对架构的影响（直接/非直接支持）</span></div>
+                    <div class="phase-step"><span class="phase-num">4</span><span><strong>场景交互</strong>：识别场景共享的架构构件，分析场景间的相互影响</span></div>
+                    <div class="phase-step"><span class="phase-num">5</span><span><strong>总体评估</strong>：综合分析，给出权重和最终评价</span></div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🔑 口诀</div>
+                <strong>「场架单交总」</strong> — 场景开发 → 架构描述 → 单个评估 → 场景交互 → 总体评估
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">SAAM方法主要分析的质量属性是（　）</div>
+                <div class="iq-opts" id="iq-opts-14">
+                    <button class="iq-btn" data-iq="14" data-opt="0" onclick="handleIQ(14,0)"><span class="iq-letter">A.</span><span>性能</span></button>
+                    <button class="iq-btn" data-iq="14" data-opt="1" onclick="handleIQ(14,1)"><span class="iq-letter">B.</span><span>可修改性</span></button>
+                    <button class="iq-btn" data-iq="14" data-opt="2" onclick="handleIQ(14,2)"><span class="iq-letter">C.</span><span>安全性</span></button>
+                    <button class="iq-btn" data-iq="14" data-opt="3" onclick="handleIQ(14,3)"><span class="iq-letter">D.</span><span>可用性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-14">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    SAAM 是最早的架构评估方法，主要分析<strong>可修改性</strong>，通过场景技术评估修改对架构的影响程度。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">SAAM方法五步过程的正确顺序是（　）</div>
+                <div class="iq-opts" id="iq-opts-15">
+                    <button class="iq-btn" data-iq="15" data-opt="0" onclick="handleIQ(15,0)"><span class="iq-letter">A.</span><span>架构描述 → 场景开发 → 单个场景评估 → 场景交互 → 总体评估</span></button>
+                    <button class="iq-btn" data-iq="15" data-opt="1" onclick="handleIQ(15,1)"><span class="iq-letter">B.</span><span>场景开发 → 架构描述 → 单个场景评估 → 场景交互 → 总体评估</span></button>
+                    <button class="iq-btn" data-iq="15" data-opt="2" onclick="handleIQ(15,2)"><span class="iq-letter">C.</span><span>场景开发 → 单个场景评估 → 架构描述 → 场景交互 → 总体评估</span></button>
+                    <button class="iq-btn" data-iq="15" data-opt="3" onclick="handleIQ(15,3)"><span class="iq-letter">D.</span><span>场景开发 → 架构描述 → 场景交互 → 单个场景评估 → 总体评估</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-15">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    SAAM五步：场景开发 → 架构描述 → 单个场景评估 → 场景交互 → 总体评估。口诀「场架单交总」帮助记忆顺序。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S7: ATAM ══════════ -->
+    <section id="s7" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 07</div>
+            <h1>ATAM — 架构权衡分析法</h1>
+            <p>多质量属性权衡 · 效用树 · 4阶段9步骤 · 考点密度 ★★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🏆</span>6.1 ATAM 方法概述 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>通俗理解：买车综合评估</strong><br>
+                ATAM像一个专业购车顾问，帮你在性能、安全、省油、舒适等多个维度之间找到最佳平衡点，而不是只看某一个指标。
+            </div>
+            <div class="formula-box">ATAM = Architecture Tradeoff Analysis Method
+                核心目标：确定多个质量属性之间的折中（Tradeoff）
+                关注的质量属性：性能 · 可用性 · 安全性 · 可修改性（4个）
+                核心工具：效用树（Utility Tree）
+                评估技术：场景技术 + 启发式分析</div>
+
+            <div class="alert alert-red">⚠️ 高频考点：效用树关注的4个质量属性是「性能·可修改性·可用性·安全」，<strong>不包含</strong>可测试性、互操作性等！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📋</span>6.2 ATAM 四阶段详解 <span class="tag tag-hot">必考</span></div>
+            <div class="mnemonic">
+                <div class="label">🔑 口诀</div>
+                <strong>「演调测报」</strong> — 演示 → 调查和分析 → 测试 → 报告
+            </div>
+
+            <div class="phase-box">
+                <div class="phase-header">🎭 阶段1：演示（3步骤）</div>
+                <div class="phase-body">
+                    <div class="phase-step"><span class="phase-num">1</span><span>介绍ATAM方法本身</span></div>
+                    <div class="phase-step"><span class="phase-num">2</span><span>介绍业务驱动因素（系统目标、约束、重要需求）</span></div>
+                    <div class="phase-step"><span class="phase-num">3</span><span>介绍要评估的体系结构（候选架构）</span></div>
+                </div>
+            </div>
+            <div class="phase-box">
+                <div class="phase-header">🔬 阶段2：调查和分析（3步骤）</div>
+                <div class="phase-body">
+                    <div class="phase-step"><span class="phase-num">4</span><span>确定架构方法（识别主要的架构决策）</span></div>
+                    <div class="phase-step"><span class="phase-num">5</span><span><strong>生成质量属性效用树</strong>（对质量属性分类和优先级排序）</span></div>
+                    <div class="phase-step"><span class="phase-num">6</span><span>分析体系结构方法 → 找出<strong>风险·非风险·敏感点·权衡点</strong></span></div>
+                </div>
+            </div>
+            <div class="phase-box">
+                <div class="phase-header">🧪 阶段3：测试（2步骤）</div>
+                <div class="phase-body">
+                    <div class="phase-step"><span class="phase-num">7</span><span>头脑风暴和优先场景（更广泛的涉众参与）</span></div>
+                    <div class="phase-step"><span class="phase-num">8</span><span>分析架构方法（针对优先场景再次分析）</span></div>
+                </div>
+            </div>
+            <div class="phase-box">
+                <div class="phase-header">📊 阶段4：报告（1步骤）</div>
+                <div class="phase-body">
+                    <div class="phase-step"><span class="phase-num">9</span><span>提供评估期间收集的所有信息（结果报告给涉众）</span></div>
+                </div>
+            </div>
+
+            <div class="alert alert-warn">⭐ 重点：风险·非风险·敏感点·权衡点 是在<strong>阶段2第6步</strong>（分析体系结构方法）中被识别的！</div>
+            <div class="alert alert-warn">⭐ 重点：效用树 是在<strong>阶段2第5步</strong>生成的，是ATAM的核心工具！</div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">ATAM方法的评估过程不包括（　）阶段</div>
+                <div class="iq-opts" id="iq-opts-16">
+                    <button class="iq-btn" data-iq="16" data-opt="0" onclick="handleIQ(16,0)"><span class="iq-letter">A.</span><span>演示</span></button>
+                    <button class="iq-btn" data-iq="16" data-opt="1" onclick="handleIQ(16,1)"><span class="iq-letter">B.</span><span>调查和分析</span></button>
+                    <button class="iq-btn" data-iq="16" data-opt="2" onclick="handleIQ(16,2)"><span class="iq-letter">C.</span><span>实施</span></button>
+                    <button class="iq-btn" data-iq="16" data-opt="3" onclick="handleIQ(16,3)"><span class="iq-letter">D.</span><span>报告</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-16">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    ATAM四阶段：演示·调查和分析·测试·报告。没有「实施」阶段，ATAM是评估方法而非实施方法。口诀「演调测报」！
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">ATAM方法中，用于对质量属性进行分类和优先级排序的工具是（　）</div>
+                <div class="iq-opts" id="iq-opts-17">
+                    <button class="iq-btn" data-iq="17" data-opt="0" onclick="handleIQ(17,0)"><span class="iq-letter">A.</span><span>场景树</span></button>
+                    <button class="iq-btn" data-iq="17" data-opt="1" onclick="handleIQ(17,1)"><span class="iq-letter">B.</span><span>效用树</span></button>
+                    <button class="iq-btn" data-iq="17" data-opt="2" onclick="handleIQ(17,2)"><span class="iq-letter">C.</span><span>决策树</span></button>
+                    <button class="iq-btn" data-iq="17" data-opt="3" onclick="handleIQ(17,3)"><span class="iq-letter">D.</span><span>功能树</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-17">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    效用树（Utility Tree）是ATAM的核心工具，在"调查和分析"阶段第5步生成，用于对质量属性进行分类、细化和优先级排序。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 3</div>
+                <div class="iq-q">以下不属于ATAM效用树关注的质量属性的是（　）</div>
+                <div class="iq-opts" id="iq-opts-18">
+                    <button class="iq-btn" data-iq="18" data-opt="0" onclick="handleIQ(18,0)"><span class="iq-letter">A.</span><span>性能</span></button>
+                    <button class="iq-btn" data-iq="18" data-opt="1" onclick="handleIQ(18,1)"><span class="iq-letter">B.</span><span>可修改性</span></button>
+                    <button class="iq-btn" data-iq="18" data-opt="2" onclick="handleIQ(18,2)"><span class="iq-letter">C.</span><span>可测试性</span></button>
+                    <button class="iq-btn" data-iq="18" data-opt="3" onclick="handleIQ(18,3)"><span class="iq-letter">D.</span><span>安全</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-18">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    效用树关注4个质量属性：<strong>性能·可修改性·可用性·安全</strong>。可测试性不在其中！口诀「性可用安」帮助记忆。
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔄</span>6.3 SAAM vs ATAM 全面对比 <span class="tag tag-hot">高频</span></div>
+            <div class="mnemonic">
+                <div class="label">🔑 一句话区分</div>
+                <strong>SAAM改单个（可修改性）· ATAM折多个（性·用·安·改）</strong>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>对比项</th><th>SAAM</th><th>ATAM</th></tr>
+                    <tr><td>特定目标</td><td>验证体系结构，发现潜在问题</td><td class="badge-gold">确定多个质量属性之间的折中</td></tr>
+                    <tr><td>主要质量属性</td><td class="badge-acc">可修改性（主要）</td><td class="badge-red">性能·可用性·安全性·可修改性</td></tr>
+                    <tr><td>评估技术</td><td>场景技术</td><td class="badge-gold">场景技术 + 启发式分析</td></tr>
+                    <tr><td>核心工具</td><td>场景分析</td><td class="badge-gold">效用树（Utility Tree）</td></tr>
+                    <tr><td>知识库可复用性</td><td>不涉及</td><td class="badge-green">有基于属性的体系模型，可复用</td></tr>
+                    <tr><td>是否找权衡点</td><td>否</td><td class="badge-red">是（核心输出之一）</td></tr>
+                </table>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">SAAM和ATAM都使用的评估技术是（　）</div>
+                <div class="iq-opts" id="iq-opts-19">
+                    <button class="iq-btn" data-iq="19" data-opt="0" onclick="handleIQ(19,0)"><span class="iq-letter">A.</span><span>场景技术</span></button>
+                    <button class="iq-btn" data-iq="19" data-opt="1" onclick="handleIQ(19,1)"><span class="iq-letter">B.</span><span>启发式分析</span></button>
+                    <button class="iq-btn" data-iq="19" data-opt="2" onclick="handleIQ(19,2)"><span class="iq-letter">C.</span><span>成本效益分析</span></button>
+                    <button class="iq-btn" data-iq="19" data-opt="3" onclick="handleIQ(19,3)"><span class="iq-letter">D.</span><span>度量分析</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-19">
+                    <div class="iq-ans-label">✅ 答案：A</div>
+                    SAAM和ATAM都使用<strong>场景技术</strong>。ATAM在场景技术基础上还增加了启发式分析（B是ATAM独有的）。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S8: 其他方法 ══════════ -->
+    <section id="s8" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 08</div>
+            <h1>其他架构评估方法</h1>
+            <p>CBAM · SAEM · SAABNet 等 · 了解特点 · 考点密度 ★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📚</span>7.1 其他评估方法汇总</div>
+            <div class="analogy">
+                <strong>记忆技巧：成本效益CBAM打头，其他七兄弟各有专长</strong>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>方法</th><th>全称/特点</th><th>核心关注</th></tr>
+                    <tr><td class="badge-red">CBAM</td><td>成本效益分析法</td><td>基于ROI（投资回报率）选择架构策略，在ATAM基础上增加经济考量</td></tr>
+                    <tr><td class="badge-acc">SAEM</td><td>软件架构评估模型</td><td>外部质量属性 + 内部质量属性</td></tr>
+                    <tr><td class="badge-acc">SAABNet</td><td>基于贝叶斯网络</td><td>度量架构属性·质量准则·质量因素</td></tr>
+                    <tr><td class="badge-acc">SACMM</td><td>软件架构修改度量</td><td>专注于软件架构<strong>修改</strong>的度量方法</td></tr>
+                    <tr><td class="badge-acc">SASAM</td><td>架构映射分析</td><td>预期架构 vs 实际架构 映射比较</td></tr>
+                    <tr><td class="badge-acc">ALRRA</td><td>架构可靠性风险</td><td>软件架构<strong>可靠性</strong>风险评估</td></tr>
+                    <tr><td class="badge-acc">AHP</td><td>层次分析法</td><td>定性分析 + 定量计算</td></tr>
+                    <tr><td class="badge-acc">COSMIC+UML</td><td>统一软件度量</td><td>统一的软件度量方法（基于度量）</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-info">💡 考试重点：CBAM基于ROI · SACMM=修改度量 · ALRRA=可靠性风险 · COSMIC+UML=度量方法</div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">CBAM方法的核心是基于（　）选择架构策略</div>
+                <div class="iq-opts" id="iq-opts-20">
+                    <button class="iq-btn" data-iq="20" data-opt="0" onclick="handleIQ(20,0)"><span class="iq-letter">A.</span><span>成本</span></button>
+                    <button class="iq-btn" data-iq="20" data-opt="1" onclick="handleIQ(20,1)"><span class="iq-letter">B.</span><span>效益</span></button>
+                    <button class="iq-btn" data-iq="20" data-opt="2" onclick="handleIQ(20,2)"><span class="iq-letter">C.</span><span>ROI（投资回报率）</span></button>
+                    <button class="iq-btn" data-iq="20" data-opt="3" onclick="handleIQ(20,3)"><span class="iq-letter">D.</span><span>风险</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-20">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    CBAM（成本效益分析法）根据受成本限制影响的<strong>ROI（Return on Investment）</strong>来选择架构策略。
+                </div>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">ALRRA方法是（　）风险评估方法</div>
+                <div class="iq-opts" id="iq-opts-21">
+                    <button class="iq-btn" data-iq="21" data-opt="0" onclick="handleIQ(21,0)"><span class="iq-letter">A.</span><span>软件架构性能</span></button>
+                    <button class="iq-btn" data-iq="21" data-opt="1" onclick="handleIQ(21,1)"><span class="iq-letter">B.</span><span>软件架构安全性</span></button>
+                    <button class="iq-btn" data-iq="21" data-opt="2" onclick="handleIQ(21,2)"><span class="iq-letter">C.</span><span>软件架构可靠性</span></button>
+                    <button class="iq-btn" data-iq="21" data-opt="3" onclick="handleIQ(21,3)"><span class="iq-letter">D.</span><span>软件架构可修改性</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-21">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    ALRRA = Architecture-Level Risk and Reliability Assessment，是软件架构<strong>可靠性</strong>风险评估方法。SACMM=修改度量，ALRRA=可靠性风险，要区分！
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S9: 真题练习 ══════════ -->
+    <section id="s9" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 09</div>
+            <h1>真题练习（30题）</h1>
+            <p>覆盖全章 · 分层难度 · 即时反馈 · 建议全部作答</p>
+        </div>
+
+        <div id="quiz-score">已作答：<span id="answered">0</span> / 30 题 &nbsp;|&nbsp; 答对：<span id="correct-count">0</span> 题</div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══════════ S10: 速记卡 ══════════ -->
+    <section id="s10" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 10</div>
+            <h1>考前速记卡</h1>
+            <p>核心知识点提炼 · 考前最后冲刺</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        const idx = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'].indexOf(id);
+        document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+        window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // ─── INLINE QUIZ ───
+    const iqAnswers = {
+        0:1, 1:1, 2:2, 3:2, 4:2, 5:3, 6:1, 7:2,
+        8:2, 9:0, 10:3, 11:3, 12:3, 13:1,
+        14:1, 15:1, 16:2, 17:1, 18:2, 19:0,
+        20:2, 21:2
+    };
+
+    function handleIQ(qi, opt) {
+        const btns = document.querySelectorAll(`[data-iq="${qi}"]`);
+        if(btns[0].classList.contains('revealed')) return;
+        const correct = iqAnswers[qi];
+        btns.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === correct) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        document.getElementById(`iq-ans-${qi}`).classList.add('show');
+    }
+
+    // ─── QUIZ DATA ───
+    const quizData = [
+        // 基础概念 1-8
+        {q:"以下属于开发期质量属性的是（　）",opts:["性能","安全性","可测试性","可用性"],ans:2,exp:"可测试性属于开发期质量属性（口诀：易扩重「测」维移）。性能·安全性·可用性均属运行期质量属性（口诀：「性安」伸互「可」鲁）。"},
+        {q:"以下属于运行期质量属性的是（　）",opts:["可扩展性","可重用性","可维护性","互操作性"],ans:3,exp:"互操作性属于运行期质量属性（口诀：性安伸「互」可鲁）。可扩展性·可重用性·可维护性均属开发期质量属性。"},
+        {q:"可用性 = 正常运行时间 / 总时间，与可靠性的区别在于（　）",opts:["可用性强调持续无故障","可用性强调时间占比，可靠性强调持续无故障","可用性和可靠性完全相同","可靠性强调时间占比"],ans:1,exp:"可用性强调时间占比（如99.9%），可靠性强调持续无故障运行能力，二者侧重不同。这是高频易混点！"},
+        {q:"以下关于「鲁棒性」的说法，正确的是（　）",opts:["鲁棒性与容错性是不同概念","鲁棒性属于开发期质量属性","鲁棒性 = 容错性 = 健壮性","鲁棒性是指系统的时间可用比例"],ans:2,exp:"鲁棒性 = 容错性 = 健壮性，三者是同一概念的不同说法，均属运行期质量属性。可用比例是「可用性」的定义。"},
+        {q:"某电商系统需要在促销活动期间快速增加服务器节点以应对流量洪峰，这体现了系统良好的（　）",opts:["可扩展性","可伸缩性","可靠性","可移植性"],ans:1,exp:"通过增加服务器节点（资源）来应对负载变化，这是「可伸缩性」。可扩展性是指增加新功能，不要混淆！"},
+        {q:"面向架构评估的质量属性中，「可修改性」包含的子属性有（　）个",opts:["2","3","4","5"],ans:2,exp:"可修改性的4个子属性：①可维护性 ②可扩展性 ③结构重组 ④可移植性。共4个。"},
+        {q:"以下不属于「面向架构评估的质量属性」的是（　）",opts:["性能","可靠性","可伸缩性","互操作性"],ans:2,exp:"面向架构评估的质量属性（7个）：性能·可靠性·安全性·可修改性·功能性·可变性·互操作性。「可伸缩性」不在其中。"},
+        {q:"质量属性场景描述的6个要素不包括（　）",opts:["刺激源","环境","成本","响应度量"],ans:2,exp:"场景6要素：刺激源·刺激·环境·制品·响应·响应度量（口诀：源刺环制响度）。「成本」不是场景要素。"},
+        // 场景识别 9-14
+        {q:"「在正常负载下，系统必须在0.5秒内响应用户的交易请求」属于（　）质量属性场景",opts:["可用性","性能","安全性","可修改性"],ans:1,exp:"关键词：「响应时间0.5秒」→ 对处理时间的要求 → 性能质量属性。回答技巧：看到响应时间/吞吐量 → 性能。"},
+        {q:"「网络失效后，系统需要在2分钟内发现错误并启用备用系统」属于（　）质量属性场景",opts:["性能","可用性","安全性","可修改性"],ans:1,exp:"关键词：「网络失效」（故障）+「启用备用系统」（冗余/恢复）→ 可用性质量属性。看到故障恢复、冗余 → 可用性。"},
+        {q:"「系统需要在4人·月内完成对Web界面风格的改造」属于（　）质量属性场景",opts:["性能","可用性","可修改性","安全性"],ans:2,exp:"关键词：「改造」+「4人·月」（工作量度量）→ 可修改性质量属性。看到修改工作量/人·月 → 可修改性。"},
+        {q:"「用户信息数据库授权必须保证99.999%可用」属于（　）质量属性场景",opts:["性能","可用性","安全性","可修改性"],ans:1,exp:"关键词：「99.999%可用」→ 时间可用率要求 → 可用性质量属性。看到N个9的可用率 → 可用性。"},
+        {q:"「主站点断电后，需要在3秒内将访问请求重定向到备用站点」属于（　）质量属性场景",opts:["性能","安全性","可修改性","可用性"],ans:3,exp:"关键词：「断电」（故障）+「重定向到备用站点」（故障切换）→ 可用性。与上一题同类：故障恢复时间要求 → 可用性。"},
+        {q:"「对交易请求处理时间的要求将影响系统数据传输协议和交易处理过程的设计」是对（　）的描述",opts:["风险点","非风险","敏感点","权衡点"],ans:2,exp:"该决策只影响「性能」一个质量属性 → 敏感点（影响1个属性）。注意：只影响一个就是敏感点，不是权衡点！"},
+        // 评估概念 15-20
+        {q:"「改变业务数据编码方式会对系统性能和安全性产生影响」是对（　）的描述",opts:["风险点","非风险","敏感点","权衡点"],ans:3,exp:"影响「性能」和「安全性」两个质量属性 → 多个属性 → 权衡点。权衡 = 权衡多个利益（多个属性）。"},
+        {q:"「现有设计中支付模块与第三方平台紧耦合，支持新平台时将导致支付代码大量修改」是对（　）的描述",opts:["风险点","非风险","敏感点","权衡点"],ans:0,exp:"紧耦合导致可修改性差，这是存在问题的架构决策 → 风险点。关键：看到「紧耦合」「难以修改」「存在隐患」→ 风险！"},
+        {q:"「假设用户请求频率每秒1个，业务处理时间小于30毫秒，响应时间设为1秒是可以接受的」是对（　）的描述",opts:["风险点","非风险","敏感点","权衡点"],ans:1,exp:"经过分析确认可以接受的合理决策 → 非风险。关键词：「可以接受」→ 非风险（良好决策）。"},
+        {q:"ATAM方法在「调查和分析」阶段需要找出（　）",opts:["业务目标和优先级","架构描述","风险·非风险·敏感点·权衡点","头脑风暴场景"],ans:2,exp:"在「调查和分析」阶段的第6步（分析体系结构方法）中，需要找出风险·非风险·敏感点·权衡点。A是阶段1，B是阶段1，D是阶段3。"},
+        {q:"ATAM方法中，「生成质量属性效用树」属于哪个阶段（　）",opts:["演示","调查和分析","测试","报告"],ans:1,exp:"效用树（Utility Tree）在「调查和分析」阶段（阶段2）的第5步生成。这是ATAM核心工具，要记住它在哪个阶段产生。"},
+        {q:"「推迟绑定时间」是提升（　）的策略",opts:["性能","可用性","可修改性","安全性"],ans:2,exp:"推迟绑定时间（如运行时注册·多态·配置文件）是提升「可修改性」的策略，属于「推迟绑定时间」策略族。"},
+        // SAAM/ATAM/其他 21-30
+        {q:"SAAM和ATAM相比，SAAM的特点是（　）",opts:["关注多个质量属性的折中","主要分析可修改性","使用效用树作为核心工具","包含4个阶段"],ans:1,exp:"SAAM主要分析「可修改性」，是最早的架构评估方法，使用场景技术，不包含效用树。ATAM才关注多个属性折中·使用效用树·分4阶段。"},
+        {q:"以下不属于ATAM「演示」阶段步骤的是（　）",opts:["介绍ATAM方法","介绍业务驱动因素","生成质量属性效用树","介绍要评估的体系结构"],ans:2,exp:"生成质量属性效用树属于「调查和分析」阶段（第5步）。演示阶段3步骤：①介绍ATAM ②介绍业务驱动因素 ③介绍架构。"},
+        {q:"CBAM方法是在（　）基础上增加经济性分析",opts:["SAAM","ATAM","SAEM","SAABNet"],ans:1,exp:"CBAM（成本效益分析法）是在ATAM基础上增加ROI分析，将成本效益引入架构评估决策中。"},
+        {q:"SACMM方法是一种（　）的度量方法",opts:["软件架构可靠性","软件架构修改","软件架构性能","软件架构安全性"],ans:1,exp:"SACMM = Software Architecture Change Metrics Model，是软件架构「修改」的度量方法。与ALRRA（可靠性风险）要区分。"},
+        {q:"以下架构评估方法中，使用贝叶斯网络的是（　）",opts:["CBAM","SAEM","SAABNet","ALRRA"],ans:2,exp:"SAABNet是基于贝叶斯网络（Bayesian Network）的架构评估方法，度量架构属性·质量准则·质量因素。"},
+        {q:"以下关于提升可用性策略的说法中，正确的是（　）",opts:["检查点/回滚属于「错误检测」","主动冗余属于「错误避免」","心跳属于「错误检测」","进程监控器属于「错误恢复」"],ans:2,exp:"心跳（Heartbeat）属于「错误检测」策略。检查点/回滚属于「错误恢复」，主动冗余属于「错误恢复」，进程监控器属于「错误避免」。"},
+        {q:"下列对于ATAM效用树4个关注属性的描述，正确的是（　）",opts:["性能·可修改性·可用性·可测试性","性能·可靠性·安全性·可修改性","性能·可修改性·可用性·安全","可用性·安全性·互操作性·可修改性"],ans:2,exp:"ATAM效用树关注：性能·可修改性·可用性·安全（4个）。注意是「安全」不是「安全性」，是「可用性」不是「可靠性」。口诀「性可用安」！"},
+        {q:"以下关于质量属性策略归属，错误的是（　）",opts:["信息隐藏 → 可修改性（防止连锁反应）","主动冗余 → 可用性（错误恢复）","用户身份验证 → 安全性（抵抗攻击）","固定优先级调度 → 可用性（错误避免）"],ans:3,exp:"固定优先级调度是「性能」策略中「资源仲裁」的手段，不是可用性策略！其他三项归属均正确。"},
+        {q:"某系统在架构评估时发现「采用微服务架构会提高系统的可伸缩性，但增加了运维复杂度和部署难度」，这是对（　）的描述",opts:["风险点","非风险","敏感点","权衡点"],ans:3,exp:"影响了可伸缩性（运行期）和运维复杂度/部署难度（可修改性相关），影响多个质量属性 → 权衡点。微服务的这个特性是典型权衡点。"},
+        {q:"SASAM方法的核心是（　）",opts:["基于ROI选择架构策略","评估软件架构可靠性风险","预期架构与实际架构的映射比较","度量软件架构修改成本"],ans:2,exp:"SASAM（Software Architecture Structural Analysis Method）通过比较预期架构与实际架构的映射差异来进行评估。ROI→CBAM，可靠性→ALRRA，修改度量→SACMM。"},
+    ];
+
+    let answered = 0, correct = 0;
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        quizData.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-q';
+            div.innerHTML = `
+      <div class="quiz-num">第 ${i+1} 题 / 共 30 题</div>
+      <div class="quiz-text">${item.q}</div>
+      <div class="quiz-options" id="opts-${i}">
+        ${['A','B','C','D'].map((L,j)=>`
+          <button class="opt-btn" data-q="${i}" data-opt="${j}" onclick="handleOpt(${i},${j})">
+            <span class="opt-letter">${L}.</span>
+            <span>${item.opts[j]}</span>
+          </button>`).join('')}
+      </div>
+      <button class="reveal-btn" id="reveal-${i}" onclick="revealAns(${i})" style="display:none">💡 查看解析</button>
+      <div class="quiz-ans" id="ans-${i}">
+        <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+        <div class="ans-body">${item.exp}</div>
+      </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleOpt(qi, opt) {
+        const item = quizData[qi];
+        const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed')) return;
+        opts.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === item.ans) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt === item.ans) correct++;
+        document.getElementById('answered').textContent = answered;
+        document.getElementById('correct-count').textContent = correct;
+        document.getElementById(`reveal-${qi}`).style.display = 'inline-flex';
+    }
+
+    function revealAns(qi) {
+        document.getElementById(`ans-${qi}`).classList.toggle('show');
+    }
+    renderQuiz();
+
+    // ─── FLASH CARDS ───
+    const flashData = [
+        {n:"01",topic:"开发期质量属性口诀",mnemonic:"易扩重测维移",detail:"易理解·可扩展·可重用·可测试·可维护·可移植（6个）"},
+        {n:"02",topic:"运行期质量属性口诀",mnemonic:"性安伸互可鲁",detail:"性能·安全性·可伸缩性·互操作性·可靠性/可用性·鲁棒性（6个）"},
+        {n:"03",topic:"可用性 vs 可靠性",mnemonic:"可用=时间占比 / 可靠=持续无故障",detail:"可用性 = 正常运行时间/总时间，可靠性强调不间断无故障"},
+        {n:"04",topic:"可扩展性 vs 可伸缩性",mnemonic:"扩=加功能 / 伸=加资源",detail:"最高频易错点！加服务器→可伸缩性；加新功能→可扩展性"},
+        {n:"05",topic:"鲁棒性=容错性=健壮性",mnemonic:"三个名字一个意思",detail:"都是指系统在异常条件下继续运行的能力，运行期属性"},
+        {n:"06",topic:"场景6要素口诀",mnemonic:"源刺环制响度",detail:"刺激源·刺激·环境·制品·响应·响应度量，缺一不可"},
+        {n:"07",topic:"场景类型速判",mnemonic:"时间→性能 / 故障恢复→可用 / 加密→安全 / 工作量→可修改",detail:"答题快速判断：看响应度量的类型决定属哪个质量属性"},
+        {n:"08",topic:"敏感点 vs 权衡点",mnemonic:"敏感=1个属性 / 权衡=多个属性",detail:"权衡点是影响多个质量属性的敏感点（敏感点的特殊情况）"},
+        {n:"09",topic:"风险 vs 非风险",mnemonic:"有问题→风险 / 可接受→非风险",detail:"看到「紧耦合」「难修改」「存在隐患」→风险；看到「合理设定」「可接受」→非风险"},
+        {n:"10",topic:"SAAM特点",mnemonic:"最早·可修改性·场景技术·场架单交总",detail:"Software Architecture Analysis Method，5步：场景开发→架构描述→单个评估→场景交互→总体评估"},
+        {n:"11",topic:"ATAM四阶段口诀",mnemonic:"演调测报",detail:"演示(3步)→调查和分析(3步)→测试(2步)→报告(1步)，共9步"},
+        {n:"12",topic:"ATAM效用树4属性",mnemonic:"性可用安（性能·可修改·可用性·安全）",detail:"⚠️ 不含可测试性！不含互操作性！4个固定，年年考"},
+        {n:"13",topic:"SAAM vs ATAM核心区别",mnemonic:"SAAM改单个 / ATAM折多个",detail:"SAAM=可修改性(1个)·场景技术；ATAM=4个属性折中·场景+启发式·效用树"},
+        {n:"14",topic:"CBAM核心",mnemonic:"在ATAM基础上+ROI分析",detail:"Cost Benefit Analysis Method，根据投资回报率选架构策略"},
+        {n:"15",topic:"可用性三族策略",mnemonic:"检测→恢复→避免",detail:"检测：心跳/Ping/异常；恢复：冗余/回滚/表决；避免：下线/事务/监控器"},
+        {n:"16",topic:"可修改性三族策略",mnemonic:"局部→防连锁→推迟绑定",detail:"局部化：高内聚低耦合；防连锁：信息隐藏/中介；推迟：配置文件/多态"},
+    ];
+
+    function renderFlash() {
+        const grid = document.getElementById('flash-grid');
+        flashData.forEach(fc => {
+            const div = document.createElement('div');
+            div.className = 'flash-card';
+            div.innerHTML = `<div class="fc-num"># ${fc.n}</div>
+      <div class="fc-topic">${fc.topic}</div>
+      <div class="fc-mnemonic">「${fc.mnemonic}」</div>
+      <div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>

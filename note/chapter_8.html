@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第八章 · 数据库设计基础知识 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#fdfbf7;--bg2:#f4efe6;--card:#fff;--card2:#f9f7f2;
+            --border:#e8e2d5;--border2:#d4cbb8;--text:#2c2825;--text2:#5e574f;--text3:#8f877c;
+            --accent:#0284c7;--accent2:#0369a1;--gold:#d97706;--gold2:#b45309;
+            --green:#059669;--red:#dc2626;--purple:#7c3aed;--pink:#db2777;--teal:#0d9488;
+            --nav-h:56px;--radius:10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+        #topnav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(253,251,247,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);z-index:1000;display:flex;align-items:center;padding:0 16px;gap:2px;overflow-x:auto;white-space:nowrap}
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px}
+        .nav-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+        main{padding-top:calc(var(--nav-h)+ 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .section-hero{text-align:center;padding:40px 20px 32px;background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);border:1px solid var(--border);border-radius:14px;margin-bottom:28px;position:relative;overflow:hidden}
+        .section-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);pointer-events:none}
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:560px;margin:0 auto}
+        .section-tag{display:inline-block;padding:3px 10px;background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:12px}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2)}
+        .analogy strong{color:var(--gold)}
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple)}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}.badge-red{color:var(--red);font-weight:600}.badge-gold{color:var(--gold);font-weight:600}.badge-acc{color:var(--accent);font-weight:600}.badge-purple{color:var(--purple);font-weight:600}.badge-teal{color:var(--teal);font-weight:600}.badge-pink{color:var(--pink);font-weight:600}
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}.vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}.vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}.vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}.vs-e .vs-title{background:rgba(217,119,6,.1);color:var(--gold)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}.vs-item .label{color:var(--text3);font-size:.75rem}
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+        .layer-stack{display:flex;flex-direction:column;gap:4px;margin:14px 0}
+        .layer-row{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);transition:border-color .15s}
+        .layer-row:hover{border-color:var(--border2)}
+        .layer-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;width:26px;flex-shrink:0;text-align:center;margin-top:2px}
+        .layer-name{font-weight:700;font-size:.87rem;min-width:100px;flex-shrink:0}
+        .layer-desc{font-size:.8rem;color:var(--text2);flex:1}
+        /* REDIS TYPE CARDS */
+        .redis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin:12px 0}
+        .redis-card{border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+        .redis-card:hover,.redis-card.active{border-color:var(--accent);background:rgba(2,132,199,.05)}
+        .redis-name{font-weight:700;font-size:.88rem;color:var(--accent);margin-bottom:3px}
+        .redis-key{font-size:.75rem;color:var(--text3)}
+        .redis-detail{display:none;margin-top:10px;padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.84rem;line-height:1.7;color:var(--text2)}
+        /* CACHE PROBLEM CARDS */
+        .cache-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:12px 0}
+        .cache-card{border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--bg2);transition:border-color .15s}
+        .cache-card:hover{border-color:var(--border2)}
+        .cache-title{font-weight:700;font-size:.88rem;margin-bottom:6px}
+        .cache-body{font-size:.8rem;color:var(--text2);line-height:1.6}
+        /* NORM LEVEL */
+        .norm-stack{display:flex;flex-direction:column;gap:4px;margin:12px 0}
+        .norm-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;transition:all .18s}
+        .norm-row:hover{border-color:var(--border2)}
+        .norm-lv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;width:50px;flex-shrink:0}
+        .norm-name{font-weight:700;font-size:.85rem;min-width:80px;flex-shrink:0}
+        .norm-req{font-size:.8rem;color:var(--text2);flex:1}
+        .norm-detail{display:none;margin-top:6px;padding:10px;background:rgba(2,132,199,.04);border:1px solid rgba(2,132,199,.15);border-radius:6px;font-size:.82rem;color:var(--text2)}
+        /* QUIZ */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.83rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4}
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        .quiz-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+        .filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s}
+        .filter-btn:hover{border-color:var(--border2);color:var(--text)}
+        .filter-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+        code{font-family:'JetBrains Mono',monospace;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:.82rem;color:var(--accent2)}
+        @media(max-width:640px){main{padding-left:12px;padding-right:12px}.section-hero h1{font-size:1.3rem}.kp-grid{grid-template-columns:1fr}.flash-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<nav id="topnav">
+    <div class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        架构师第八章
+    </div>
+    <button class="nav-btn active" onclick="showSection('map',this)">🗺️ 知识地图</button>
+    <button class="nav-btn" onclick="showSection('s1',this)">① 基础概念</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">② 关系数据库</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">③ 范式&事务</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">④ 数据库设计</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">⑤ 优化&分布式</button>
+    <button class="nav-btn" onclick="showSection('s6',this)">⑥ Redis缓存</button>
+    <button class="nav-btn" onclick="showSection('quiz',this)">📝 练习题</button>
+    <button class="nav-btn" onclick="showSection('flashcard',this)">⚡ 速记卡</button>
+</nav>
+
+<main>
+
+    <!-- ══ MAP ══ -->
+    <section id="map" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">CHAPTER 08</div>
+            <h1>数据库设计基础知识</h1>
+            <p>选择题 + 案例分析高频章节 · 范式必考 · Redis案例常考 ⭐⭐⭐⭐</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🗺️</span>全章知识架构</div>
+            <div style="overflow-x:auto;padding:8px 0">
+                <svg viewBox="0 0 900 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:640px;max-height:440px">
+                    <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d4cbb8"/></marker></defs>
+                    <rect x="345" y="196" width="180" height="46" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+                    <text x="435" y="215" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0369a1">第八章</text>
+                    <text x="435" y="233" text-anchor="middle" font-size="10.5" fill="#0284c7">数据库设计基础知识</text>
+                    <line x1="345" y1="210" x2="195" y2="68" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="108" y="48" width="128" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="172" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">1. 基础概念</text>
+                    <text x="172" y="79" text-anchor="middle" font-size="9.5" fill="#5e574f">三级模式·三要素·DBMS</text>
+                    <line x1="345" y1="218" x2="150" y2="172" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="28" y="154" width="134" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="95" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">2. 关系数据库</text>
+                    <text x="95" y="185" text-anchor="middle" font-size="9.5" fill="#5e574f">候选码·关系代数</text>
+                    <line x1="345" y1="235" x2="150" y2="300" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="28" y="282" width="134" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="95" y="298" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">3. 范式&amp;事务</text>
+                    <text x="95" y="313" text-anchor="middle" font-size="9.5" fill="#5e574f">1NF→BCNF · ACID</text>
+                    <line x1="345" y1="242" x2="195" y2="378" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="108" y="360" width="128" height="38" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+                    <text x="172" y="376" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">4. 数据库设计</text>
+                    <text x="172" y="391" text-anchor="middle" font-size="9.5" fill="#5e574f">六步骤·E-R图</text>
+                    <line x1="525" y1="242" x2="655" y2="378" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="628" y="360" width="134" height="38" rx="6" fill="#fce7f3" stroke="#db2777" stroke-width="1"/>
+                    <text x="695" y="376" text-anchor="middle" font-size="11" font-weight="600" fill="#db2777">5. 优化&amp;分布式</text>
+                    <text x="695" y="391" text-anchor="middle" font-size="9.5" fill="#5e574f">反规范化·透明性</text>
+                    <line x1="525" y1="235" x2="720" y2="300" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="706" y="282" width="134" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+                    <text x="773" y="298" text-anchor="middle" font-size="11" font-weight="600" fill="#b45309">6. NoSQL&amp;Redis</text>
+                    <text x="773" y="313" text-anchor="middle" font-size="9.5" fill="#5e574f">五大类型·穿雪穿</text>
+                    <line x1="525" y1="218" x2="718" y2="172" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="706" y="154" width="134" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1"/>
+                    <text x="773" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">Redis持久化</text>
+                    <text x="773" y="185" text-anchor="middle" font-size="9.5" fill="#5e574f">RDB快照·AOF日志</text>
+                    <line x1="525" y1="210" x2="675" y2="68" stroke="#d4cbb8" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <rect x="628" y="48" width="134" height="38" rx="6" fill="#f0f9ff" stroke="#0284c7" stroke-width="1"/>
+                    <text x="695" y="64" text-anchor="middle" font-size="11" font-weight="600" fill="#0284c7">分布式透明性</text>
+                    <text x="695" y="79" text-anchor="middle" font-size="9.5" fill="#5e574f">分位局（高→低）</text>
+                    <rect x="386" y="164" width="90" height="18" rx="9" fill="rgba(220,38,38,.12)" stroke="rgba(220,38,38,.28)"/>
+                    <text x="431" y="177" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">选择+案例常考</text>
+                </svg>
+            </div>
+        </div>
+        <div class="kp-grid">
+            <div class="kp-item"><div class="kp-title">🔥 三级模式两级映像</div><div class="kp-body">外→逻辑独立性<br>概/内→物理独立性</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 范式四级</div><div class="kp-body">1NF原子·2NF消部分·3NF消传递<br>BCNF每决定因素都是候选码</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 ACID事务</div><div class="kp-body">原子·一致·隔离·持久<br>口诀：爱死的</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 关系代数</div><div class="kp-body">选择=选行 · 投影=选列<br>笛卡尔积：元组×，属性+</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 分布式透明性</div><div class="kp-body">分片&gt;位置&gt;局部（高到低）<br>分片透明性最高！</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ Redis五大类型</div><div class="kp-body">弦哈利赛哲<br>Zset=排行榜 · List=消息队列</div></div>
+            <div class="kp-item"><div class="kp-title">🔥 缓存三大问题</div><div class="kp-body">穿透=key不存在<br>雪崩=批量过期 · 击穿=热点过期</div></div>
+            <div class="kp-item"><div class="kp-title">⚡ 反规范化5技术</div><div class="kp-body">冗派组水垂<br>水平=按行 · 垂直=按列</div></div>
+        </div>
+    </section>
+
+    <!-- ══ S1: 基础概念 ══ -->
+    <section id="s1" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>数据库基础概念</h1>
+            <p>三阶段 · 三级模式两级映像 · 数据模型三要素 · 考点密度 ★★★★</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>📚</span>1.1 数据库发展三阶段</div>
+            <div class="analogy"><strong>类比：管理家里照片的进化</strong><br><strong>人工管理</strong> = 拍完就删，不保存 · <strong>文件系统</strong> = 按年份建文件夹，数据孤立 · <strong>数据库系统</strong> = 用相册软件，自动分类快速搜索</div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#d4cbb8"><div class="layer-num" style="color:var(--text3)">人</div><div class="layer-name">人工管理阶段</div><div class="layer-desc">数据不保存，无软件管理，数据和程序不独立</div></div>
+                <div class="layer-row" style="border-color:#d97706"><div class="layer-num" style="color:var(--gold)">文</div><div class="layer-name" style="color:var(--gold)">文件系统阶段</div><div class="layer-desc">数据可长期保存，但有严重的<strong>数据冗余</strong>和孤立问题</div></div>
+                <div class="layer-row" style="border-color:#059669"><div class="layer-num" style="color:var(--green)">数</div><div class="layer-name" style="color:var(--green)">数据库系统阶段</div><div class="layer-desc">数据独立、充分共享、操作方便，统一管理</div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「人文数」</strong> → 人工→文件→数据库</div>
+            <div class="alert alert-red">⚠️ 文件系统阶段有严重的<strong>数据冗余</strong>！不是没有冗余！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏗️</span>1.2 数据库三级模式两级映像 <span class="tag tag-hot">★★必考</span></div>
+            <div class="analogy"><strong>类比：看房子的三个视角</strong><br><strong>外模式</strong> = 你看到的装修效果（用户视图）· <strong>概念模式</strong> = 房子的整体结构图（逻辑结构）· <strong>内模式</strong> = 钢筋水泥的具体布局（物理存储）</div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#0284c7"><div class="layer-num" style="color:var(--accent)">外</div><div class="layer-name" style="color:var(--accent)">外模式（子模式）</div><div class="layer-desc">用户视图，每个用户看到的局部数据视图</div></div>
+                <div class="layer-row" style="border-color:#d97706;background:rgba(217,119,6,.03)"><div class="layer-num" style="color:var(--gold)">概</div><div class="layer-name" style="color:var(--gold)">概念模式（模式）</div><div class="layer-desc">全局逻辑结构，整个数据库的总体描述</div></div>
+                <div class="layer-row" style="border-color:#059669"><div class="layer-num" style="color:var(--green)">内</div><div class="layer-name" style="color:var(--green)">内模式（存储模式）</div><div class="layer-desc">物理存储方式，最接近硬件的层次</div></div>
+            </div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">外模式/概念模式映像</div>
+                    <div class="vs-item"><span>保证</span><span class="badge-acc">逻辑独立性 ⭐</span></div>
+                    <div class="vs-item"><span>含义</span><span>概念模式变化，外模式不变</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">概念模式/内模式映像</div>
+                    <div class="vs-item"><span>保证</span><span class="badge-green">物理独立性 ⭐</span></div>
+                    <div class="vs-item"><span>含义</span><span>物理存储变化，概念模式不变</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「外概内」</strong> → 谐音「外卖概不退」<br><strong>外/概→逻辑独立性 · 概/内→物理独立性</strong></div>
+            <div class="alert alert-red">⚠️ 外模式是用户视图（逻辑层），不是物理存储！内模式才是物理存储！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🧩</span>1.3 数据模型三要素 & 数据完整性</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">数据结构</div><div class="vs-item"><span>含义</span><span>数据长什么样</span></div><div class="vs-item"><span>类比</span><span>游戏里有什么角色</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">数据操作</div><div class="vs-item"><span>含义</span><span>增删改查</span></div><div class="vs-item"><span>类比</span><span>角色能做什么动作</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">数据约束</div><div class="vs-item"><span>含义</span><span>业务规则限制</span></div><div class="vs-item"><span>类比</span><span>游戏不能作弊</span></div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「结操约」</strong> → 谐音「姐操纵」→ 姐姐操纵游戏，遵守约定</div>
+            <div class="sub-title">数据约束三大类</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>约束类型</th><th>要求</th><th>例子</th></tr>
+                    <tr><td class="badge-red">实体完整性</td><td class="badge-red">主键不能为空</td><td>每个学生必须有学号</td></tr>
+                    <tr><td class="badge-acc">参照完整性</td><td>外键要么为空，要么存在于参照表</td><td>选课的课程号必须在课程表里</td></tr>
+                    <tr><td class="badge-gold">用户定义完整性</td><td>业务规则约束</td><td>成绩0-100分</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 主键绝对不能为空（实体完整性）· 外键<strong>可以为空</strong>，但有值时必须存在于参照表！</div>
+        </div>
+    </section>
+
+    <!-- ══ S2: 关系数据库 ══ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>关系数据库</h1>
+            <p>基本概念 · 候选码/主码/外码 · 关系代数运算 · 考点密度 ★★★★</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>📊</span>2.1 关系数据库基本概念</div>
+            <div class="analogy"><strong>类比：Excel表格</strong><br><strong>属性</strong>=列名 · <strong>域</strong>=每列取值范围 · <strong>元组</strong>=一行数据 · <strong>候选码</strong>=能唯一识别一行的列 · <strong>主码</strong>=选定的唯一标识 · <strong>外码</strong>=指向其他表的列</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>概念</th><th>说明</th><th>例子</th></tr>
+                    <tr><td class="badge-acc">候选码</td><td>能唯一标识元组的属性或属性组</td><td>学号、身份证号（可多个）</td></tr>
+                    <tr><td class="badge-red">主码（主键）</td><td>从候选码中选定的<strong>一个</strong></td><td>学号（只能有一个！）</td></tr>
+                    <tr><td class="badge-gold">外码（外键）</td><td>引用其他表的码</td><td>选课表中的学号</td></tr>
+                    <tr><td class="badge-acc">主属性</td><td>包含在候选码中的属性</td><td>学号是主属性</td></tr>
+                    <tr><td class="badge-acc">非主属性</td><td>不在任何候选码中的属性</td><td>姓名、年龄</td></tr>
+                    <tr><td class="badge-purple">全码</td><td>所有属性组成候选码</td><td>选课表（学号+课程号）</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 主码只能有<strong>一个</strong>，候选码可以有多个！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>⚙️</span>2.2 关系代数运算 <span class="tag tag-hot">★★高频</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">集合运算（4种）</div>
+                    <div class="vs-item"><span>并（∪）</span><span>两表合并</span></div>
+                    <div class="vs-item"><span>差（-）</span><span>A有B没有的</span></div>
+                    <div class="vs-item"><span>交（∩）</span><span>两表都有的</span></div>
+                    <div class="vs-item"><span class="badge-red">笛卡尔积（×）</span><span class="badge-red">元组×，属性+</span></div>
+                </div>
+                <div class="vs-card vs-c">
+                    <div class="vs-title">专门运算（4种）</div>
+                    <div class="vs-item"><span class="badge-red">选择（σ）</span><span class="badge-red">选行（筛选记录）</span></div>
+                    <div class="vs-item"><span class="badge-acc">投影（π）</span><span class="badge-acc">选列（筛选字段）</span></div>
+                    <div class="vs-item"><span>连接（⋈）</span><span>两表关联</span></div>
+                    <div class="vs-item"><span>除（÷）</span><span>找满足所有条件的</span></div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div>
+                <strong>集合运算：「并差交笛」</strong><br>
+                <strong>专门运算：「选投连除」</strong> → 选行 · 投列 · 连接 · 除<br>
+                <strong>笛卡尔积</strong>：R(m元组,n属性) × S(p元组,q属性) = <strong>m×p元组，n+q属性</strong>
+            </div>
+            <div class="alert alert-red">⚠️ 选择=<strong>选行</strong>，投影=<strong>选列</strong>，千万别搞反！</div>
+            <div class="sub-title">外连接三种</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">左外连接</div><div class="vs-item"><span>保留</span><span class="badge-acc">左表所有记录</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">右外连接</div><div class="vs-item"><span>保留</span><span class="badge-green">右表所有记录</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">全外连接</div><div class="vs-item"><span>保留</span><span class="badge-purple">两表所有记录</span></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ S3: 范式 & 事务 ══ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>函数依赖 · 范式 · 事务ACID</h1>
+            <p>范式判断必考 · ACID四特性 · 考点密度 ★★★★★</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🔗</span>3.1 函数依赖三种类型</div>
+            <div class="analogy"><strong>类比：因果关系</strong><br><strong>完全函数依赖</strong>：知道学号就能确定姓名（一对一确定）<br><strong>部分函数依赖</strong>：（学号+课程号）→姓名，其实只需要学号就够了<br><strong>传递依赖</strong>：学号→系号→系主任（间接依赖）</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>依赖类型</th><th>定义</th><th>例子</th></tr>
+                    <tr><td class="badge-green">完全函数依赖</td><td>X→Y，且X的任何子集都不能→Y</td><td>（学号,课程号）→成绩</td></tr>
+                    <tr><td class="badge-red">部分函数依赖</td><td>X→Y，但X有子集也能→Y</td><td>（学号,课程号）→姓名（学号就够）</td></tr>
+                    <tr><td class="badge-gold">传递依赖</td><td>X→Y，Y→Z（X不→Z直接）</td><td>学号→系号→系主任</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「完部传」</strong> → 谐音「玩不传」</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🏠</span>3.2 四大范式 <span class="tag tag-hot">★★★必考</span></div>
+            <div class="analogy"><strong>类比：房子的装修等级</strong> — 毛坯房(1NF)→简装(2NF)→精装(3NF)→豪装(BCNF)</div>
+            <div class="norm-stack">
+                <div class="norm-row" onclick="toggleNorm('nf1')" style="border-color:#0284c7">
+                    <div class="norm-lv" style="color:var(--accent)">1NF</div>
+                    <div class="norm-name" style="color:var(--accent)">第一范式</div>
+                    <div class="norm-req">属性不可再分（原子性）</div>
+                    <span style="color:var(--text3);font-size:.75rem;flex-shrink:0">点击展开 ▾</span>
+                </div>
+                <div id="nf1" class="norm-detail">满足1NF：每个属性都是不可再分的原子值。例如：地址字段不能包含省市区，要分开存储。<br><strong>毛坯房</strong>：每个格子只放一样东西</div>
+                <div class="norm-row" onclick="toggleNorm('nf2')" style="border-color:#d97706">
+                    <div class="norm-lv" style="color:var(--gold)">2NF</div>
+                    <div class="norm-name" style="color:var(--gold)">第二范式</div>
+                    <div class="norm-req">在1NF基础上，消除<strong>非主属性对主码的部分函数依赖</strong></div>
+                    <span style="color:var(--text3);font-size:.75rem;flex-shrink:0">点击展开 ▾</span>
+                </div>
+                <div id="nf2" class="norm-detail">非主属性必须<strong>完全依赖</strong>于主码，不能只依赖主码的一部分。<br>例如：（学号,课程号）→姓名，姓名只依赖学号，这就违反了2NF。<br><strong>简装房</strong>：消除部分依赖</div>
+                <div class="norm-row" onclick="toggleNorm('nf3')" style="border-color:#059669">
+                    <div class="norm-lv" style="color:var(--green)">3NF</div>
+                    <div class="norm-name" style="color:var(--green)">第三范式</div>
+                    <div class="norm-req">在2NF基础上，消除<strong>非主属性对主码的传递函数依赖</strong></div>
+                    <span style="color:var(--text3);font-size:.75rem;flex-shrink:0">点击展开 ▾</span>
+                </div>
+                <div id="nf3" class="norm-detail">非主属性不能通过另一个非主属性间接依赖主码。<br>例如：学号→系号→系主任，系主任传递依赖学号，违反3NF。<br><strong>精装房</strong>：消除传递依赖</div>
+                <div class="norm-row" onclick="toggleNorm('nfb')" style="border-color:#dc2626;background:rgba(220,38,38,.02)">
+                    <div class="norm-lv" style="color:var(--red)">BCNF</div>
+                    <div class="norm-name" style="color:var(--red)">BC范式</div>
+                    <div class="norm-req">每个<strong>决定因素</strong>都必须是<strong>候选码</strong>（最严格）</div>
+                    <span style="color:var(--text3);font-size:.75rem;flex-shrink:0">点击展开 ▾</span>
+                </div>
+                <div id="nfb" class="norm-detail">BCNF是3NF的加强，消除了主属性对候选码的传递依赖。<br>例如：若有多个候选码且相互重叠，3NF可能不够，需要BCNF。<br><strong>豪装房</strong>：最严格的范式</div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div>
+                <strong>「一二三BC」</strong> → 谐音「一二三不错」<br>
+                <strong>2NF消部分依赖 · 3NF消传递依赖 · BCNF最严格</strong>
+            </div>
+            <div class="alert alert-red">⚠️ 2NF消除<strong>部分</strong>依赖，3NF消除<strong>传递</strong>依赖，别搞混！</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>💳</span>3.3 事务ACID特性 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy"><strong>类比：银行转账</strong> — 转账时必须保证这4个特性，钱不能凭空消失</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(2,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">A — 原子性 Atomicity</div><div class="vs-item"><span>含义</span><span>要么全成功，要么全失败</span></div><div class="vs-item"><span>类比</span><span>扣款和到账，不能只做一半</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">C — 一致性 Consistency</div><div class="vs-item"><span>含义</span><span>执行前后数据保持一致</span></div><div class="vs-item"><span>类比</span><span>转账前后总金额不变</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">I — 隔离性 Isolation</div><div class="vs-item"><span>含义</span><span>事务之间互不影响中间状态</span></div><div class="vs-item"><span>类比</span><span>你转账时别人看不到中间状态</span></div></div>
+                <div class="vs-card vs-e"><div class="vs-title">D — 持久性 Durability</div><div class="vs-item"><span>含义</span><span>提交后永久保存</span></div><div class="vs-item"><span>类比</span><span>转账成功后断电也不丢失</span></div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「ACID」</strong> → 谐音「爱死的」→ 原子·一致·隔离·持久</div>
+        </div>
+    </section>
+
+    <!-- ══ S4: 数据库设计 ══ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04</div>
+            <h1>数据库设计</h1>
+            <p>六步骤 · E-R图 · 联系类型 · 考点密度 ★★★☆</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🏗️</span>4.1 数据库设计六步骤</div>
+            <div class="analogy"><strong>类比：盖房子</strong> — 业主说需求→画户型图→详细施工图→选材料→开工→物业管理</div>
+            <div class="flow" style="flex-direction:column;align-items:flex-start;gap:6px">
+                <div style="display:flex;align-items:center;gap:8px"><div class="flow-step" style="min-width:100px;border-color:var(--accent);color:var(--accent)">① 需求分析</div><span style="font-size:.8rem;color:var(--text2)">调研需求，定义数据与处理需求（最重要的基础）</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div class="flow-step" style="min-width:100px;border-color:var(--gold);color:var(--gold)">② 概念设计</div><span style="font-size:.8rem;color:var(--text2)">画E-R图，独立于具体DBMS的概念模型</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div class="flow-step" style="min-width:100px;border-color:var(--green);color:var(--green)">③ 逻辑设计</div><span style="font-size:.8rem;color:var(--text2)">E-R图→关系模式，转成表结构</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div class="flow-step" style="min-width:100px;border-color:var(--purple);color:var(--purple)">④ 物理设计</div><span style="font-size:.8rem;color:var(--text2)">选索引、分区、存储结构等</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div class="flow-step" style="min-width:100px;border-color:var(--pink);color:var(--pink)">⑤ 实施</div><span style="font-size:.8rem;color:var(--text2)">建表、导入数据、编写程序</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div class="flow-step" style="min-width:100px;">⑥ 运维</div><span style="font-size:.8rem;color:var(--text2)">监控、优化、备份恢复</span></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「需概逻物实运」</strong> → 谐音「需高楼物实运」</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🗺️</span>4.2 E-R图三要素 & 联系类型</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">实体</div><div class="vs-item"><span>图形</span><span class="badge-acc">矩形 □</span></div><div class="vs-item"><span>例子</span><span>学生、课程</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">属性</div><div class="vs-item"><span>图形</span><span class="badge-green">椭圆 ○</span></div><div class="vs-item"><span>例子</span><span>姓名、学号</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">联系</div><div class="vs-item"><span>图形</span><span class="badge-purple">菱形 ◇</span></div><div class="vs-item"><span>例子</span><span>选课</span></div></div>
+            </div>
+            <div class="sub-title">联系类型（1:1 · 1:N · M:N）</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>类型</th><th>含义</th><th>例子</th><th>转为关系模式</th></tr>
+                    <tr><td class="badge-acc">1:1（一对一）</td><td>双方各只对应一个</td><td>人—身份证</td><td>合并或任一方加外键</td></tr>
+                    <tr><td class="badge-gold">1:N（一对多）</td><td>一方对应多个</td><td>班级—学生</td><td>N方加外键</td></tr>
+                    <tr><td class="badge-red">M:N（多对多）</td><td>双方各对应多个</td><td>学生—课程</td><td class="badge-red">需要中间表（如选课表）</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 多对多关系需要中间表！E-R图需要转换成关系模式，不是直接对应数据库表！</div>
+        </div>
+    </section>
+
+    <!-- ══ S5: 优化 & 分布式 ══ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05</div>
+            <h1>数据库优化 & 分布式数据库</h1>
+            <p>反规范化5技术 · 分布式透明性 · 四大特点 · 考点密度 ★★★★</p>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>🔧</span>5.1 反规范化设计（集中式优化） <span class="tag tag-key">★高频</span></div>
+            <div class="analogy"><strong>类比：空间换时间</strong> — 在衣柜里给每件衣服贴标签（冗余），虽然费地方，但找起来更快</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>技术</th><th>含义</th><th>例子</th><th>分割方向</th></tr>
+                    <tr><td class="badge-acc">增加冗余列</td><td>重复存储其他表的数据</td><td>订单表存客户姓名</td><td>—</td></tr>
+                    <tr><td class="badge-gold">增加派生列</td><td>存储计算结果</td><td>订单表存总价=单价×数量</td><td>—</td></tr>
+                    <tr><td class="badge-acc">重新组表</td><td>常查询的两表合并</td><td>学生+班级→学生班级表</td><td>—</td></tr>
+                    <tr><td class="badge-red">水平分割</td><td class="badge-red">按行（记录）分割</td><td>按时间分表：订单2023、2024</td><td class="badge-red">行</td></tr>
+                    <tr><td class="badge-purple">垂直分割</td><td class="badge-purple">按列（字段）分割</td><td>常用字段和不常用字段分开</td><td class="badge-purple">列</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「冗派组水垂」</strong> → 谐音「容派组水吹」</div>
+            <div class="alert alert-red">⚠️ 水平分割=<strong>按行</strong>（记录）分割，垂直分割=<strong>按列</strong>（字段）分割，别搞混！</div>
+            <div class="sub-title">避免不一致的方法</div>
+            <div class="flow">
+                <div class="flow-step">触发器（自动同步）</div><div class="flow-arrow">+</div>
+                <div class="flow-step">事务机制</div><div class="flow-arrow">+</div>
+                <div class="flow-step">应用保证</div><div class="flow-arrow">+</div>
+                <div class="flow-step">批处理脚本（定期同步）</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🌐</span>5.2 分布式数据库四大特点 & 透明性</div>
+            <div class="analogy"><strong>类比：银行系统</strong> — 任何网点都能查你账户（共享）· 各网点独立运营（自治）· 一个停电不影响其他（可用）· 数据存各地服务器（分布）</div>
+            <div class="kp-grid" style="grid-template-columns:repeat(4,1fr)">
+                <div class="kp-item"><div class="kp-title">共享性</div><div class="kp-body">各节点数据可共享</div></div>
+                <div class="kp-item"><div class="kp-title">自治性</div><div class="kp-body">各节点独立管理</div></div>
+                <div class="kp-item"><div class="kp-title">可用性</div><div class="kp-body">一个节点故障不影响全局</div></div>
+                <div class="kp-item"><div class="kp-title">分布性</div><div class="kp-body">数据分散存储</div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「共自可分」</strong> → 谐音「公子可分」</div>
+            <div class="sub-title">分布透明性三级（由高到低）<span class="tag tag-hot">★★必考</span></div>
+            <div class="layer-stack">
+                <div class="layer-row" style="border-color:#059669;background:rgba(5,150,105,.03)">
+                    <div class="layer-num" style="color:var(--green)">高</div>
+                    <div class="layer-name" style="color:var(--green)">分片透明性</div>
+                    <div class="layer-desc">用户<strong>完全不知道</strong>数据是否分片 → 直接查"学生表"</div>
+                </div>
+                <div class="layer-row" style="border-color:#d97706">
+                    <div class="layer-num" style="color:var(--gold)">中</div>
+                    <div class="layer-name" style="color:var(--gold)">位置透明性</div>
+                    <div class="layer-desc">知道分片情况，但<strong>不知道在哪台服务器</strong> → 知道有北京片、上海片</div>
+                </div>
+                <div class="layer-row" style="border-color:#dc2626">
+                    <div class="layer-num" style="color:var(--red)">低</div>
+                    <div class="layer-name" style="color:var(--red)">局部数据模型透明性</div>
+                    <div class="layer-desc">知道分片和位置，但<strong>不知道用什么数据库</strong> → 知道IP，不知道MySQL还是Oracle</div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「分位局」</strong> → 透明度从高到低：分片 > 位置 > 局部</div>
+            <div class="alert alert-red">⚠️ 分片透明性是<strong>最高</strong>级（用户最无感）！局部透明性是最低级！别搞反！</div>
+            <div class="sub-title">分布式数据库四大优化技术</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>技术</th><th>原理</th><th>适用场景</th></tr>
+                    <tr><td class="badge-red">主从复制</td><td>主库写入后自动复制到从库</td><td>防止单点故障</td></tr>
+                    <tr><td class="badge-acc">读写分离</td><td>写→主库，读→从库</td><td>读多写少</td></tr>
+                    <tr><td class="badge-gold">分表</td><td>一张大表拆成多张小表</td><td>单表数据过大</td></tr>
+                    <tr><td class="badge-purple">分库</td><td>不同业务用不同数据库</td><td>业务模块隔离</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ 主从复制：主库写、从库读（不是反过来！）</div>
+        </div>
+    </section>
+
+    <!-- ══ S6: Redis ══ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>NoSQL & Redis缓存</h1>
+            <p>五大数据类型 · 持久化RDB/AOF · 三大缓存异常 · 考点密度 ★★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🗃️</span>6.1 NoSQL四大类型</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(4,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">键值对</div><div class="vs-item"><span>代表</span><span class="badge-red">Redis</span></div><div class="vs-item"><span>类比</span><span>字典</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">列式存储</div><div class="vs-item"><span>代表</span><span class="badge-green">HBase</span></div><div class="vs-item"><span>类比</span><span>按列存</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">文档型</div><div class="vs-item"><span>代表</span><span class="badge-purple">MongoDB</span></div><div class="vs-item"><span>类比</span><span>JSON文档</span></div></div>
+                <div class="vs-card vs-e"><div class="vs-title">图数据库</div><div class="vs-item"><span>代表</span><span class="badge-gold">Neo4j</span></div><div class="vs-item"><span>类比</span><span>关系网络</span></div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「键列文图」</strong> → 谐音「见了文图」</div>
+            <div class="alert alert-info">💡 NoSQL特点：易扩展·高性能·灵活数据模型·高可用，但<strong>不保证强一致性</strong>（最终一致性）</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🔴</span>6.2 Redis五大数据类型 <span class="tag tag-hot">★★案例常考</span></div>
+            <div class="analogy"><strong>Redis = 超快的便利贴</strong> — 基于内存存储（比硬盘快100倍），键值对格式，用于缓存热点数据</div>
+            <div class="redis-grid" id="redis-cards">
+                <div class="redis-card" onclick="showRedis('str')"><div class="redis-name">String</div><div class="redis-key">字符串 · 计数器</div></div>
+                <div class="redis-card" onclick="showRedis('hash')"><div class="redis-name">Hash</div><div class="redis-key">哈希表 · 用户信息</div></div>
+                <div class="redis-card" onclick="showRedis('list')"><div class="redis-name">List</div><div class="redis-key">列表 · 消息队列</div></div>
+                <div class="redis-card" onclick="showRedis('set')"><div class="redis-name">Set</div><div class="redis-key">无序集合 · 去重</div></div>
+                <div class="redis-card" onclick="showRedis('zset')" style="border-color:rgba(220,38,38,.2)"><div class="redis-name" style="color:var(--red)">Zset</div><div class="redis-key" style="color:var(--red)">有序集合 · 排行榜</div></div>
+            </div>
+            <div id="redis-detail" class="redis-detail"></div>
+            <div class="tbl-wrap" style="margin-top:12px">
+                <table>
+                    <tr><th>类型</th><th>特点</th><th>典型应用</th><th>关键操作</th></tr>
+                    <tr><td class="badge-acc">String</td><td>最基础，任意二进制</td><td>计数器、缓存</td><td><code>GET SET INCR</code></td></tr>
+                    <tr><td class="badge-gold">Hash</td><td>键值对集合</td><td>用户信息</td><td><code>HSET HGET HGETALL</code></td></tr>
+                    <tr><td class="badge-green">List</td><td>双向链表</td><td>消息队列、评论</td><td><code>LPUSH RPUSH LPOP</code></td></tr>
+                    <tr><td class="badge-purple">Set</td><td>无序不重复</td><td>标签、去重、共同好友</td><td><code>SADD SINTER SUNION</code></td></tr>
+                    <tr><td class="badge-red">Zset</td><td>有序集合（带分数）</td><td class="badge-red">排行榜</td><td><code>ZADD ZRANGE</code></td></tr>
+                </table>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「弦哈利赛哲」</strong> → String·Hash·List·Set·Zset</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>💾</span>6.3 Redis持久化：RDB vs AOF</div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">RDB（快照）</div>
+                    <div class="vs-item"><span>原理</span><span>定期拍快照到硬盘</span></div>
+                    <div class="vs-item"><span>文件大小</span><span class="badge-green">小</span></div>
+                    <div class="vs-item"><span>恢复速度</span><span class="badge-green">快</span></div>
+                    <div class="vs-item"><span>数据安全</span><span class="badge-red">低（可能丢几分钟）</span></div>
+                    <div class="vs-item"><span>类比</span><span>定期备份手机到电脑</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">AOF（日志）</div>
+                    <div class="vs-item"><span>原理</span><span>记录每条写命令</span></div>
+                    <div class="vs-item"><span>文件大小</span><span class="badge-red">大</span></div>
+                    <div class="vs-item"><span>恢复速度</span><span class="badge-red">慢</span></div>
+                    <div class="vs-item"><span>数据安全</span><span class="badge-green">高（最多丢1秒）</span></div>
+                    <div class="vs-item"><span>类比</span><span>记账本记录每一笔交易</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ AOF比RDB<strong>更安全</strong>（丢失数据少）· RDB比AOF<strong>恢复更快</strong>（直接加载快照）</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>⚠️</span>6.4 三大缓存异常问题 <span class="tag tag-hot">★★高频</span></div>
+            <div class="cache-grid">
+                <div class="cache-card" style="border-color:rgba(2,132,199,.3)">
+                    <div class="cache-title" style="color:var(--accent)">🔍 缓存穿透</div>
+                    <div class="cache-body">
+                        <strong>原因：</strong>大量请求查询<strong>不存在</strong>的key<br>
+                        <strong>场景：</strong>恶意攻击，查询ID=-1的用户<br>
+                        <strong>后果：</strong>请求直接打到数据库<br>
+                        <strong>解决：</strong>布隆过滤器 · 缓存空值 · 参数校验
+                    </div>
+                </div>
+                <div class="cache-card" style="border-color:rgba(217,119,6,.3)">
+                    <div class="cache-title" style="color:var(--gold)">❄️ 缓存雪崩</div>
+                    <div class="cache-body">
+                        <strong>原因：</strong><strong>大量key同时过期</strong><br>
+                        <strong>场景：</strong>凌晨0点10万个key同时失效<br>
+                        <strong>后果：</strong>数据库被请求淹没崩溃<br>
+                        <strong>解决：</strong>过期时间加随机值 · 主从集群 · 服务降级
+                    </div>
+                </div>
+                <div class="cache-card" style="border-color:rgba(220,38,38,.3)">
+                    <div class="cache-title" style="color:var(--red)">💥 缓存击穿</div>
+                    <div class="cache-body">
+                        <strong>原因：</strong>单个<strong>热点key</strong>过期<br>
+                        <strong>场景：</strong>热门商品key过期，瞬间1万请求<br>
+                        <strong>后果：</strong>数据库被单个热点压垮<br>
+                        <strong>解决：</strong>热点key永不过期 · 分布式锁
+                    </div>
+                </div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div>
+                <strong>「穿雪穿」</strong> → 穿透·雪崩·击穿<br>
+                <strong>穿透=key不存在</strong> · <strong>雪崩=大量key过期</strong> · <strong>击穿=热点key过期</strong>
+            </div>
+            <div class="sub-title">Redis集群三种模式</div>
+            <div class="vs-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="vs-card vs-b"><div class="vs-title">主从复制集群</div><div class="vs-item"><span>结构</span><span>1主+多从</span></div><div class="vs-item"><span>作用</span><span>读写分离</span></div></div>
+                <div class="vs-card vs-c"><div class="vs-title">哨兵集群 Sentinel</div><div class="vs-item"><span>功能</span><span>监控健康</span></div><div class="vs-item"><span>特点</span><span>主库挂了自动选新主</span></div></div>
+                <div class="vs-card vs-d"><div class="vs-title">Cluster集群</div><div class="vs-item"><span>功能</span><span>数据分片存储</span></div><div class="vs-item"><span>特点</span><span>每节点负责一部分数据</span></div></div>
+            </div>
+            <div class="mnemonic"><div class="label">🧠 速记口诀</div><strong>「主哨克」</strong> → 主从 · 哨兵 · Cluster</div>
+        </div>
+    </section>
+
+    <!-- ══ QUIZ ══ -->
+    <section id="quiz" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">PRACTICE</div>
+            <h1>36道练习题</h1>
+            <p>点击选项即时判断 · 点击「查看解析」获取详细讲解</p>
+        </div>
+        <div style="font-size:.85rem;color:var(--text2);margin-bottom:12px">已答：<span id="answered">0</span> 题 &nbsp;·&nbsp; 正确：<span id="correct-count">0</span> 题 &nbsp;·&nbsp; 正确率：<span id="accuracy">—</span></div>
+        <div class="quiz-filter">
+            <button class="filter-btn active" onclick="filterQuiz('all',this)">全部 (36)</button>
+            <button class="filter-btn" onclick="filterQuiz(0,this)">数据库基础 (1-10)</button>
+            <button class="filter-btn" onclick="filterQuiz(1,this)">关系数据库 (11-20)</button>
+            <button class="filter-btn" onclick="filterQuiz(2,this)">设计与优化 (21-30)</button>
+            <button class="filter-btn" onclick="filterQuiz(3,this)">分布式&Redis (31-36)</button>
+        </div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══ FLASH ══ -->
+    <section id="flashcard" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">FLASH CARDS</div>
+            <h1>⚡ 速记卡 — 考前必背</h1>
+            <p>悬停查看详情 · 覆盖本章全部核心考点</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+    </section>
+
+</main>
+<script>
+    function showSection(id,btn){
+        document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');btn.classList.add('active');
+    }
+    function toggleNorm(id){
+        const el=document.getElementById(id);
+        el.style.display=el.style.display==='block'?'none':'block';
+    }
+    const redisDetails={
+        str:'<strong>String（字符串）</strong><br>最基础的数据类型，可以存储任意二进制数据<br>典型应用：<span style="color:var(--red)">计数器（视频播放量、点赞数）</span>、缓存<br>关键操作：<code>SET key value</code> · <code>GET key</code> · <code>INCR key</code>（自增）<br>类比：计数器，每次播放视频就+1',
+        hash:'<strong>Hash（哈希表）</strong><br>键值对的集合，适合存储对象<br>典型应用：<span style="color:var(--gold)">用户信息</span>（name, age, city 等字段）<br>关键操作：<code>HSET key field value</code> · <code>HGET key field</code> · <code>HGETALL key</code><br>类比：用户信息卡片，一个key对应一张卡片',
+        list:'<strong>List（列表）</strong><br>双向链表，有序，可重复<br>典型应用：<span style="color:var(--green)">消息队列</span>、评论列表、最新动态<br>关键操作：<code>LPUSH</code>（左插）· <code>RPUSH</code>（右插）· <code>LPOP</code>（左弹出）<br>类比：排队系统，先进先出（FIFO）',
+        set:'<strong>Set（无序集合）</strong><br>无序、不重复的集合<br>典型应用：<span style="color:var(--purple)">标签系统</span>、去重、共同好友（交集）<br>关键操作：<code>SADD key member</code> · <code>SINTER</code>（交集）· <code>SUNION</code>（并集）<br>类比：标签系统，每个标签不重复',
+        zset:'<strong>Zset（有序集合）</strong><br>每个元素都有一个分数（score），按分数排序<br>典型应用：<span style="color:var(--red)">排行榜</span>（热搜、游戏排名）<br>关键操作：<code>ZADD key score member</code> · <code>ZRANGE key start stop</code><br>类比：热搜榜，每个话题有热度值，按热度排序'
+    };
+    function showRedis(key){
+        const det=document.getElementById('redis-detail');
+        document.querySelectorAll('.redis-card').forEach(c=>c.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        det.style.display='block';det.innerHTML=redisDetails[key];
+    }
+    // QUIZ
+    const quizData=[
+        {cat:0,q:'数据库系统与文件系统的区别不包括（）',opts:['对应用程序的高度独立性','数据的充分共享性','文件组织形式的多样化','操作方便性'],ans:2,exp:'文件组织形式多样化是文件系统的特点，不是数据库系统的优势。数据库系统的优势是：独立性、共享性、操作方便性。'},
+        {cat:0,q:'数据库管理系统的主要功能不包括（）',opts:['数据定义','数据库操作','程序编译','数据库运行管理'],ans:2,exp:'DBMS五大功能：数据定义·数据操作·运行管理·数据组织存储·建立维护。程序编译不是DBMS的功能。'},
+        {cat:0,q:'数据库三级模式中，描述数据物理存储的是（）',opts:['外模式','概念模式','内模式','逻辑模式'],ans:2,exp:'内模式描述数据的物理存储方式；外模式是用户视图；概念模式是全局逻辑结构。'},
+        {cat:0,q:'保证数据库逻辑独立性的是（）',opts:['外模式/概念模式映像','概念模式/内模式映像','外模式/内模式映像','三级模式'],ans:0,exp:'外模式/概念模式映像→保证逻辑独立性；概念模式/内模式映像→保证物理独立性。'},
+        {cat:0,q:'数据模型三要素不包括（）',opts:['数据结构','数据操作','数据约束','数据存储'],ans:3,exp:'数据模型三要素口诀「结操约」——数据结构·数据操作·数据约束条件。「数据存储」不在其中。'},
+        {cat:0,q:'实体完整性要求（）',opts:['主键可以为空','主键不能为空','外键不能为空','所有属性不能为空'],ans:1,exp:'实体完整性：主属性（主键）绝对不能取空值。外键可以为空，但有值时必须存在于参照表。'},
+        {cat:0,q:'参照完整性是指（）',opts:['主键的完整性','外键的完整性','属性的完整性','元组的完整性'],ans:1,exp:'参照完整性主要指外键参照的完整性，外键要么为空，要么必须在参照表中存在。'},
+        {cat:0,q:'数据库发展的三个阶段依次是（）',opts:['文件系统、人工管理、数据库系统','人工管理、数据库系统、文件系统','人工管理、文件系统、数据库系统','数据库系统、文件系统、人工管理'],ans:2,exp:'发展顺序：人工管理→文件系统→数据库系统（记忆：「人文数」）'},
+        {cat:0,q:'文件系统阶段的主要缺点不包括（）',opts:['数据冗余','数据不一致','数据孤立','数据不能长期保存'],ans:3,exp:'文件系统的特点是数据可以长期保存（比人工管理阶段进步），缺点是数据冗余、不一致、孤立。'},
+        {cat:0,q:'用户定义完整性是指（）',opts:['主键约束','外键约束','业务规则约束','非空约束'],ans:2,exp:'用户定义完整性反映具体应用的业务规则，如"成绩0-100分"、"年龄18-65"等。'},
+        // 关系数据库
+        {cat:1,q:'在关系数据库中，能唯一标识一个元组的属性或属性组称为（）',opts:['外码','主码','候选码','全码'],ans:2,exp:'候选码是能唯一标识元组的属性或属性组（可以有多个）；主码是从候选码中选定的一个（只能有一个）。'},
+        {cat:1,q:'关系代数中，选择运算的作用是（）',opts:['选择列','选择行','连接表','投影列'],ans:1,exp:'选择（σ）：选行（筛选记录）；投影（π）：选列（筛选字段）。别搞混！'},
+        {cat:1,q:'关系R有m个元组n个属性，S有p个元组q个属性，R×S结果有（）',opts:['m+p个元组，n+q个属性','m×p个元组，n×q个属性','m×p个元组，n+q个属性','m+p个元组，n×q个属性'],ans:2,exp:'笛卡尔积：元组数相乘（m×p），属性数相加（n+q）。记住：元组×，属性+。'},
+        {cat:1,q:'若关系模式R的每个分量都是不可再分的数据项，则R属于（）',opts:['1NF','2NF','3NF','BCNF'],ans:0,exp:'1NF（第一范式）要求属性不可再分（原子性）。这是最基本的范式要求。'},
+        {cat:1,q:'消除了非主属性对主码的部分函数依赖的范式是（）',opts:['1NF','2NF','3NF','BCNF'],ans:1,exp:'2NF要求非主属性完全依赖主码，消除部分依赖。记忆：2NF消部分依赖。'},
+        {cat:1,q:'消除了非主属性对主码的传递函数依赖的范式是（）',opts:['1NF','2NF','3NF','BCNF'],ans:2,exp:'3NF要求非主属性不传递依赖主码。记忆：3NF消传递依赖。'},
+        {cat:1,q:'事务的ACID特性中，A代表（）',opts:['原子性','一致性','隔离性','持久性'],ans:0,exp:'ACID：A=Atomicity（原子性）·C=Consistency（一致性）·I=Isolation（隔离性）·D=Durability（持久性）'},
+        {cat:1,q:'事务的持久性是指（）',opts:['事务要么全做要么全不做','事务执行前后数据一致','事务之间互不影响','事务一旦提交，结果永久保存'],ans:3,exp:'持久性（Durability）：事务提交后，对数据库的改变是永久的，即使系统崩溃也不会丢失。'},
+        {cat:1,q:'关系模式R(A,B,C)，函数依赖A→B，B→C，则C对A是（）',opts:['完全函数依赖','部分函数依赖','传递函数依赖','直接函数依赖'],ans:2,exp:'A→B，B→C，所以C通过B传递依赖于A，这是传递函数依赖。'},
+        {cat:1,q:'左外连接的结果（）',opts:['只保留左表匹配的记录','保留左表所有记录','只保留右表匹配的记录','保留两表所有记录'],ans:1,exp:'左外连接保留左表所有记录，右表不匹配的字段用NULL填充。全外连接保留两表所有记录。'},
+        // 设计与优化
+        {cat:2,q:'数据库设计的第一步是（）',opts:['概念设计','逻辑设计','需求分析','物理设计'],ans:2,exp:'数据库设计六步骤口诀「需概逻物实运」，第一步是需求分析——调研数据与处理需求。'},
+        {cat:2,q:'E-R图中，实体用什么图形表示（）',opts:['矩形','椭圆','菱形','圆形'],ans:0,exp:'E-R图：实体（矩形□）·属性（椭圆○）·联系（菱形◇）。'},
+        {cat:2,q:'反规范化设计的主要目的是（）',opts:['减少数据冗余','提高查询性能','保证数据一致性','简化数据结构'],ans:1,exp:'反规范化通过增加冗余来提高查询性能（空间换时间）。代价是可能导致数据不一致。'},
+        {cat:2,q:'水平分割表是指（）',opts:['按列分割','按行分割','按主键分割','按外键分割'],ans:1,exp:'水平分割=按行（记录）分割，如按时间分表；垂直分割=按列（字段）分割。'},
+        {cat:2,q:'垂直分割表的主要作用是（）',opts:['减少数据量','减少I/O次数','提高并发性','简化查询'],ans:1,exp:'垂直分割将常用字段和不常用字段分开，查询常用字段时减少I/O次数（不用读取不常用字段）。'},
+        {cat:2,q:'增加派生列属于（）',opts:['规范化设计','反规范化设计','物理设计','概念设计'],ans:1,exp:'派生列（如总价=单价×数量，预先计算存储）是反规范化设计，用于减少实时计算量提高查询速度。'},
+        {cat:2,q:'分布式数据库的读写分离是指（）',opts:['主库负责读，从库负责写','主库负责写，从库负责读','主从库都可读写','主从库都只读'],ans:1,exp:'读写分离：主库（Master）处理写操作，从库（Slave）处理读操作，提高并发性能。'},
+        {cat:2,q:'分库的主要目的是（）',opts:['减少数据量','提高查询速度','差异化管理不同业务','备份数据'],ans:2,exp:'分库将不同业务模块的数据分开存储，便于差异化管理、独立扩展和业务隔离。'},
+        {cat:2,q:'NoSQL数据库的特点不包括（）',opts:['易扩展','高性能','强一致性','灵活的数据模型'],ans:2,exp:'NoSQL特点：易扩展·高性能·灵活数据模型·高可用。但NoSQL通常是最终一致性，不保证强一致性。'},
+        {cat:2,q:'Redis属于哪种NoSQL数据库（）',opts:['列式存储','键值对存储','文档型','图数据库'],ans:1,exp:'Redis是键值对（Key-Value）存储数据库，也可用作缓存。代表：Redis；列式：HBase；文档：MongoDB；图：Neo4j。'},
+        // 分布式&Redis
+        {cat:3,q:'分布式数据库的分片透明性是指（）',opts:['用户知道数据分片情况','用户不知道数据分片情况','用户知道数据存储位置','用户知道使用的数据库类型'],ans:1,exp:'分片透明性是最高级别的透明性，用户完全不需要知道数据是否分片，直接查全局表名即可。'},
+        {cat:3,q:'Redis的String类型最适合用于（）',opts:['存储用户信息','实现排行榜','计数器','消息队列'],ans:2,exp:'String类型适合做计数器（如浏览量、点赞数），支持INCR自增操作。Hash适合存储用户信息，Zset适合排行榜，List适合消息队列。'},
+        {cat:3,q:'Redis的Zset类型最适合用于（）',opts:['去重','排行榜','用户信息存储','消息队列'],ans:1,exp:'Zset（有序集合）每个元素有分数（score），按分数排序，适合实现排行榜（如热搜、游戏排名）。'},
+        {cat:3,q:'缓存穿透的主要原因是（）',opts:['大量key同时过期','热点key过期','查询不存在的key','Redis宕机'],ans:2,exp:'缓存穿透是指大量请求查询不存在的key，导致请求直接打到数据库。三大问题：穿透=key不存在，雪崩=批量过期，击穿=热点过期。'},
+        {cat:3,q:'Redis的AOF持久化方式的特点是（）',opts:['文件小、恢复快','文件大、恢复慢','定期快照','不记录写操作'],ans:1,exp:'AOF记录每条写命令，文件大、恢复慢，但数据更安全（最多丢1秒）。RDB是定期快照，文件小、恢复快，但可能丢失几分钟数据。'},
+        {cat:3,q:'水平分割表和垂直分割表的区别是（）',opts:['水平分割按列，垂直分割按行','水平分割按行，垂直分割按列','两者都按行分割','两者都按列分割'],ans:1,exp:'水平分割：按行（记录）分割，如按时间分表（2023、2024年订单）；垂直分割：按列（字段）分割，如常用字段和不常用字段分开。'},
+    ];
+    let answered=0,correct=0;
+    function renderQuiz(items){
+        const c=document.getElementById('quiz-container');c.innerHTML='';
+        items.forEach(item=>{
+            const gi=quizData.indexOf(item);
+            const d=document.createElement('div');d.className='quiz-q';
+            d.innerHTML=`<div class="quiz-num">第 ${gi+1} 题 / 共 36 题</div>
+    <div class="quiz-text">${item.q}</div>
+    <div class="quiz-options" id="opts-${gi}">
+      ${['A','B','C','D'].map((L,j)=>`<button class="opt-btn" data-q="${gi}" data-opt="${j}" onclick="handleOpt(${gi},${j})"><span class="opt-letter">${L}.</span><span>${item.opts[j]}</span></button>`).join('')}
+    </div>
+    <button class="reveal-btn" id="reveal-${gi}" onclick="revealAns(${gi})" style="display:none">💡 查看解析</button>
+    <div class="quiz-ans" id="ans-${gi}"><div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div><div class="ans-body">${item.exp}</div></div>`;
+            c.appendChild(d);
+        });
+    }
+    function handleOpt(qi,opt){
+        const item=quizData[qi];
+        const opts=document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed'))return;
+        opts.forEach((btn,j)=>{btn.classList.add('revealed');if(j===item.ans)btn.classList.add('correct');else if(j===opt)btn.classList.add('wrong');});
+        answered++;if(opt===item.ans)correct++;
+        document.getElementById('answered').textContent=answered;
+        document.getElementById('correct-count').textContent=correct;
+        document.getElementById('accuracy').textContent=Math.round(correct/answered*100)+'%';
+        document.getElementById(`reveal-${qi}`).style.display='inline-flex';
+    }
+    function revealAns(qi){document.getElementById(`ans-${qi}`).classList.toggle('show');}
+    function filterQuiz(cat,btn){
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        renderQuiz(cat==='all'?quizData:quizData.filter(q=>q.cat===cat));
+    }
+    renderQuiz(quizData);
+    // FLASH
+    const flashData=[
+        {n:'01',topic:'数据库发展三阶段',mnemonic:'人文数',detail:'人工→文件→数据库。文件系统有数据冗余！不是没有！'},
+        {n:'02',topic:'三级模式两级映像',mnemonic:'外概内',detail:'外/概映像→逻辑独立性 · 概/内映像→物理独立性'},
+        {n:'03',topic:'数据模型三要素',mnemonic:'结操约',detail:'数据结构·数据操作·数据约束（用户定义+实体+参照）'},
+        {n:'04',topic:'实体完整性',mnemonic:'主键不能为空',detail:'外键可以为空，但有值时必须存在于参照表！'},
+        {n:'05',topic:'关系数据库核心概念',mnemonic:'候选码可多个，主码只能一个',detail:'全码=所有属性都是候选码 · 外码引用其他表的码'},
+        {n:'06',topic:'关系代数',mnemonic:'选行·投列·笛积=元组×属性+',detail:'选投连除 · 别搞混选行和投列！'},
+        {n:'07',topic:'函数依赖三种',mnemonic:'完部传',detail:'完全依赖·部分依赖·传递依赖'},
+        {n:'08',topic:'四大范式',mnemonic:'一二三BC',detail:'1NF原子 · 2NF消部分依赖 · 3NF消传递依赖 · BCNF最严格'},
+        {n:'09',topic:'ACID事务',mnemonic:'爱死的(ACID)',detail:'原子Atomicity·一致Consistency·隔离Isolation·持久Durability'},
+        {n:'10',topic:'数据库设计六步骤',mnemonic:'需概逻物实运',detail:'需求分析→概念设计→逻辑设计→物理设计→实施→运维'},
+        {n:'11',topic:'E-R图三要素',mnemonic:'矩形=实体·椭圆=属性·菱形=联系',detail:'M:N关系需要中间表！E-R图需转换为关系模式！'},
+        {n:'12',topic:'反规范化5技术',mnemonic:'冗派组水垂',detail:'水平分割=按行 · 垂直分割=按列 · 别搞反！'},
+        {n:'13',topic:'分布式透明性',mnemonic:'分位局（高到低）',detail:'分片透明性最高！局部透明性最低！分片=用户最无感'},
+        {n:'14',topic:'分布式数据库特点',mnemonic:'共自可分',detail:'共享性·自治性·可用性·分布性'},
+        {n:'15',topic:'分布式优化四技术',mnemonic:'主读分分',detail:'主从复制·读写分离（主写从读！）·分表·分库'},
+        {n:'16',topic:'NoSQL四大类型',mnemonic:'键列文图',detail:'键值=Redis · 列式=HBase · 文档=MongoDB · 图=Neo4j'},
+        {n:'17',topic:'Redis五大数据类型',mnemonic:'弦哈利赛哲',detail:'String计数·Hash对象·List队列·Set去重·Zset排行榜'},
+        {n:'18',topic:'Redis持久化',mnemonic:'RDB快照小快，AOF日志大慢',detail:'AOF更安全，RDB恢复更快！'},
+        {n:'19',topic:'三大缓存异常',mnemonic:'穿雪穿（穿透·雪崩·击穿）',detail:'穿透=key不存在 · 雪崩=批量过期 · 击穿=热点key过期'},
+        {n:'20',topic:'Redis集群三模式',mnemonic:'主哨克',detail:'主从复制·哨兵Sentinel（自动故障转移）·Cluster分片'},
+    ];
+    (function renderFlash(){
+        const g=document.getElementById('flash-grid');
+        flashData.forEach(fc=>{
+            const d=document.createElement('div');d.className='flash-card';
+            d.innerHTML=`<div class="fc-num"># ${fc.n}</div><div class="fc-topic">${fc.topic}</div><div class="fc-mnemonic">「${fc.mnemonic}」</div><div class="fc-detail">${fc.detail}</div>`;
+            g.appendChild(d);
+        });
+    })();
+</script>
+</body>
+</html>

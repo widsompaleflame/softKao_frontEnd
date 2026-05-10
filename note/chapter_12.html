@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第十二章 · 软件架构演化与维护 | 系统架构师通关宝典</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfbf7;
+            --bg2: #f4efe6;
+            --card: #ffffff;
+            --card2: #f9f7f2;
+            --border: #e8e2d5;
+            --border2: #d4cbb8;
+            --text: #2c2825;
+            --text2: #5e574f;
+            --text3: #8f877c;
+            --accent: #0284c7;
+            --accent2: #0369a1;
+            --gold: #d97706;
+            --gold2: #b45309;
+            --green: #059669;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --pink: #db2777;
+            --teal: #0d9488;
+            --nav-h: 56px;
+            --radius: 10px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;font-size:15px}
+        body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden;}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:var(--bg)}
+        ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+        /* ── TOP NAV ── */
+        #topnav{
+            position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+            background:rgba(253,251,247,.93);backdrop-filter:blur(14px);
+            border-bottom:1px solid var(--border);z-index:1000;
+            display:flex;align-items:center;padding:0 16px;gap:2px;
+            overflow-x:auto;white-space:nowrap;
+        }
+        #topnav::-webkit-scrollbar{height:2px}
+        .nav-brand{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-right:12px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+        .nav-btn{
+            display:inline-flex;align-items:center;gap:5px;
+            padding:5px 12px;border-radius:6px;border:1px solid transparent;
+            background:transparent;color:var(--text2);font-family:inherit;
+            font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;
+            white-space:nowrap;flex-shrink:0;
+        }
+        .nav-btn:hover{background:var(--card);color:var(--text);border-color:var(--border)}
+        .nav-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent)}
+
+        /* ── MAIN ── */
+        main{padding-top:calc(var(--nav-h) + 24px);padding-bottom:64px;max-width:960px;margin:0 auto;padding-left:20px;padding-right:20px}
+        .page-section{display:none;animation:fadeUp .35s ease}
+        .page-section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── HERO ── */
+        .section-hero{
+            text-align:center;padding:40px 20px 32px;
+            background:linear-gradient(135deg,var(--bg2) 0%,var(--card) 100%);
+            border:1px solid var(--border);border-radius:14px;margin-bottom:28px;
+            position:relative;overflow:hidden;
+        }
+        .section-hero::before{
+            content:'';position:absolute;inset:0;
+            background:radial-gradient(ellipse at 50% 0%,rgba(2,132,199,.07) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .section-hero h1{font-size:1.6rem;font-weight:900;color:var(--text);margin-bottom:8px}
+        .section-hero p{color:var(--text2);font-size:.9rem;max-width:520px;margin:0 auto}
+        .section-tag{
+            display:inline-block;padding:3px 10px;
+            background:rgba(2,132,199,.12);border:1px solid rgba(2,132,199,.25);
+            color:var(--accent);border-radius:20px;font-size:.72rem;font-weight:600;
+            letter-spacing:.06em;margin-bottom:12px;
+        }
+
+        /* ── CARD ── */
+        .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+        .card:hover{border-color:var(--border2)}
+        .card-title{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .card-title .icon{font-size:1.1rem}
+
+        /* ── ANALOGY ── */
+        .analogy{background:rgba(217,119,6,.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--gold2);}
+        .analogy strong{color:var(--gold)}
+
+        /* ── MNEMONIC ── */
+        .mnemonic{background:rgba(124,58,237,.07);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:.88rem;color:var(--purple);}
+        .mnemonic .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--purple);margin-bottom:4px}
+
+        /* ── FORMULA BOX ── */
+        .formula-box{
+            background:#f0f6fa;border:1px solid rgba(2,132,199,.2);border-radius:8px;
+            padding:14px 16px;font-family:'JetBrains Mono',monospace;
+            font-size:.82rem;color:var(--accent2);white-space:pre-wrap;overflow-x:auto;
+            margin:12px 0;line-height:1.8;
+        }
+
+        /* ── TABLES ── */
+        .tbl-wrap{overflow-x:auto;margin:12px 0}
+        table{width:100%;border-collapse:collapse;font-size:.83rem}
+        th{background:var(--card2);color:var(--accent);font-weight:600;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border2)}
+        td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+        tr:hover td{background:rgba(0,0,0,.02);color:var(--text)}
+        td:first-child,th:first-child{color:var(--text);font-weight:500}
+        .badge-green{color:var(--green);font-weight:600}
+        .badge-red{color:var(--red);font-weight:600}
+        .badge-gold{color:var(--gold);font-weight:600}
+        .badge-acc{color:var(--accent);font-weight:600}
+        .badge-purple{color:var(--purple);font-weight:600}
+        .badge-teal{color:var(--teal);font-weight:600}
+
+        /* ── KP GRID ── */
+        .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}
+        .kp-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-size:.82rem;}
+        .kp-item .kp-title{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:.8rem}
+        .kp-item .kp-body{color:var(--text2);line-height:1.5}
+
+        /* ── ALERT ── */
+        .alert{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:.85rem;margin:10px 0;border:1px solid;}
+        .alert-warn{background:rgba(217,119,6,.07);border-color:rgba(217,119,6,.25);color:var(--gold2)}
+        .alert-info{background:rgba(2,132,199,.07);border-color:rgba(2,132,199,.2);color:var(--accent2)}
+        .alert-red{background:rgba(220,38,38,.06);border-color:rgba(220,38,38,.22);color:var(--red)}
+        .alert-green{background:rgba(5,150,105,.06);border-color:rgba(5,150,105,.22);color:var(--green)}
+
+        /* ── SUB TITLE ── */
+        .sub-title{font-size:.95rem;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+        .sub-title::before{content:'';display:inline-block;width:3px;height:1em;background:var(--accent);border-radius:2px}
+
+        /* ── TAG ── */
+        .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+        .tag-hot{background:rgba(220,38,38,.12);color:var(--red);border:1px solid rgba(220,38,38,.22)}
+        .tag-key{background:rgba(2,132,199,.1);color:var(--accent);border:1px solid rgba(2,132,199,.2)}
+        .tag-gold{background:rgba(217,119,6,.1);color:var(--gold);border:1px solid rgba(217,119,6,.2)}
+        .tag-green{background:rgba(5,150,105,.1);color:var(--green);border:1px solid rgba(5,150,105,.2)}
+
+        /* ── VS GRID ── */
+        .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+        @media(max-width:480px){.vs-grid{grid-template-columns:1fr}}
+        .vs-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+        .vs-title{font-size:.82rem;font-weight:700;margin-bottom:10px;text-align:center;padding:4px;border-radius:4px}
+        .vs-a .vs-title{background:rgba(220,38,38,.1);color:var(--red)}
+        .vs-b .vs-title{background:rgba(2,132,199,.1);color:var(--accent)}
+        .vs-c .vs-title{background:rgba(5,150,105,.1);color:var(--green)}
+        .vs-d .vs-title{background:rgba(124,58,237,.1);color:var(--purple)}
+        .vs-item{display:flex;justify-content:space-between;font-size:.8rem;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+        .vs-item:last-child{border-bottom:none}
+        .vs-item .label{color:var(--text3);font-size:.75rem;flex-shrink:0;margin-right:8px}
+
+        /* ── FLOW ── */
+        .flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:10px 0;font-size:.82rem}
+        .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:4px 10px;color:var(--text)}
+        .flow-arrow{color:var(--text3);font-size:.9rem}
+
+        /* ── EVOLUTION TIMELINE ── */
+        .evo-timeline{display:flex;flex-direction:column;gap:6px;margin:14px 0}
+        .evo-row{
+            display:grid;grid-template-columns:36px 1fr 1fr;gap:10px;align-items:center;
+            padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);
+            font-size:.82rem;transition:border-color .15s;
+        }
+        .evo-row:hover{border-color:var(--border2)}
+        .evo-num{
+            font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.88rem;
+            width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+            background:var(--accent);color:#fff;flex-shrink:0;
+        }
+        .evo-stage{font-weight:700;color:var(--text)}
+        .evo-detail{color:var(--text2);font-size:.79rem}
+        .evo-analogy{color:var(--text3);font-size:.76rem;font-style:italic}
+
+        /* ── PRINCIPLES GRID ── */
+        .principles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:12px 0}
+        .principle-card{
+            background:var(--bg2);border:1px solid var(--border);border-radius:7px;
+            padding:10px 12px;font-size:.8rem;transition:border-color .15s;
+        }
+        .principle-card:hover{border-color:var(--border2)}
+        .pc-cat{font-size:.68rem;color:var(--text3);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+        .pc-name{font-weight:700;color:var(--text);margin-bottom:2px}
+        .pc-desc{color:var(--text2);font-size:.76rem;line-height:1.45}
+        .pc-mgt .pc-name{color:var(--accent)}
+        .pc-stb .pc-name{color:var(--gold2)}
+        .pc-str .pc-name{color:var(--purple)}
+        .pc-qlt .pc-name{color:var(--green)}
+        .pc-adp .pc-name{color:var(--teal)}
+
+        /* ── INLINE QUIZ ── */
+        .inline-quiz{background:rgba(2,132,199,.04);border:1px solid rgba(2,132,199,.18);border-radius:9px;padding:14px 16px;margin:14px 0}
+        .iq-label{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .iq-q{font-size:.88rem;font-weight:500;margin-bottom:10px;color:var(--text)}
+        .iq-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+        .iq-btn{
+            display:flex;gap:8px;align-items:flex-start;padding:7px 11px;border-radius:6px;
+            border:1px solid var(--border);background:var(--card);color:var(--text2);
+            font-family:inherit;font-size:.82rem;cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .iq-btn:hover:not(.revealed){border-color:var(--accent2);background:rgba(2,132,199,.06);color:var(--text)}
+        .iq-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .iq-btn.wrong{background:rgba(220,38,38,.07);border-color:var(--red);color:var(--red)}
+        .iq-btn.revealed{pointer-events:none}
+        .iq-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.1em}
+        .iq-ans{display:none;padding:10px 12px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.18);border-radius:6px;font-size:.82rem;color:var(--text2);margin-top:4px;animation:fadeUp .25s ease;}
+        .iq-ans.show{display:block}
+        .iq-ans-label{color:var(--green);font-weight:700;margin-bottom:2px}
+
+        /* ── QUIZ SECTION ── */
+        .quiz-q{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;transition:border-color .2s;}
+        .quiz-q:hover{border-color:var(--border2)}
+        .quiz-num{font-size:.72rem;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+        .quiz-text{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:12px;line-height:1.6}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        @media(max-width:480px){.quiz-options{grid-template-columns:1fr}}
+        .opt-btn{
+            display:flex;align-items:flex-start;gap:8px;padding:8px 11px;
+            border-radius:7px;border:1px solid var(--border);background:var(--bg2);
+            color:var(--text2);font-family:inherit;font-size:.83rem;
+            cursor:pointer;transition:all .18s;text-align:left;line-height:1.4;
+        }
+        .opt-btn:hover{border-color:var(--accent2);color:var(--text);background:rgba(2,132,199,.07)}
+        .opt-btn.correct{background:rgba(5,150,105,.1);border-color:var(--green);color:var(--green)}
+        .opt-btn.wrong{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red)}
+        .opt-btn.revealed{pointer-events:none}
+        .opt-letter{font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.1em}
+        .reveal-btn{
+            display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+            border-radius:6px;border:1px solid var(--border2);background:transparent;
+            color:var(--text2);font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .18s;
+        }
+        .reveal-btn:hover{background:var(--card2);color:var(--text)}
+        .quiz-ans{margin-top:10px;padding:12px 14px;background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.2);border-radius:7px;font-size:.84rem;display:none;animation:fadeUp .25s ease;}
+        .quiz-ans.show{display:block}
+        .ans-label{color:var(--green);font-weight:700;margin-bottom:4px}
+        .ans-body{color:var(--text2);line-height:1.6}
+        #quiz-score{font-size:.85rem;color:var(--text2);margin-bottom:16px}
+        #quiz-score span{color:var(--gold2);font-weight:700}
+
+        /* ── FLASH CARDS ── */
+        .flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:16px}
+        .flash-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:transform .2s,border-color .2s;}
+        .flash-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+        .fc-num{font-size:.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+        .fc-topic{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+        .fc-mnemonic{font-size:.88rem;color:var(--gold);font-weight:600;margin-bottom:4px}
+        .fc-detail{font-size:.8rem;color:var(--text2)}
+
+        /* ── SUMMARY TABLE ── */
+        .summary-table{border-radius:10px;overflow:hidden;border:1px solid var(--border);margin:16px 0}
+        .summary-row{display:flex;border-bottom:1px solid var(--border);font-size:.83rem;}
+        .summary-row:last-child{border-bottom:none}
+        .summary-row:hover{background:rgba(0,0,0,.015)}
+        .summary-k{padding:10px 14px;font-weight:700;color:var(--accent);min-width:130px;background:var(--card2);flex-shrink:0;display:flex;align-items:center}
+        .summary-v{padding:10px 14px;color:var(--text2);flex:1}
+    </style>
+</head>
+<body>
+
+<!-- ══ TOP NAV ══ -->
+<nav id="topnav">
+    <div class="nav-brand">🔄 第十二章</div>
+    <button class="nav-btn active" onclick="showSection('s1',this)">🌱 演化概述</button>
+    <button class="nav-btn" onclick="showSection('s2',this)">🔧 面向对象演化</button>
+    <button class="nav-btn" onclick="showSection('s3',this)">⚡ 演化方式分类</button>
+    <button class="nav-btn" onclick="showSection('s4',this)">📏 演化原则 ★</button>
+    <button class="nav-btn" onclick="showSection('s5',this)">🌐 网站演化实例</button>
+    <button class="nav-btn" onclick="showSection('s6',this)">🛠️ 架构维护</button>
+    <button class="nav-btn" onclick="showSection('s7',this)">✏️ 综合练习题</button>
+    <button class="nav-btn" onclick="showSection('s8',this)">⚡ 速记闪卡</button>
+</nav>
+
+<main>
+
+    <!-- ══════════ S1: 演化概述 ══════════ -->
+    <section id="s1" class="page-section active">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 01</div>
+            <h1>软件架构演化与定义的关系</h1>
+            <p>三大要素 · 增删改本质 · 演化目的 | 考试权重 ★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🌱</span>1.1 软件架构三大要素与演化本质 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>生活类比：装修房子</strong><br>
+                刚搬进去是毛坯（初始架构），随着家庭成员变化（需求变化），需要打隔断、加家具、改水电（演化），但又不能动承重墙（保持主体稳定）。软件架构演化就是对三大要素的持续优化过程。
+            </div>
+            <div class="formula-box">软件架构三大要素：
+                ① 组件（Component）   → 系统的功能单元
+                ② 连接件（Connector） → 组件间的交互机制
+                ③ 约束（Constraint）  → 组件与连接件的配置规则
+
+                演化的本质 = 对三大要素的 添加（A）· 修改（M）· 删除（D）
+                演化目的   = 适应环境变化 + 满足用户需求变化</div>
+            <div class="alert alert-warn">⚠️ 演化关注的是三大要素的"增删改"，不是"查"。演化不仅仅是修 Bug，更是主动适应变化！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「组连约，加改删」</strong><br>
+                谐音故事：祖父（组）练功（连）每月（约），家（加）里改（改）了三（删）次——祖父练功每月一次，家里改造三次
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">软件架构演化主要关注组件、连接件和约束的（　）</div>
+                <div class="iq-opts" id="iq-opts-0">
+                    <button class="iq-btn" data-iq="0" data-opt="0" onclick="handleIQ(0,0)"><span class="iq-letter">A.</span><span>添加</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="1" onclick="handleIQ(0,1)"><span class="iq-letter">B.</span><span>修改</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="2" onclick="handleIQ(0,2)"><span class="iq-letter">C.</span><span>删除</span></button>
+                    <button class="iq-btn" data-iq="0" data-opt="3" onclick="handleIQ(0,3)"><span class="iq-letter">D.</span><span>添加、修改和删除</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-0">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    演化是对三大要素（组件、连接件、约束）的全方位操作，包括添加、修改和删除三种操作，缺一不可。只选A、B或C都是不完整的。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S2: 面向对象演化 ══════════ -->
+    <section id="s2" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 02</div>
+            <h1>面向对象软件架构演化过程</h1>
+            <p>对象·消息·复合片段·约束 | 操作符辨析 ★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔧</span>2.1 四类演化操作概览 <span class="tag tag-key">理解</span></div>
+            <div class="analogy">
+                <strong>微信群类比</strong><br>
+                对象 = 群成员，消息 = 聊天记录，复合片段 = 话题分组（如"#公告"），约束 = 群规。对群的所有管理操作正好对应演化的四类。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>演化类型</th><th>操作符</th><th>含义</th><th>记忆提示</th></tr>
+                    <tr>
+                        <td class="badge-acc" rowspan="2">对象演化</td>
+                        <td><span style="font-family:monospace;font-weight:700">AO</span></td>
+                        <td>Add Object — 添加对象</td>
+                        <td>A=Add，O=Object</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">DO</span></td>
+                        <td>Delete Object — 删除对象</td>
+                        <td>D=Delete，O=Object</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold" rowspan="5">消息演化</td>
+                        <td><span style="font-family:monospace;font-weight:700">AM</span></td>
+                        <td>Add Message — 添加消息</td>
+                        <td>A=Add，M=Message</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">DM</span></td>
+                        <td>Delete Message — 删除消息</td>
+                        <td>D=Delete</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">SMO</span></td>
+                        <td>Swap Message Order — <strong>交换两条消息的时间顺序</strong></td>
+                        <td>S=Swap，Order顺序</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">OM</span></td>
+                        <td>Overturn Message — <strong>反转消息的发送方与接收方</strong></td>
+                        <td>O=Overturn 反转</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">CMM</span></td>
+                        <td>Change Message Module — <strong>改变消息的发送或接收对象</strong></td>
+                        <td>C=Change，Module=对象</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-purple" rowspan="4">复合片段演化</td>
+                        <td><span style="font-family:monospace;font-weight:700">AF</span></td>
+                        <td>Add Fragment — 添加复合片段</td>
+                        <td>F=Fragment</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">DF</span></td>
+                        <td>Delete Fragment — 删除复合片段</td>
+                        <td>D=Delete</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">FTC</span></td>
+                        <td>Fragment Type Change — <strong>改变复合片段类型</strong></td>
+                        <td>T=Type 类型</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">FCC</span></td>
+                        <td>Fragment Condition Change — <strong>改变复合片段条件</strong></td>
+                        <td>C=Condition 条件</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-green" rowspan="2">约束演化</td>
+                        <td><span style="font-family:monospace;font-weight:700">AC</span></td>
+                        <td>Add Constraint — 添加约束</td>
+                        <td>C=Constraint</td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family:monospace;font-weight:700">DC</span></td>
+                        <td>Delete Constraint — 删除约束</td>
+                        <td>D=Delete</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 极易混淆三兄弟：SMO（交换顺序）· OM（反转发送/接收方）· CMM（改变发送或接收对象）——方向不同，性质完全不同！</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「对消片约，各有增删」</strong><br>
+                消息5操作：AM加 · DM删 · SMO换序 · OM反转 · CMM改对象<br>
+                <strong>关键：OM=反转发接双方；CMM=换掉其中一方</strong>
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">在面向对象软件架构演化中，"反转消息的发送对象与接收对象"属于（　）操作</div>
+                <div class="iq-opts" id="iq-opts-1">
+                    <button class="iq-btn" data-iq="1" data-opt="0" onclick="handleIQ(1,0)"><span class="iq-letter">A.</span><span>SMO（交换消息顺序）</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="1" onclick="handleIQ(1,1)"><span class="iq-letter">B.</span><span>OM（反转发送与接收方）</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="2" onclick="handleIQ(1,2)"><span class="iq-letter">C.</span><span>CMM（改变发送或接收对象）</span></button>
+                    <button class="iq-btn" data-iq="1" data-opt="3" onclick="handleIQ(1,3)"><span class="iq-letter">D.</span><span>AM（添加消息）</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-1">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    OM = Overturn Message，即将发送方与接收方对调（A→B 变成 B→A）。SMO是交换两条消息的时间顺序（谁先谁后），CMM是把发送方或接收方换成另一个对象（A→B 变成 A→C）。三者方向不同！
+                </div>
+            </div>
+            <div class="inline-quiz" style="margin-top:10px">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">复合片段演化中，"改变复合片段类型"属于（　）操作</div>
+                <div class="iq-opts" id="iq-opts-2">
+                    <button class="iq-btn" data-iq="2" data-opt="0" onclick="handleIQ(2,0)"><span class="iq-letter">A.</span><span>AF（添加片段）</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="1" onclick="handleIQ(2,1)"><span class="iq-letter">B.</span><span>DF（删除片段）</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="2" onclick="handleIQ(2,2)"><span class="iq-letter">C.</span><span>FTC（改变类型）</span></button>
+                    <button class="iq-btn" data-iq="2" data-opt="3" onclick="handleIQ(2,3)"><span class="iq-letter">D.</span><span>FCC（改变条件）</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-2">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    FTC = Fragment Type Change，改变复合片段的类型（如把 alt 改成 opt）。FCC = Fragment Condition Change，改变复合片段的条件（如把 [x&gt;0] 改成 [x&gt;=0]），是改条件不是改类型。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S3: 演化方式分类 ══════════ -->
+    <section id="s3" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 03</div>
+            <h1>软件架构演化方式分类</h1>
+            <p>静态演化 · 动态演化 · 演化时期 | 考试权重 ★★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🕒</span>3.1 软件架构演化时期（4个）<span class="tag tag-hot">高频</span></div>
+            <div class="analogy">
+                <strong>建筑工程类比</strong><br>
+                设计时演化=图纸改设计；运行前演化=交房前改装修；有限制运行时演化=按消防规定改造；运行时演化=不停电改线路（最难最贵）。
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>演化时期</th><th>时间点</th><th>特点</th></tr>
+                    <tr><td class="badge-acc">① 设计时演化</td><td>代码编译<strong>之前</strong></td><td>成本最低，最灵活，推荐优先</td></tr>
+                    <tr><td class="badge-gold">② 运行前演化</td><td>编译之后、执行<strong>之前</strong></td><td>编译完成但未启动时修改</td></tr>
+                    <tr><td class="badge-purple">③ 有限制运行时演化</td><td>满足特定约束条件时</td><td>预设演化条件，安全可控</td></tr>
+                    <tr><td class="badge-red">④ 运行时演化</td><td>系统运行中无法满足要求时</td><td>代价最高，风险最大</td></tr>
+                </table>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「设运限运」→ 谐音"设运限运（是云海运）"</strong><br>
+                设计时→运行前→有限制运行时→运行时，按时间顺序递进，代价逐步升高
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">"发生在代码编译之后、系统执行之前"的演化时期是（　）</div>
+                <div class="iq-opts" id="iq-opts-3">
+                    <button class="iq-btn" data-iq="3" data-opt="0" onclick="handleIQ(3,0)"><span class="iq-letter">A.</span><span>设计时演化</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="1" onclick="handleIQ(3,1)"><span class="iq-letter">B.</span><span>运行前演化</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="2" onclick="handleIQ(3,2)"><span class="iq-letter">C.</span><span>有限制运行时演化</span></button>
+                    <button class="iq-btn" data-iq="3" data-opt="3" onclick="handleIQ(3,3)"><span class="iq-letter">D.</span><span>运行时演化</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-3">
+                    <div class="iq-ans-label">✅ 答案：B</div>
+                    运行前演化的时间点精确定义：编译完成之后、系统执行之前。设计时演化是编译前；有限制运行时是有条件约束的运行时演化；运行时演化是系统运行过程中的实时演化。
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🔄</span>3.2 静态演化 vs 动态演化 <span class="tag tag-hot">陷阱题</span></div>
+            <div class="vs-grid">
+                <div class="vs-card vs-b">
+                    <div class="vs-title">🏪 静态演化（停机改造）</div>
+                    <div class="vs-item"><span class="label">类比</span><span>商场<strong>闭店</strong>装修</span></div>
+                    <div class="vs-item"><span class="label">时机</span><span>系统停止运行时</span></div>
+                    <div class="vs-item"><span class="label">风险</span><span>较低，可充分测试</span></div>
+                    <div class="vs-item"><span class="label">代价</span><span>服务中断成本</span></div>
+                </div>
+                <div class="vs-card vs-a">
+                    <div class="vs-title">🏬 动态演化（不停机升级）</div>
+                    <div class="vs-item"><span class="label">类比</span><span>商场<strong>不打烊</strong>换装饰</span></div>
+                    <div class="vs-item"><span class="label">时机</span><span>系统持续运行中</span></div>
+                    <div class="vs-item"><span class="label">风险</span><span>较高，需精心设计</span></div>
+                    <div class="vs-item"><span class="label">代价</span><span>技术复杂度成本</span></div>
+                </div>
+            </div>
+
+            <div class="sub-title">静态演化过程（5步，必须按序）</div>
+            <div class="flow">
+                <div class="flow-step">① 软件理解</div><span class="flow-arrow">→</span>
+                <div class="flow-step">② 需求变更分析</div><span class="flow-arrow">→</span>
+                <div class="flow-step">③ 演化计划</div><span class="flow-arrow">→</span>
+                <div class="flow-step">④ 系统重构</div><span class="flow-arrow">→</span>
+                <div class="flow-step">⑤ 系统测试</div>
+            </div>
+
+            <div class="sub-title">动态演化的四类内容 <span class="tag tag-hot">格式/风格 陷阱！</span></div>
+            <div class="kp-grid" style="grid-template-columns:repeat(4,1fr)">
+                <div class="kp-item">
+                    <div class="kp-title">① 属性改名</div>
+                    <div class="kp-body">修改组件的属性名称</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">② 行为变化</div>
+                    <div class="kp-body">组件行为逻辑发生改变</div>
+                </div>
+                <div class="kp-item">
+                    <div class="kp-title">③ 拓扑结构改变</div>
+                    <div class="kp-body">组件间连接关系变化</div>
+                </div>
+                <div class="kp-item" style="border-color:var(--accent);background:rgba(2,132,199,.06)">
+                    <div class="kp-title" style="color:var(--red)">④ 风格变化 ★</div>
+                    <div class="kp-body" style="color:var(--red)">架构风格发生改变（≠格式变化！）</div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 历年真题陷阱："格式变化"不是动态演化的内容！正确答案是<strong>风格变化</strong>。选到"格式变化"就中招了！</div>
+
+            <div class="sub-title">DSA描述语言（3种）</div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>语言</th><th>视角</th><th>记忆</th></tr>
+                    <tr><td class="badge-acc">π-ADL</td><td>行为视角</td><td>π=行为（π计算）</td></tr>
+                    <tr><td class="badge-gold">Pilar</td><td>反射视角</td><td>Pilar=柱子（反射）</td></tr>
+                    <tr><td class="badge-purple">LIME</td><td>协调视角</td><td>LIME=酸橙（协调）</td></tr>
+                </table>
+            </div>
+
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">根据所修改的内容不同，软件的动态演化不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-4">
+                    <button class="iq-btn" data-iq="4" data-opt="0" onclick="handleIQ(4,0)"><span class="iq-letter">A.</span><span>属性改名</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="1" onclick="handleIQ(4,1)"><span class="iq-letter">B.</span><span>行为变化</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="2" onclick="handleIQ(4,2)"><span class="iq-letter">C.</span><span>拓扑结构改变</span></button>
+                    <button class="iq-btn" data-iq="4" data-opt="3" onclick="handleIQ(4,3)"><span class="iq-letter">D.</span><span>格式变化</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-4">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    动态演化的四类内容是：属性改名、行为变化、拓扑结构改变、<strong>风格变化</strong>。"格式变化"是干扰项，没有"格式变化"这个类别！这是历年真题的经典陷阱，务必牢记。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S4: 演化原则 ══════════ -->
+    <section id="s4" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 04 ★★★</div>
+            <h1>软件结构演化原则（18条）</h1>
+            <p>管控·稳定·结构·质量·适应 | 平滑 vs 主体维持 必考辨析！</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📏</span>4.1 18条原则速览表 <span class="tag tag-hot">必考</span></div>
+            <div class="analogy">
+                <strong>养孩子的18条铁律类比</strong><br>
+                管控类=控制零花钱和上网时间；稳定类=保持家庭核心价值观；结构类=优化家庭分工；质量类=培养好习惯；适应类=适应新环境、新学校。
+            </div>
+            <div class="principles-grid">
+                <div class="principle-card pc-mgt"><div class="pc-cat">管控类</div><div class="pc-name">演化成本控制</div><div class="pc-desc">演化的总代价在可接受范围内</div></div>
+                <div class="principle-card pc-mgt"><div class="pc-cat">管控类</div><div class="pc-name">进度可控</div><div class="pc-desc">演化进度在预定计划内</div></div>
+                <div class="principle-card pc-mgt"><div class="pc-cat">管控类</div><div class="pc-name">风险可控</div><div class="pc-desc">经济/时间/技术/环境风险可控</div></div>
+                <div class="principle-card pc-mgt"><div class="pc-cat">管控类</div><div class="pc-name">影响可控</div><div class="pc-desc">变更对其他模块影响可控</div></div>
+                <div class="principle-card pc-mgt"><div class="pc-cat">管控类</div><div class="pc-name">复杂性可控</div><div class="pc-desc">演化不增加不必要复杂性</div></div>
+                <div class="principle-card pc-stb" style="border-color:rgba(217,119,6,.35)"><div class="pc-cat">稳定类</div><div class="pc-name">主体维持 ★</div><div class="pc-desc"><strong>平均增量稳定</strong>，主体行为稳定</div></div>
+                <div class="principle-card pc-stb" style="border-color:rgba(217,119,6,.35)"><div class="pc-cat">稳定类</div><div class="pc-name">平滑演化 ★</div><div class="pc-desc"><strong>演化速率稳定</strong>，版本更新率稳定</div></div>
+                <div class="principle-card pc-stb" style="border-color:rgba(217,119,6,.35)"><div class="pc-cat">稳定类</div><div class="pc-name">目标一致</div><div class="pc-desc">阶段目标与最终目标一致</div></div>
+                <div class="principle-card pc-str"><div class="pc-cat">结构类</div><div class="pc-name">系统总体结构优化</div><div class="pc-desc">演化让整体结构更优</div></div>
+                <div class="principle-card pc-str"><div class="pc-cat">结构类</div><div class="pc-name">模块独立演化</div><div class="pc-desc">各模块演化尽量相互独立</div></div>
+                <div class="principle-card pc-qlt"><div class="pc-cat">质量类</div><div class="pc-name">有利于重构</div><div class="pc-desc">演化使系统更易重构</div></div>
+                <div class="principle-card pc-qlt"><div class="pc-cat">质量类</div><div class="pc-name">有利于重用</div><div class="pc-desc">演化使组件更具可重用性</div></div>
+                <div class="principle-card pc-qlt"><div class="pc-cat">质量类</div><div class="pc-name">设计原则遵循</div><div class="pc-desc">遵循既定设计原则</div></div>
+                <div class="principle-card pc-qlt"><div class="pc-cat">质量类</div><div class="pc-name">质量向好</div><div class="pc-desc">演化后整体质量不下降</div></div>
+                <div class="principle-card pc-adp"><div class="pc-cat">适应类</div><div class="pc-name">适应新技术</div><div class="pc-desc">独立于特定技术手段</div></div>
+                <div class="principle-card pc-adp"><div class="pc-cat">适应类</div><div class="pc-name">环境适应性</div><div class="pc-desc">可在不同环境下运行</div></div>
+                <div class="principle-card pc-adp"><div class="pc-cat">适应类</div><div class="pc-name">标准依从性</div><div class="pc-desc">遵循行业标准</div></div>
+                <div class="principle-card pc-adp"><div class="pc-cat">适应类</div><div class="pc-name">适应新需求</div><div class="pc-desc">演化使系统更好响应新需求</div></div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀（18条）</div>
+                <strong>「成进风主总平，目模影复构重，遵新环标质需」</strong><br>
+                故事：成精的疯子（成进风）主播总评价（主总平），目睹模仿影帝复购充值（目模影复构重），尊重新环保质量需求（遵新环标质需）
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⭐</span>4.2 高频考点：平滑演化 vs 主体维持 <span class="tag tag-hot">历年必考</span></div>
+            <div class="vs-grid">
+                <div class="vs-card" style="border-color:rgba(2,132,199,.4)">
+                    <div class="vs-title" style="background:rgba(2,132,199,.1);color:var(--accent)">🌊 平滑演化</div>
+                    <div class="vs-item"><span class="label">关键词</span><span><strong>演化速率</strong>稳定</span></div>
+                    <div class="vs-item"><span class="label">表现</span><span>相邻版本更新率相对稳定</span></div>
+                    <div class="vs-item"><span class="label">度量</span><span>看版本之间的变化量</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>匀速行驶，不忽快忽慢</span></div>
+                </div>
+                <div class="vs-card" style="border-color:rgba(217,119,6,.4)">
+                    <div class="vs-title" style="background:rgba(217,119,6,.1);color:var(--gold2)">🏛️ 主体维持</div>
+                    <div class="vs-item"><span class="label">关键词</span><span><strong>平均增量</strong>稳定</span></div>
+                    <div class="vs-item"><span class="label">表现</span><span>系统主体行为保持稳定</span></div>
+                    <div class="vs-item"><span class="label">度量</span><span>看系统总量增长的平均值</span></div>
+                    <div class="vs-item"><span class="label">类比</span><span>孩子每年稳步成长</span></div>
+                </div>
+            </div>
+            <div class="alert alert-red">⚠️ 考试做题：看到"速率稳定/版本更新率"→ <strong>平滑演化</strong>；看到"增量稳定/主体行为"→ <strong>主体维持</strong>。两者一字之差，答案相反！</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题 1</div>
+                <div class="iq-q">在软件系统的生命周期里，软件的演化速率趋于稳定，如相邻版本的更新率相对稳定。这描述的是（　）原则</div>
+                <div class="iq-opts" id="iq-opts-5">
+                    <button class="iq-btn" data-iq="5" data-opt="0" onclick="handleIQ(5,0)"><span class="iq-letter">A.</span><span>主体维持</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="1" onclick="handleIQ(5,1)"><span class="iq-letter">B.</span><span>系统总体结构优化</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="2" onclick="handleIQ(5,2)"><span class="iq-letter">C.</span><span>平滑演化</span></button>
+                    <button class="iq-btn" data-iq="5" data-opt="3" onclick="handleIQ(5,3)"><span class="iq-letter">D.</span><span>目标一致</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-5">
+                    <div class="iq-ans-label">✅ 答案：C</div>
+                    关键词"演化速率"、"版本更新率稳定" → 平滑演化。若题目改为"平均增量稳定"或"主体行为稳定"则是主体维持。这两个原则是本章最高频的混淆考点！
+                </div>
+            </div>
+            <div class="inline-quiz" style="margin-top:10px">
+                <div class="iq-label">📋 配套例题 2</div>
+                <div class="iq-q">"软件演化的平均增量须保持平稳，保证软件系统主体行为稳定"是（　）原则</div>
+                <div class="iq-opts" id="iq-opts-6">
+                    <button class="iq-btn" data-iq="6" data-opt="0" onclick="handleIQ(6,0)"><span class="iq-letter">A.</span><span>主体维持</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="1" onclick="handleIQ(6,1)"><span class="iq-letter">B.</span><span>平滑演化</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="2" onclick="handleIQ(6,2)"><span class="iq-letter">C.</span><span>目标一致</span></button>
+                    <button class="iq-btn" data-iq="6" data-opt="3" onclick="handleIQ(6,3)"><span class="iq-letter">D.</span><span>影响可控</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-6">
+                    <div class="iq-ans-label">✅ 答案：A</div>
+                    关键词"平均增量稳定"、"主体行为稳定" → 主体维持。注意与平滑演化的区别：平滑演化强调速率，主体维持强调增量和行为。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S5: 网站演化实例 ══════════ -->
+    <section id="s5" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 05 ★★★</div>
+            <h1>大型网站系统架构演化实例</h1>
+            <p>10阶段演化路径 | 案例题·论文必备，餐厅发展史类比</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🌐</span>5.1 十阶段演化路径（完整版）</div>
+            <div class="analogy">
+                <strong>餐饮连锁发展史类比</strong><br>
+                从夫妻小店（单体）→ 前厅后厨分离（垂直）→ 备菜（缓存）→ 多家分店（集群）→ 收银分台（读写分离）→ 外卖前置点（CDN）→ 不同菜系分别采购（分布式）→ 智能点餐（NoSQL）→ 拆分品牌线（业务拆分）→ 中央厨房+加盟体系（微服务）
+            </div>
+            <div class="evo-timeline">
+                <div class="evo-row">
+                    <div class="evo-num">1</div>
+                    <div>
+                        <div class="evo-stage">单体架构</div>
+                        <div class="evo-detail">应用、数据库、文件全部在<strong>1台服务器</strong>上</div>
+                    </div>
+                    <div class="evo-analogy">夫妻小店，啥都自己来</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">2</div>
+                    <div>
+                        <div class="evo-stage">垂直架构</div>
+                        <div class="evo-detail">应用服务器 + 文件服务器 + 数据服务器，<strong>3台分离</strong></div>
+                    </div>
+                    <div class="evo-analogy">前厅后厨分开，专人专事</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">3</div>
+                    <div>
+                        <div class="evo-stage">使用缓存</div>
+                        <div class="evo-detail">本地缓存 + 分布式缓存，减少数据库压力</div>
+                    </div>
+                    <div class="evo-analogy">备菜柜，常用食材提前备好</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">4</div>
+                    <div>
+                        <div class="evo-stage">服务集群</div>
+                        <div class="evo-detail">负载均衡 + 应用服务器集群，横向扩容</div>
+                    </div>
+                    <div class="evo-analogy">开了多家分店，分流客人</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">5</div>
+                    <div>
+                        <div class="evo-stage">数据库读写分离</div>
+                        <div class="evo-detail">主库写、从库读，<strong>主从复制机制</strong>同步</div>
+                    </div>
+                    <div class="evo-analogy">账房先生专管开单，收银台专管收钱</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num" style="background:var(--gold)">6</div>
+                    <div>
+                        <div class="evo-stage">反向代理 + CDN <span class="tag tag-gold" style="font-size:.7rem">易混淆</span></div>
+                        <div class="evo-detail">CDN在<strong>网络提供商机房</strong>；反向代理在<strong>网站中心机房</strong>；原理相同，都是<strong>缓存</strong></div>
+                    </div>
+                    <div class="evo-analogy">社区设外卖自提点（CDN），店内设叫号台（反向代理）</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">7</div>
+                    <div>
+                        <div class="evo-stage">分布式文件系统 + 分布式数据库</div>
+                        <div class="evo-detail">业务分库，不同业务数据单独存储</div>
+                    </div>
+                    <div class="evo-analogy">川菜、粤菜分别采购，互不干扰</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">8</div>
+                    <div>
+                        <div class="evo-stage">NoSQL + 搜索引擎</div>
+                        <div class="evo-detail">处理海量非结构化数据，提升查询效率</div>
+                    </div>
+                    <div class="evo-analogy">智能点餐系统，大数据推荐菜品</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num">9</div>
+                    <div>
+                        <div class="evo-stage">业务拆分</div>
+                        <div class="evo-detail">大应用拆分为多个独立的子应用，各自部署</div>
+                    </div>
+                    <div class="evo-analogy">拆分成独立品牌线（正餐/快餐/外卖）</div>
+                </div>
+                <div class="evo-row">
+                    <div class="evo-num" style="background:var(--purple)">10</div>
+                    <div>
+                        <div class="evo-stage">分布式服务（SOA/微服务）</div>
+                        <div class="evo-detail">公共业务抽取为服务，各应用调用，形成服务中心</div>
+                    </div>
+                    <div class="evo-analogy">中央厨房 + 加盟体系，统一配送，各店调用</div>
+                </div>
+            </div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀（10阶段）</div>
+                <strong>「单垂缓集读，反分N拆分」</strong><br>
+                单（单体）→垂（垂直）→缓（缓存）→集（集群）→读（读写分离）→反（反向代理CDN）→分（分布式文件/数据库）→N（NoSQL+搜索）→拆（业务拆分）→分（分布式服务）
+            </div>
+            <div class="alert alert-warn">⚠️ CDN vs 反向代理：都是缓存，但位置不同！CDN在<strong>网络提供商机房</strong>（离用户近），反向代理在<strong>网站中心机房</strong>（离服务器近）。</div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">关于大型网站架构演化中的CDN和反向代理，下列说法正确的是（　）</div>
+                <div class="iq-opts" id="iq-opts-7">
+                    <button class="iq-btn" data-iq="7" data-opt="0" onclick="handleIQ(7,0)"><span class="iq-letter">A.</span><span>两者基本原理都是缓存</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="1" onclick="handleIQ(7,1)"><span class="iq-letter">B.</span><span>CDN部署在网站中心机房</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="2" onclick="handleIQ(7,2)"><span class="iq-letter">C.</span><span>反向代理部署在网络提供商机房</span></button>
+                    <button class="iq-btn" data-iq="7" data-opt="3" onclick="handleIQ(7,3)"><span class="iq-letter">D.</span><span>两者实现的功能完全不同</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-7">
+                    <div class="iq-ans-label">✅ 答案：A</div>
+                    CDN和反向代理的基本原理都是<strong>缓存</strong>。位置区别：CDN部署在<strong>网络提供商机房</strong>（靠近用户），反向代理部署在<strong>网站中心机房</strong>（靠近服务器）。B、C说反了，D完全错误。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S6: 架构维护 ══════════ -->
+    <section id="s6" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 06</div>
+            <h1>软件架构维护</h1>
+            <p>三大管理 · 6个度量指标 · 构件管理陷阱 | 考试权重 ★★</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">🛠️</span>6.1 维护过程三大管理 <span class="tag tag-hot">陷阱题</span></div>
+            <div class="analogy">
+                <strong>图书馆类比</strong><br>
+                知识管理 = 图书分类编目；修改管理 = 版本修订（修改区域隔离）；版本管理 = 不同版次的书。<strong>注意：没有"构件借阅管理"这回事！</strong>
+            </div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>管理类型</th><th>核心内容</th><th>关键点</th></tr>
+                    <tr>
+                        <td class="badge-acc">① 架构知识管理</td>
+                        <td>管理架构知识 = <strong>架构设计 + 架构设计决策</strong></td>
+                        <td>决策也是知识的一部分！</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-gold">② 架构修改管理</td>
+                        <td>建立<strong>隔离区域</strong>，将修改影响降到最小</td>
+                        <td>隔离区域是核心机制</td>
+                    </tr>
+                    <tr>
+                        <td class="badge-green">③ 架构版本管理</td>
+                        <td>记录架构变更历史，为演化提供<strong>可靠依据</strong></td>
+                        <td>版本是演化的基础</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="alert alert-red">⚠️ 最高频陷阱：维护过程<strong>不包括"架构构件管理"</strong>！选到"构件管理"就错了。三大管理是：知识·修改·版本。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「知修版」→ 谐音"智修板"</strong><br>
+                智者（知识管理）修（修改管理）板子（版本管理）——只有三块板，没有第四块"构件板"！
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">软件架构维护过程不包括（　）</div>
+                <div class="iq-opts" id="iq-opts-8">
+                    <button class="iq-btn" data-iq="8" data-opt="0" onclick="handleIQ(8,0)"><span class="iq-letter">A.</span><span>架构知识管理</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="1" onclick="handleIQ(8,1)"><span class="iq-letter">B.</span><span>架构修改管理</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="2" onclick="handleIQ(8,2)"><span class="iq-letter">C.</span><span>架构版本管理</span></button>
+                    <button class="iq-btn" data-iq="8" data-opt="3" onclick="handleIQ(8,3)"><span class="iq-letter">D.</span><span>架构构件管理</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-8">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    维护过程仅包含三大管理：知识管理、修改管理、版本管理。"架构构件管理"不是维护过程的组成部分，是本章最经典的高频干扰项！
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span>6.2 可维护性6个度量指标 <span class="tag tag-key">理解</span></div>
+            <div class="tbl-wrap">
+                <table>
+                    <tr><th>指标名称</th><th>缩写</th><th>度量内容</th></tr>
+                    <tr><td class="badge-acc">圈复杂度</td><td><span style="font-family:monospace;font-weight:700">CNN</span></td><td>程序逻辑复杂程度（分支越多越复杂）</td></tr>
+                    <tr><td class="badge-gold">扇入扇出度</td><td><span style="font-family:monospace;font-weight:700">FFC</span></td><td>模块被调用次数（扇入）和调用其他模块数（扇出）</td></tr>
+                    <tr><td class="badge-purple">模块间耦合度</td><td><span style="font-family:monospace;font-weight:700">CBO</span></td><td>模块与其他类的耦合程度</td></tr>
+                    <tr><td class="badge-green">模块的响应</td><td><span style="font-family:monospace;font-weight:700">RFC</span></td><td>接收到消息后可能执行的方法数</td></tr>
+                    <tr><td class="badge-acc">紧内聚度</td><td><span style="font-family:monospace;font-weight:700">TCC</span></td><td>直接共享方法比例（紧密内聚）</td></tr>
+                    <tr><td class="badge-teal">松内聚度</td><td><span style="font-family:monospace;font-weight:700">LCC</span></td><td>直接或间接共享方法比例（宽松内聚）</td></tr>
+                </table>
+            </div>
+            <div class="alert alert-warn">⚠️ 干扰项：代码行数（LOC）不属于6个可维护性度量指标！LOC是软件规模指标。</div>
+            <div class="mnemonic">
+                <div class="label">🧠 速记口诀</div>
+                <strong>「圈扇耦响紧松」→ 谐音"圈扇藕响紧松"</strong><br>
+                圈（CNN圈复杂度）扇（FFC扇入扇出）藕（CBO耦合度）响（RFC响应）紧（TCC紧内聚）松（LCC松内聚）——共6个，没有LOC！
+            </div>
+            <div class="inline-quiz">
+                <div class="iq-label">📋 配套例题</div>
+                <div class="iq-q">以下不属于架构可维护性度量指标的是（　）</div>
+                <div class="iq-opts" id="iq-opts-9">
+                    <button class="iq-btn" data-iq="9" data-opt="0" onclick="handleIQ(9,0)"><span class="iq-letter">A.</span><span>圈复杂度（CNN）</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="1" onclick="handleIQ(9,1)"><span class="iq-letter">B.</span><span>扇入扇出度（FFC）</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="2" onclick="handleIQ(9,2)"><span class="iq-letter">C.</span><span>模块间耦合度（CBO）</span></button>
+                    <button class="iq-btn" data-iq="9" data-opt="3" onclick="handleIQ(9,3)"><span class="iq-letter">D.</span><span>代码行数（LOC）</span></button>
+                </div>
+                <div class="iq-ans" id="iq-ans-9">
+                    <div class="iq-ans-label">✅ 答案：D</div>
+                    6个可维护性指标口诀"圈扇耦响紧松"：CNN、FFC、CBO、RFC、TCC、LCC。代码行数（LOC）是软件规模指标，不是可维护性度量指标。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ S7: 综合练习题 ══════════ -->
+    <section id="s7" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 07</div>
+            <h1>综合练习题（30题）</h1>
+            <p>覆盖全章考点 · 点击选项即时反馈 · 💡查看详解</p>
+        </div>
+        <div id="quiz-score">已作答：<span id="answered">0</span> 题 &nbsp;|&nbsp; 答对：<span id="correct-count">0</span> 题</div>
+        <div id="quiz-container"></div>
+    </section>
+
+    <!-- ══════════ S8: 速记闪卡 ══════════ -->
+    <section id="s8" class="page-section">
+        <div class="section-hero">
+            <div class="section-tag">SECTION 08</div>
+            <h1>速记闪卡</h1>
+            <p>考前冲刺 · 核心口诀速查 · 距5月23日考试冲刺！</p>
+        </div>
+        <div class="flash-grid" id="flash-grid"></div>
+
+        <div class="card" style="margin-top:28px">
+            <div class="card-title"><span class="icon">🏆</span>本章核心速记总表</div>
+            <div class="summary-table">
+                <div class="summary-row">
+                    <div class="summary-k">架构三要素</div>
+                    <div class="summary-v">组件 · 连接件 · 约束 → 演化=对三者的增删改</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">面向对象操作符</div>
+                    <div class="summary-v">AO/DO对象 · AM/DM/SMO/OM/CMM消息 · AF/DF/FTC/FCC片段 · AC/DC约束</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">SMO vs OM vs CMM</div>
+                    <div class="summary-v">SMO=换时序 · OM=反转发接双方 · CMM=换掉其中一方</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">演化时期</div>
+                    <div class="summary-v">设运限运 → 设计时·运行前·有限制运行时·运行时</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">静态演化5步</div>
+                    <div class="summary-v">理需划构试 → 理解·需求分析·演化计划·系统重构·系统测试</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">动态演化内容</div>
+                    <div class="summary-v">属行拓<strong>风</strong>（风格！不是格式！）→ 属性改名·行为·拓扑·风格</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">DSA描述语言</div>
+                    <div class="summary-v">π-ADL（行为）· Pilar（反射）· LIME（协调）</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">18条演化原则</div>
+                    <div class="summary-v">成进风主总平，目模影复构重，遵新环标质需</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">平滑 vs 主体维持</div>
+                    <div class="summary-v">平滑=速率稳定/版本更新率 ↔ 主体维持=增量稳定/主体行为</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">10阶段口诀</div>
+                    <div class="summary-v">单垂缓集读，反分N拆分（共10阶段）</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">CDN vs 反向代理</div>
+                    <div class="summary-v">都是缓存！CDN=网络提供商机房 · 反向代理=网站中心机房</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">维护三大管理</div>
+                    <div class="summary-v">知修版（知识·修改·版本）→ <strong>没有构件管理！</strong></div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">架构知识定义</div>
+                    <div class="summary-v">架构设计 + 架构设计<strong>决策</strong>（决策也是知识）</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-k">可维护性6指标</div>
+                    <div class="summary-v">圈扇耦响紧松 → CNN·FFC·CBO·RFC·TCC·LCC（无LOC！）</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    // ─── NAV ───
+    function showSection(id, btn) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (btn) btn.classList.add('active');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // ─── INLINE QUIZ ───
+    const iqAnswers = {
+        0: 3,  // S1
+        1: 1, 2: 2,  // S2
+        3: 1, 4: 3,  // S3
+        5: 2, 6: 0,  // S4
+        7: 0,        // S5
+        8: 3, 9: 3   // S6
+    };
+
+    function handleIQ(qi, opt) {
+        const correct = iqAnswers[qi];
+        const btns = document.querySelectorAll(`[data-iq="${qi}"]`);
+        if (btns[0].classList.contains('revealed')) return;
+        btns.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if (j === correct) btn.classList.add('correct');
+            else if (j === opt) btn.classList.add('wrong');
+        });
+        document.getElementById(`iq-ans-${qi}`).classList.add('show');
+    }
+
+    // ─── QUIZ DATA (30题) ───
+    const quizData = [
+        // 基础概念 1-6
+        {q:"软件架构包括的三大要素是（　）",opts:["组件、连接件、约束","类、对象、接口","模块、接口、协议","数据、控制、状态"],ans:0,exp:"软件架构三要素是：组件（Component）、连接件（Connector）、约束（Constraint）。演化就是对这三要素进行添加、修改、删除操作。"},
+        {q:"软件架构演化主要关注组件、连接件和约束的（　）",opts:["添加","修改","删除","添加、修改和删除"],ans:3,exp:"演化是对三大要素的全方位操作：添加（适应新需求）、修改（调整现有结构）、删除（去除冗余），三者缺一不可，选D最完整。"},
+        {q:"在面向对象软件架构演化中，AO代表（　）",opts:["添加对象","添加操作","添加约束","添加消息"],ans:0,exp:"AO = Add Object，添加对象。面向对象演化操作命名规律：第一个字母A/D=添加/删除，第二个字母O/M/F/C=对象/消息/片段/约束。"},
+        {q:"消息演化中，'交换两条消息时间顺序'属于（　）操作",opts:["AM","DM","SMO","OM"],ans:2,exp:"SMO = Swap Message Order，交换两条消息的时间顺序（谁先谁后）。OM是反转发送方和接收方（方向），CMM是改变发送或接收对象（换人），三者完全不同。"},
+        {q:"'改变消息的发送或接收对象'属于（　）操作",opts:["SMO","OM","CMM","AM"],ans:2,exp:"CMM = Change Message Module，改变消息的发送方或接收方（A→B 改成 A→C，换了一方）。OM是把A→B反转成B→A（双方互换），SMO是调整消息先后顺序。"},
+        {q:"复合片段演化中，'改变复合片段类型'属于（　）操作",opts:["AF","DF","FTC","FCC"],ans:2,exp:"FTC = Fragment Type Change，改变复合片段的类型（如把交互类型alt改为opt）。FCC = Fragment Condition Change，改变条件（如 [x>0] 改成 [x>=0]）。T和C的区别：T=Type类型，C=Condition条件。"},
+        // 演化时期和方式 7-12
+        {q:"关于软件架构演化时期，'发生在编译之后、执行之前'的是（　）",opts:["设计时演化","运行前演化","有限制运行时演化","运行时演化"],ans:1,exp:"运行前演化的精确时间点：编译完成之后、系统正式执行之前。设计时是编译前；有限制运行时是有特定约束条件的运行时演化；运行时是系统正常运行中。"},
+    {q:"'在系统设计时规定演化的具体条件，演化只发生在某些特定约束满足时'属于（　）",opts:["设计时演化","运行前演化","有限制运行时演化","运行时演化"],ans:2,exp:"有限制运行时演化的特征：预先设定演化条件，只有满足特定约束时演化才触发，是一种预设好的安全演化机制，不同于无条件的运行时演化。"},
+    {q:"软件静态演化的一般过程顺序正确的是（　）",opts:["软件理解→需求变更分析→演化计划→系统重构→系统测试","需求变更分析→软件理解→演化计划→系统测试→系统重构","演化计划→软件理解→需求变更分析→系统重构→系统测试","软件理解→演化计划→需求变更分析→系统重构→系统测试"],ans:0,exp:"静态演化5步口诀'理需划构试'：①软件理解（先搞清楚现状）→②需求变更分析→③演化计划→④系统重构（实施）→⑤系统测试。顺序不能颠倒！"},
+    {q:"根据所修改的内容不同，软件动态演化不包括（　）",opts:["属性改名","行为变化","拓扑结构改变","格式变化"],ans:3,exp:"动态演化四类内容口诀'属行拓风'：属性改名、行为变化、拓扑结构改变、风格变化。'格式变化'是干扰项，正确的是'风格变化'！这是历年真题高频陷阱，务必牢记！"},
+    {q:"基于行为视角的DSA描述语言是（　）",opts:["π-ADL","Pilar","LIME","UML"],ans:0,exp:"三种DSA语言分别对应三种视角：π-ADL（行为视角）、Pilar（反射视角）、LIME（协调视角）。UML是统一建模语言，不是专门的DSA描述语言。"},
+    {q:"以下不属于动态重配置模式的是（　）",opts:["主从模式","中央控制模式","客户端/服务器模式","发布/订阅模式"],ans:3,exp:"动态重配置四种模式：主从、中央控制、C/S（客户端/服务器）、分布式控制。发布/订阅模式是一种通信模式（事件系统架构风格），不是动态重配置模式。"},
+    // 演化原则 13-20
+    {q:"'软件演化的平均增量须保持平稳，保证软件系统主体行为稳定'是（　）原则",opts:["主体维持","平滑演化","目标一致","影响可控"],ans:0,exp:"关键词'平均增量稳定'、'主体行为稳定' → 主体维持原则。区分：平滑演化强调'演化速率稳定/版本更新率'，主体维持强调'增量稳定/主体行为'。"},
+    {q:"'软件的演化速率趋于稳定'指的是（　）原则",opts:["主体维持","平滑演化","风险可控","进度可控"],ans:1,exp:"关键词'演化速率稳定' → 平滑演化。如果看到'版本更新率相对稳定'也是平滑演化。若看到'增量稳定/主体行为'则是主体维持。"},
+    {q:"'架构演化的阶段目标和最终目标要一致'是（　）原则",opts:["主体维持","平滑演化","目标一致","系统总体结构优化"],ans:2,exp:"目标一致原则的标准表述：演化的每个阶段性目标与最终目标方向保持一致，不能为了短期利益偏离长期目标。"},
+    {q:"'如果一个模块发生变更，给其他模块带来的影响在可控范围内'是（　）原则",opts:["模块独立演化","影响可控","复杂性可控","风险可控"],ans:1,exp:"影响可控原则：关注变更对其他模块的影响范围。与模块独立演化不同：模块独立演化指各模块的演化过程互不干扰，影响可控指变更后的影响范围受控。"},
+    {q:"'软件中各模块自身的演化最好相互独立'是（　）原则",opts:["模块独立演化","影响可控","有利于重构","有利于重用"],ans:0,exp:"模块独立演化：每个模块的演化过程不依赖其他模块，尽量独立推进。与影响可控的区分：独立演化强调过程独立，影响可控强调影响范围受控。"},
+    {q:"'架构演化中的经济、时间、人力、技术、环境风险在可控范围内'是（　）原则",opts:["进度可控","风险可控","影响可控","复杂性可控"],ans:1,exp:"风险可控：涵盖多种风险类型（经济·时间·人力·技术·环境）。与进度可控区分：进度可控只看时间/进度，风险可控是全方位风险管理。"},
+    {q:"以下不属于软件结构演化原则的是（　）",opts:["演化成本控制原则","适应新技术原则","平滑演化原则","完全替换原则"],ans:3,exp:"18条演化原则中没有'完全替换原则'，演化本身强调在原有基础上演进，而非完全替换。"},
+    {q:"'软件要独立于特定的技术手段，可运行于不同平台'是（　）原则",opts:["适应新技术","环境适应性","标准依从性","适应新需求"],ans:0,exp:"适应新技术原则：软件不应绑定特定技术手段，应具备跨平台运行能力，方便迁移到新技术环境。"},
+    // 网站演化 21-26
+    {q:"大型网站系统架构演化第一阶段的特征是（　）",opts:["应用与数据分离","所有资源在一台服务器","使用缓存","数据库读写分离"],ans:1,exp:"第一阶段单体架构：应用服务器、数据库、文件系统全部在同一台服务器上。类比：夫妻店，啥都自己来。"},
+    {q:"大型网站架构演化中，使用应用服务器、文件服务器、数据服务器3台服务器的阶段是（　）",opts:["单体架构","垂直架构","缓存架构","集群架构"],ans:1,exp:"第二阶段垂直架构：将应用、文件、数据库分离到3台独立服务器。是'单体→分离'的第一步。"},
+    {q:"关于CDN和反向代理，下列说法正确的是（　）",opts:["两者基本原理都是缓存","CDN部署在网站中心机房","反向代理部署在网络提供商机房","两者实现功能完全不同"],ans:0,exp:"CDN和反向代理的基本原理都是缓存。位置区别：CDN在网络提供商机房（靠近用户），反向代理在网站中心机房（靠近服务器）。B、C描述位置说反了。"},
+    {q:"数据库读写分离阶段，应用服务器读数据时访问（　）",opts:["主数据库","从数据库","缓存","文件系统"],ans:1,exp:"读写分离规则：写操作→主库，读操作→从库。主从通过复制机制保持数据同步。这样读请求分摊到从库，减轻主库压力。"},
+    {q:"大型网站架构演化的第10阶段是（　）",opts:["业务拆分","NoSQL + 搜索引擎","分布式服务（微服务）","数据库读写分离"],ans:2,exp:"10阶段口诀'单垂缓集读，反分N拆分'：第10阶段是分布式服务（SOA/微服务），将公共业务抽取为独立服务，形成服务中心。"},
+    {q:"大型网站架构中，'多台服务器提供相同应用，通过负载均衡分发请求'描述的是（　）阶段",opts:["垂直架构","服务集群","读写分离","业务拆分"],ans:1,exp:"服务集群（第4阶段）的特征：多台应用服务器运行相同应用，前面加负载均衡器分发请求，可水平扩容。"},
+    // 架构维护 27-30
+    {q:"软件架构维护过程不包括（　）",opts:["架构知识管理","架构修改管理","架构版本管理","架构构件管理"],ans:3,exp:"维护三大管理口诀'知修版'：知识管理、修改管理、版本管理。'架构构件管理'是本章最高频陷阱！维护中没有'构件管理'。"},
+    {q:"架构知识的定义是（　）",opts:["架构设计 + 架构文档","架构设计 + 架构设计决策","架构组件 + 架构连接件","架构需求 + 架构实现"],ans:1,exp:"架构知识 = 架构设计 + 架构设计决策。设计决策（为什么这样设计，有哪些权衡）是架构知识的重要组成，不能只有设计结果文档。"},
+    {q:"以下不属于架构可维护性度量指标的是（　）",opts:["圈复杂度（CNN）","扇入扇出度（FFC）","模块间耦合度（CBO）","代码行数（LOC）"],ans:3,exp:"6个可维护性指标口诀'圈扇耦响紧松'：CNN、FFC、CBO、RFC、TCC、LCC。代码行数LOC是软件规模指标，不是可维护性度量指标。"},
+    {q:"软件架构修改管理的核心机制是（　）",opts:["建立隔离区域，将修改影响降到最小","记录所有版本历史","捕捉架构知识","评估质量属性"],ans:0,exp:"架构修改管理的核心：建立隔离区域，把修改的影响隔离在最小范围内，避免牵一发而动全身。版本历史是版本管理的职责，知识捕捉是知识管理的职责。"},
+    ];
+
+    let answered = 0, correct = 0;
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        quizData.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'quiz-q';
+            div.innerHTML = `
+      <div class="quiz-num">第 ${i+1} 题 / 共 30 题</div>
+      <div class="quiz-text">${item.q}</div>
+      <div class="quiz-options" id="opts-${i}">
+        ${['A','B','C','D'].map((L,j)=>`
+          <button class="opt-btn" data-q="${i}" data-opt="${j}" onclick="handleOpt(${i},${j})">
+            <span class="opt-letter">${L}.</span>
+            <span>${item.opts[j]}</span>
+          </button>`).join('')}
+      </div>
+      <button class="reveal-btn" id="reveal-${i}" onclick="revealAns(${i})" style="display:none">💡 查看解析</button>
+      <div class="quiz-ans" id="ans-${i}">
+        <div class="ans-label">✅ 正确答案：${'ABCD'[item.ans]}</div>
+        <div class="ans-body">${item.exp}</div>
+      </div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleOpt(qi, opt) {
+        const item = quizData[qi];
+        const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+        if(opts[0].classList.contains('revealed')) return;
+        opts.forEach((btn, j) => {
+            btn.classList.add('revealed');
+            if(j === item.ans) btn.classList.add('correct');
+            else if(j === opt) btn.classList.add('wrong');
+        });
+        answered++;
+        if(opt === item.ans) correct++;
+        document.getElementById('answered').textContent = answered;
+        document.getElementById('correct-count').textContent = correct;
+        document.getElementById(`reveal-${qi}`).style.display = 'inline-flex';
+    }
+
+    function revealAns(qi) {
+        document.getElementById(`ans-${qi}`).classList.toggle('show');
+    }
+    renderQuiz();
+
+    // ─── FLASH CARDS ───
+    const flashData = [
+        {n:"01",topic:"软件架构三要素",mnemonic:"组连约 · 加改删",detail:"组件·连接件·约束，演化=增删改，不是'查'！"},
+        {n:"02",topic:"消息演化三兄弟",mnemonic:"SMO换序·OM反转·CMM换人",detail:"⚠️最易混淆！SMO=调顺序；OM=发接双方互换；CMM=换掉其中一方"},
+        {n:"03",topic:"FTC vs FCC",mnemonic:"FTC=改类型 · FCC=改条件",detail:"T=Type类型；C=Condition条件。片段演化最容易混的两个"},
+        {n:"04",topic:"演化四时期",mnemonic:"设运限运（设计/运行前/有限制/运行时）",detail:"代价从低到高递增！设计时演化最便宜"},
+        {n:"05",topic:"静态演化5步",mnemonic:"理需划构试",detail:"理解→需求分析→演化计划→系统重构→系统测试，顺序固定"},
+        {n:"06",topic:"动态演化内容",mnemonic:"属行拓风（风格！不是格式！）",detail:"⚠️历年真题陷阱！是'风格变化'，没有'格式变化'"},
+        {n:"07",topic:"DSA描述语言",mnemonic:"π行为·Pilar反射·LIME协调",detail:"记住三种语言对应的视角，π-ADL最常考"},
+        {n:"08",topic:"平滑演化 vs 主体维持",mnemonic:"平滑=速率 · 主体=增量",detail:"⭐本章最高频混淆！速率/版本更新率→平滑；增量/主体行为→主体维持"},
+        {n:"09",topic:"目标一致原则",mnemonic:"阶段目标 = 最终目标",detail:"不能为了短期目标偏离长期方向"},
+        {n:"10",topic:"10阶段口诀",mnemonic:"单垂缓集读，反分N拆分",detail:"单体→垂直→缓存→集群→读写分离→反向代理CDN→分布式→NoSQL→业务拆分→微服务"},
+        {n:"11",topic:"CDN vs 反向代理",mnemonic:"都是缓存！位置不同",detail:"CDN=网络提供商机房（靠用户）；反向代理=网站中心机房（靠服务器）"},
+        {n:"12",topic:"维护三大管理",mnemonic:"知修版（知识·修改·版本）",detail:"⚠️没有构件管理！选到'构件管理'必错"},
+        {n:"13",topic:"架构知识定义",mnemonic:"架构设计 + 架构设计决策",detail:"决策也是知识的一部分，不能只有文档"},
+        {n:"14",topic:"可维护性6指标",mnemonic:"圈扇耦响紧松",detail:"CNN·FFC·CBO·RFC·TCC·LCC，代码行数LOC不在其中！"},
+        {n:"15",topic:"架构修改管理核心",mnemonic:"建立隔离区域",detail:"把修改影响隔离在最小范围，不是'记录版本'也不是'评估质量'"},
+    ];
+
+    function renderFlash() {
+        const grid = document.getElementById('flash-grid');
+        flashData.forEach(fc => {
+            const div = document.createElement('div');
+            div.className = 'flash-card';
+            div.innerHTML = `<div class="fc-num"># ${fc.n}</div>
+      <div class="fc-topic">${fc.topic}</div>
+      <div class="fc-mnemonic">「${fc.mnemonic}」</div>
+      <div class="fc-detail">${fc.detail}</div>`;
+            grid.appendChild(div);
+        });
+    }
+    renderFlash();
+</script>
+</body>
+</html>
